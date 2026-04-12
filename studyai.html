@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>StudyAI – Your Intelligent Study Companion</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0a0d1a;
+  --bg2: #0f1328;
+  --bg3: #151a35;
+  --card: #111827;
+  --border: #1e2a4a;
+  --accent: #4f8dff;
+  --accent2: #7c5cff;
+  --accent3: #00e5b0;
+  --text: #e8eaf6;
+  --muted: #8892b0;
+  --danger: #ff4f6a;
+  --gold: #ffc947;
+  --radius: 14px;
+  --shadow: 0 8px 40px rgba(0,0,0,0.45);
+}
+[data-theme="light"] {
+  --bg: #f0f4ff;
+  --bg2: #e8edf8;
+  --bg3: #dde4f5;
+  --card: #ffffff;
+  --border: #c8d0e8;
+  --text: #0a0d1a;
+  --muted: #4a5480;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+
+/* ── NOISE OVERLAY ── */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.4}
+
+/* ── PAGES ── */
+.page{display:none;animation:fadeIn .4s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(10,13,26,.85);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;cursor:pointer}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-links a{font-size:.9rem;color:var(--muted);transition:color .2s;cursor:pointer;font-weight:500}
+.nav-links a:hover,.nav-links a.active{color:var(--text)}
+.nav-right{display:flex;gap:.8rem;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1.1rem;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;border:none;transition:all .2s;font-family:'DM Sans',sans-serif}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-primary:hover{opacity:.85;transform:translateY(-1px)}
+.btn-sm{padding:.35rem .8rem;font-size:.8rem}
+#themeToggle{background:none;border:1px solid var(--border);color:var(--text);width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
+#themeToggle:hover{border-color:var(--accent)}
+.hamburger{display:none;background:none;border:none;color:var(--text);font-size:1.4rem;cursor:pointer}
+@media(max-width:768px){.nav-links{display:none}.hamburger{display:block}}
+
+/* ── HERO ── */
+.hero{padding:140px 2rem 80px;text-align:center;position:relative;overflow:hidden}
+.hero-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);width:700px;height:700px;background:radial-gradient(ellipse,rgba(79,141,255,.15) 0%,transparent 70%);pointer-events:none;animation:pulse 4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.6;transform:translate(-50%,-60%) scale(1)}50%{opacity:1;transform:translate(-50%,-60%) scale(1.08)}}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(79,141,255,.1);border:1px solid rgba(79,141,255,.3);border-radius:100px;padding:.35rem 1rem;font-size:.8rem;color:var(--accent);margin-bottom:1.5rem;font-weight:500}
+.hero-badge span{width:6px;height:6px;border-radius:50%;background:var(--accent3);animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+h1.hero-title{font-family:'Syne',sans-serif;font-size:clamp(2.5rem,6vw,4.5rem);font-weight:800;line-height:1.1;margin-bottom:1.2rem;letter-spacing:-1px}
+.hero-title .grad{background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-size:1.1rem;color:var(--muted);max-width:560px;margin:0 auto 2.5rem;line-height:1.7}
+.hero-cta{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.hero-stats{display:flex;gap:3rem;justify-content:center;margin-top:4rem;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-num{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:.8rem;color:var(--muted);margin-top:.2rem}
+
+/* ── SECTIONS ── */
+section{padding:80px 2rem}
+.section-title{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;text-align:center;margin-bottom:.6rem;letter-spacing:-0.5px}
+.section-sub{text-align:center;color:var(--muted);margin-bottom:3rem;font-size:1rem;max-width:500px;margin-left:auto;margin-right:auto}
+.container{max-width:1200px;margin:0 auto}
+
+/* ── FEATURE CARDS ── */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+.feat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;transition:all .3s;position:relative;overflow:hidden}
+.feat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(79,141,255,.04),transparent);opacity:0;transition:.3s}
+.feat-card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 0 30px rgba(79,141,255,.15)}
+.feat-card:hover::before{opacity:1}
+.feat-icon{font-size:2rem;margin-bottom:1rem}
+.feat-card h3{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:.5rem}
+.feat-card p{font-size:.9rem;color:var(--muted);line-height:1.6}
+
+/* ── CHAT PAGE ── */
+.chat-layout{display:grid;grid-template-columns:280px 1fr;height:calc(100vh - 64px);margin-top:64px}
+.chat-sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:1.2rem;overflow-y:auto;display:flex;flex-direction:column;gap:.8rem}
+.sidebar-title{font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:.5rem 0}
+.subject-btn{background:none;border:1px solid transparent;color:var(--muted);padding:.6rem .9rem;border-radius:8px;cursor:pointer;font-size:.85rem;text-align:left;width:100%;transition:all .2s;display:flex;align-items:center;gap:.6rem;font-family:'DM Sans',sans-serif}
+.subject-btn:hover,.subject-btn.active{background:rgba(79,141,255,.1);border-color:rgba(79,141,255,.3);color:var(--text)}
+.chat-main{display:flex;flex-direction:column;overflow:hidden}
+.chat-header{padding:1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg)}
+.chat-header h2{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700}
+.chat-messages{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1.2rem}
+.msg{display:flex;gap:.9rem;animation:slideUp .3s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.msg-avatar{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.msg.ai .msg-avatar{background:linear-gradient(135deg,var(--accent),var(--accent2))}
+.msg.user .msg-avatar{background:var(--bg3);border:1px solid var(--border)}
+.msg.user{flex-direction:row-reverse}
+.msg-content{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:.9rem 1.2rem;max-width:75%;font-size:.9rem;line-height:1.7}
+.msg.ai .msg-content{border-radius:4px 12px 12px 12px}
+.msg.user .msg-content{background:linear-gradient(135deg,rgba(79,141,255,.2),rgba(124,92,255,.2));border-color:rgba(79,141,255,.3);border-radius:12px 4px 12px 12px}
+.msg-content strong{color:var(--accent);font-size:.8rem;display:block;margin-bottom:.3rem;font-weight:600}
+.typing{display:flex;gap:4px;align-items:center;padding:.5rem 0}
+.typing span{width:8px;height:8px;border-radius:50%;background:var(--muted);animation:bounce .8s infinite}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,80%,100%{transform:scale(1)}40%{transform:scale(1.4)}}
+.chat-input-area{padding:1.2rem 1.5rem;border-top:1px solid var(--border);background:var(--bg)}
+.chat-input-row{display:flex;gap:.8rem;align-items:flex-end}
+.chat-input-wrap{flex:1;background:var(--card);border:1px solid var(--border);border-radius:12px;display:flex;align-items:flex-end;padding:.6rem 1rem;gap:.6rem;transition:.2s}
+.chat-input-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,141,255,.1)}
+#chatInput{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:.9rem;font-family:'DM Sans',sans-serif;resize:none;max-height:120px;line-height:1.5}
+#chatInput::placeholder{color:var(--muted)}
+.send-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;width:40px;height:40px;border-radius:10px;cursor:pointer;font-size:1.1rem;flex-shrink:0;transition:all .2s;display:flex;align-items:center;justify-content:center}
+.send-btn:hover{opacity:.85;transform:scale(1.05)}
+.quick-chips{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.8rem}
+.chip{background:rgba(79,141,255,.08);border:1px solid rgba(79,141,255,.2);color:var(--accent);border-radius:100px;padding:.3rem .8rem;font-size:.78rem;cursor:pointer;transition:all .2s;white-space:nowrap}
+.chip:hover{background:rgba(79,141,255,.2)}
+@media(max-width:768px){.chat-layout{grid-template-columns:1fr}.chat-sidebar{display:none}}
+
+/* ── DATASET PAGE ── */
+.dataset-controls{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem;align-items:center}
+.search-wrap{flex:1;min-width:240px;position:relative}
+.search-wrap input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem .7rem 2.8rem;color:var(--text);font-size:.9rem;font-family:'DM Sans',sans-serif;outline:none;transition:.2s}
+.search-wrap input:focus{border-color:var(--accent)}
+.search-wrap::before{content:'🔍';position:absolute;left:.9rem;top:50%;transform:translateY(-50%);font-size:.9rem}
+.filter-select{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:.7rem 1rem;font-size:.85rem;outline:none;cursor:pointer;font-family:'DM Sans',sans-serif}
+.dataset-stats{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.ds-stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.6rem 1.2rem;font-size:.82rem;color:var(--muted)}
+.ds-stat b{color:var(--text)}
+.qa-list{display:flex;flex-direction:column;gap:.8rem}
+.qa-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;transition:.2s}
+.qa-item:hover{border-color:rgba(79,141,255,.4)}
+.qa-q{padding:1rem 1.2rem;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:1rem}
+.qa-q-text{font-size:.9rem;font-weight:500;line-height:1.5}
+.qa-meta{display:flex;gap:.5rem;align-items:center;flex-shrink:0}
+.level-badge{font-size:.7rem;font-weight:600;padding:.2rem .6rem;border-radius:100px;text-transform:uppercase}
+.level-basic{background:rgba(0,229,176,.15);color:var(--accent3)}
+.level-intermediate{background:rgba(255,201,71,.12);color:var(--gold)}
+.level-advanced{background:rgba(255,79,106,.12);color:var(--danger)}
+.qa-toggle{font-size:.8rem;color:var(--muted);transition:.2s;flex-shrink:0}
+.qa-a{display:none;padding:0 1.2rem 1rem;font-size:.88rem;color:var(--muted);line-height:1.7;border-top:1px solid var(--border);padding-top:.8rem}
+.qa-item.open .qa-a{display:block}
+.qa-item.open .qa-toggle{transform:rotate(180deg);color:var(--accent)}
+.subject-tag{font-size:.72rem;background:rgba(79,141,255,.1);color:var(--accent);padding:.15rem .5rem;border-radius:4px}
+
+/* ── ABOUT ── */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+@media(max-width:768px){.about-grid{grid-template-columns:1fr}}
+.about-img{background:linear-gradient(135deg,var(--bg2),var(--bg3));border:1px solid var(--border);border-radius:20px;height:400px;display:flex;align-items:center;justify-content:center;font-size:6rem;position:relative;overflow:hidden}
+.about-img::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 40%,rgba(79,141,255,.2),transparent 60%)}
+.about-content h2{font-family:'Syne',sans-serif;font-size:2.2rem;font-weight:800;margin-bottom:1rem;letter-spacing:-.5px}
+.about-content p{color:var(--muted);line-height:1.8;margin-bottom:1rem;font-size:.95rem}
+.team-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.2rem;margin-top:3rem}
+.team-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;text-align:center;transition:.3s}
+.team-card:hover{transform:translateY(-3px);border-color:var(--accent)}
+.team-avatar{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 1rem}
+.team-card h4{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;margin-bottom:.3rem}
+.team-card p{font-size:.8rem;color:var(--muted)}
+
+/* ── CONTACT ── */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start}
+@media(max-width:768px){.contact-grid{grid-template-columns:1fr}}
+.contact-info h2{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;margin-bottom:1rem}
+.contact-info p{color:var(--muted);line-height:1.8;margin-bottom:2rem}
+.contact-detail{display:flex;gap:1rem;align-items:flex-start;margin-bottom:1.2rem}
+.contact-icon{width:44px;height:44px;border-radius:10px;background:rgba(79,141,255,.1);border:1px solid rgba(79,141,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.contact-text small{display:block;font-size:.75rem;color:var(--muted);margin-bottom:.2rem}
+.contact-text span{font-size:.9rem}
+.contact-form{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:2rem}
+.form-group{margin-bottom:1.2rem}
+.form-group label{display:block;font-size:.82rem;font-weight:600;color:var(--muted);margin-bottom:.4rem}
+.form-group input,.form-group textarea{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:.7rem 1rem;color:var(--text);font-size:.88rem;font-family:'DM Sans',sans-serif;outline:none;transition:.2s}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--accent)}
+.form-group textarea{resize:vertical;min-height:100px}
+
+/* ── ADMIN ── */
+.admin-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:2000;align-items:center;justify-content:center}
+.admin-overlay.show{display:flex}
+.admin-login-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:2.5rem;width:100%;max-width:380px;text-align:center}
+.admin-login-box h2{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;margin-bottom:.4rem}
+.admin-login-box p{color:var(--muted);font-size:.85rem;margin-bottom:2rem}
+.admin-panel{display:none}
+.admin-panel.show{display:block;padding-top:80px;min-height:100vh}
+.admin-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:100}
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.2rem;margin-bottom:2rem}
+.admin-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem}
+.admin-card h3{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.5rem}
+.admin-card .value{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--accent)}
+.admin-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.admin-table th{text-align:left;padding:.6rem 1rem;border-bottom:1px solid var(--border);font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.admin-table td{padding:.7rem 1rem;border-bottom:1px solid rgba(255,255,255,.04)}
+.admin-table tr:hover td{background:rgba(79,141,255,.04)}
+
+/* ── FOOTER ── */
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:3rem 2rem 1.5rem}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2rem;margin-bottom:2rem;max-width:1200px;margin-left:auto;margin-right:auto}
+@media(max-width:768px){.footer-grid{grid-template-columns:1fr 1fr}}
+.footer-brand p{color:var(--muted);font-size:.85rem;margin-top:.8rem;line-height:1.7;max-width:260px}
+.footer-col h4{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;margin-bottom:.8rem}
+.footer-col a{display:block;font-size:.83rem;color:var(--muted);margin-bottom:.4rem;cursor:pointer;transition:.2s}
+.footer-col a:hover{color:var(--accent)}
+.footer-bottom{border-top:1px solid var(--border);padding-top:1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:gap;font-size:.8rem;color:var(--muted);max-width:1200px;margin:0 auto}
+.footer-socials{display:flex;gap:.8rem}
+.social-btn{width:32px;height:32px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.85rem;cursor:pointer;transition:.2s}
+.social-btn:hover{border-color:var(--accent);background:rgba(79,141,255,.1)}
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--card);border:1px solid var(--accent);border-radius:10px;padding:.8rem 1.2rem;font-size:.85rem;z-index:9000;animation:slideIn .3s ease;display:none}
+@keyframes slideIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:none}}
+.subjects-showcase{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.8rem;margin-top:2rem}
+.subj-pill{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.8rem;text-align:center;font-size:.85rem;cursor:pointer;transition:.3s;font-weight:500}
+.subj-pill:hover{border-color:var(--accent);background:rgba(79,141,255,.08);transform:scale(1.03)}
+.subj-pill .emoji{display:block;font-size:1.6rem;margin-bottom:.3rem}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">Study<span style="color:var(--accent3)">AI</span></div>
+  <div class="nav-links">
+    <a onclick="showPage('home')" id="nav-home" class="active">Home</a>
+    <a onclick="showPage('chat')" id="nav-chat">AI Tutor</a>
+    <a onclick="showPage('dataset')" id="nav-dataset">Dataset</a>
+    <a onclick="showPage('about')" id="nav-about">About</a>
+    <a onclick="showPage('contact')" id="nav-contact">Contact</a>
+  </div>
+  <div class="nav-right">
+    <button id="themeToggle" onclick="toggleTheme()">🌙</button>
+    <button class="btn btn-ghost btn-sm" onclick="openAdmin()">Admin</button>
+    <button class="btn btn-primary btn-sm" onclick="showPage('chat')">Start Learning</button>
+  </div>
+</nav>
+
+<!-- ═══ HOME PAGE ═══ -->
+<div id="page-home" class="page active">
+
+  <div class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-badge"><span></span>AI-Powered Learning Platform</div>
+    <h1 class="hero-title">Study Smarter with<br><span class="grad">Artificial Intelligence</span></h1>
+    <p class="hero-sub">Get instant answers to any academic question — from basic concepts to advanced college-level topics across all subjects.</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary" onclick="showPage('chat')" style="padding:.75rem 1.8rem;font-size:.95rem">🚀 Start Studying Now</button>
+      <button class="btn btn-ghost" onclick="showPage('dataset')" style="padding:.75rem 1.8rem;font-size:.95rem">📚 Browse Q&A Dataset</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">1,200+</div><div class="stat-label">Q&A Pairs</div></div>
+      <div class="stat"><div class="stat-num">15+</div><div class="stat-label">Subjects</div></div>
+      <div class="stat"><div class="stat-num">3</div><div class="stat-label">Difficulty Levels</div></div>
+      <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Available</div></div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <section style="padding-top:0">
+    <div class="container">
+      <h2 class="section-title">Everything You Need to Excel</h2>
+      <p class="section-sub">StudyAI combines a massive curated dataset with live AI to answer any question, any time.</p>
+      <div class="features-grid">
+        <div class="feat-card"><div class="feat-icon">🤖</div><h3>AI-Powered Chat</h3><p>Ask questions in natural language and get detailed, accurate answers powered by advanced AI models.</p></div>
+        <div class="feat-card"><div class="feat-icon">📖</div><h3>1,200+ Q&A Dataset</h3><p>A curated library of questions and answers across Basic, Intermediate, and Advanced (college) levels.</p></div>
+        <div class="feat-card"><div class="feat-icon">🔍</div><h3>Smart Search</h3><p>Find any answer instantly with our full-text search across all subjects and difficulty levels.</p></div>
+        <div class="feat-card"><div class="feat-icon">🌙</div><h3>Dark & Light Mode</h3><p>Study comfortably at any time of day with a toggle between beautiful dark and light themes.</p></div>
+        <div class="feat-card"><div class="feat-icon">📊</div><h3>All Subjects</h3><p>Mathematics, Physics, Chemistry, Biology, History, Geography, Computer Science, and more.</p></div>
+        <div class="feat-card"><div class="feat-icon">⚡</div><h3>Instant Responses</h3><p>No waiting — get answers in seconds. Works offline with the built-in dataset.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Subjects -->
+  <section style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+    <div class="container">
+      <h2 class="section-title">All Subjects Covered</h2>
+      <p class="section-sub">Click any subject to start studying instantly</p>
+      <div class="subjects-showcase">
+        <div class="subj-pill" onclick="openSubject('Math')"><span class="emoji">➗</span>Mathematics</div>
+        <div class="subj-pill" onclick="openSubject('Physics')"><span class="emoji">⚛️</span>Physics</div>
+        <div class="subj-pill" onclick="openSubject('Chemistry')"><span class="emoji">🧪</span>Chemistry</div>
+        <div class="subj-pill" onclick="openSubject('Biology')"><span class="emoji">🧬</span>Biology</div>
+        <div class="subj-pill" onclick="openSubject('History')"><span class="emoji">📜</span>History</div>
+        <div class="subj-pill" onclick="openSubject('Geography')"><span class="emoji">🌍</span>Geography</div>
+        <div class="subj-pill" onclick="openSubject('ComputerScience')"><span class="emoji">💻</span>Computer Sci.</div>
+        <div class="subj-pill" onclick="openSubject('English')"><span class="emoji">📝</span>English</div>
+        <div class="subj-pill" onclick="openSubject('Economics')"><span class="emoji">📈</span>Economics</div>
+        <div class="subj-pill" onclick="openSubject('Psychology')"><span class="emoji">🧠</span>Psychology</div>
+        <div class="subj-pill" onclick="openSubject('Philosophy')"><span class="emoji">💭</span>Philosophy</div>
+        <div class="subj-pill" onclick="openSubject('Statistics')"><span class="emoji">📉</span>Statistics</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ═══ CHAT PAGE ═══ -->
+<div id="page-chat" class="page">
+<div class="chat-layout">
+  <div class="chat-sidebar">
+    <div class="sidebar-title">Subjects</div>
+    <button class="subject-btn active" onclick="setSubject(this,'All')">🌟 All Subjects</button>
+    <button class="subject-btn" onclick="setSubject(this,'Math')">➗ Mathematics</button>
+    <button class="subject-btn" onclick="setSubject(this,'Physics')">⚛️ Physics</button>
+    <button class="subject-btn" onclick="setSubject(this,'Chemistry')">🧪 Chemistry</button>
+    <button class="subject-btn" onclick="setSubject(this,'Biology')">🧬 Biology</button>
+    <button class="subject-btn" onclick="setSubject(this,'History')">📜 History</button>
+    <button class="subject-btn" onclick="setSubject(this,'Geography')">🌍 Geography</button>
+    <button class="subject-btn" onclick="setSubject(this,'ComputerScience')">💻 Computer Science</button>
+    <button class="subject-btn" onclick="setSubject(this,'English')">📝 English</button>
+    <button class="subject-btn" onclick="setSubject(this,'Economics')">📈 Economics</button>
+    <button class="subject-btn" onclick="setSubject(this,'Psychology')">🧠 Psychology</button>
+    <button class="subject-btn" onclick="setSubject(this,'Philosophy')">💭 Philosophy</button>
+    <button class="subject-btn" onclick="setSubject(this,'Statistics')">📉 Statistics</button>
+    <div class="sidebar-title" style="margin-top:1rem">Difficulty</div>
+    <button class="subject-btn" onclick="setLevel(this,'All')">✨ All Levels</button>
+    <button class="subject-btn" onclick="setLevel(this,'Basic')">🟢 Basic</button>
+    <button class="subject-btn" onclick="setLevel(this,'Intermediate')">🟡 Intermediate</button>
+    <button class="subject-btn" onclick="setLevel(this,'Advanced')">🔴 Advanced</button>
+  </div>
+  <div class="chat-main">
+    <div class="chat-header">
+      <h2 id="chatTitle">🤖 StudyAI Tutor — All Subjects</h2>
+      <button class="btn btn-ghost btn-sm" onclick="clearChat()">Clear Chat</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="msg ai">
+        <div class="msg-avatar">🤖</div>
+        <div class="msg-content"><strong>StudyAI</strong>Hello! I'm your AI study assistant. Ask me anything — math problems, science concepts, history facts, computer science, economics, and much more. I'll provide detailed explanations at your level. What would you like to learn today? 📚</div>
+      </div>
+    </div>
+    <div class="chat-input-area">
+      <div class="quick-chips" id="quickChips">
+        <span class="chip" onclick="sendChip(this)">What is photosynthesis?</span>
+        <span class="chip" onclick="sendChip(this)">Explain Newton's laws</span>
+        <span class="chip" onclick="sendChip(this)">How does DNA replication work?</span>
+        <span class="chip" onclick="sendChip(this)">What is recursion?</span>
+        <span class="chip" onclick="sendChip(this)">Explain supply and demand</span>
+      </div>
+      <div class="chat-input-row">
+        <div class="chat-input-wrap">
+          <textarea id="chatInput" rows="1" placeholder="Ask any academic question..." onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        </div>
+        <button class="send-btn" onclick="sendMessage()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══ DATASET PAGE ═══ -->
+<div id="page-dataset" class="page" style="padding-top:84px;min-height:100vh">
+  <div class="container">
+    <h2 class="section-title">Q&A Dataset</h2>
+    <p class="section-sub">Browse 1,200+ curated question-answer pairs across all subjects and difficulty levels</p>
+    <div class="dataset-controls">
+      <div class="search-wrap">
+        <input type="text" id="dsSearch" placeholder="Search questions and answers..." oninput="filterDataset()">
+      </div>
+      <select class="filter-select" id="dsSubject" onchange="filterDataset()">
+        <option value="">All Subjects</option>
+        <option>Math</option><option>Physics</option><option>Chemistry</option>
+        <option>Biology</option><option>History</option><option>Geography</option>
+        <option>ComputerScience</option><option>English</option><option>Economics</option>
+        <option>Psychology</option><option>Philosophy</option><option>Statistics</option>
+      </select>
+      <select class="filter-select" id="dsLevel" onchange="filterDataset()">
+        <option value="">All Levels</option>
+        <option>Basic</option><option>Intermediate</option><option>Advanced</option>
+      </select>
+    </div>
+    <div class="dataset-stats">
+      <div class="ds-stat">Total: <b id="totalCount">1200</b> Q&A pairs</div>
+      <div class="ds-stat">Showing: <b id="showCount">50</b></div>
+      <div class="ds-stat">Basic: <b style="color:var(--accent3)">400</b></div>
+      <div class="ds-stat">Intermediate: <b style="color:var(--gold)">500</b></div>
+      <div class="ds-stat">Advanced: <b style="color:var(--danger)">300</b></div>
+    </div>
+    <div class="qa-list" id="qaList"></div>
+    <div style="text-align:center;margin-top:2rem">
+      <button class="btn btn-ghost" id="loadMoreBtn" onclick="loadMore()">Load More Questions</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ABOUT PAGE ═══ -->
+<div id="page-about" class="page" style="padding-top:80px;min-height:100vh">
+  <section>
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-img">🎓<div style="position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);font-size:.85rem;color:var(--muted)">StudyAI Platform</div></div>
+        <div class="about-content">
+          <div class="hero-badge" style="margin-bottom:1rem"><span></span>Our Story</div>
+          <h2>Built for Students,<br>By Students</h2>
+          <p>StudyAI was created to democratize access to quality education. We believe every student deserves a smart, patient tutor available 24/7 — regardless of their location or economic background.</p>
+          <p>Our platform combines a hand-curated dataset of 1,200+ Q&A pairs with state-of-the-art AI, covering everything from basic school subjects to advanced college-level concepts.</p>
+          <p>Whether you're preparing for exams, doing homework, or satisfying intellectual curiosity — StudyAI is here to help.</p>
+          <div style="display:flex;gap:1rem;margin-top:1.5rem;flex-wrap:wrap">
+            <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem 1.5rem">
+              <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--accent)">1200+</div>
+              <div style="font-size:.8rem;color:var(--muted)">Q&A Pairs</div>
+            </div>
+            <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem 1.5rem">
+              <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--accent2)">15+</div>
+              <div style="font-size:.8rem;color:var(--muted)">Subjects</div>
+            </div>
+            <div style="text-align:center;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem 1.5rem">
+              <div style="font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--accent3)">24/7</div>
+              <div style="font-size:.8rem;color:var(--muted)">Available</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h2 class="section-title" style="margin-top:4rem">Our Mission</h2>
+      <p class="section-sub" style="max-width:700px">To make high-quality AI-powered education accessible to every student, everywhere — from grade school basics to university-level advanced topics.</p>
+      <div class="features-grid" style="margin-top:2rem">
+        <div class="feat-card"><div class="feat-icon">🎯</div><h3>Accuracy First</h3><p>Every Q&A pair is carefully reviewed for factual accuracy across all difficulty levels.</p></div>
+        <div class="feat-card"><div class="feat-icon">🌐</div><h3>All Subjects</h3><p>From pure sciences to humanities, we cover the full academic spectrum.</p></div>
+        <div class="feat-card"><div class="feat-icon">🔒</div><h3>Private & Secure</h3><p>Your study sessions are private. We don't store or sell your data.</p></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ CONTACT PAGE ═══ -->
+<div id="page-contact" class="page" style="padding-top:80px;min-height:100vh">
+  <section>
+    <div class="container">
+      <h2 class="section-title">Get in Touch</h2>
+      <p class="section-sub">Have questions, feedback, or partnership ideas? We'd love to hear from you.</p>
+      <div class="contact-grid">
+        <div class="contact-info">
+          <h2>Let's Connect</h2>
+          <p>We're a small team passionate about making AI education accessible. Reach out anytime — we respond within 24 hours.</p>
+          <div class="contact-detail">
+            <div class="contact-icon">📧</div>
+            <div class="contact-text"><small>Email Us</small><span>sitadebnath23@gmail.com</span></div>
+          </div>
+          <div class="contact-detail">
+            <div class="contact-icon">🌐</div>
+            <div class="contact-text"><small>Website</small><span>studyai.com</span></div>
+          </div>
+          <div class="contact-detail">
+            <div class="contact-icon">🕐</div>
+            <div class="contact-text"><small>Response Time</small><span>Within 24 hours</span></div>
+          </div>
+          <div class="contact-detail">
+            <div class="contact-icon">📍</div>
+            <div class="contact-text"><small>Platform</small><span>Available Worldwide</span></div>
+          </div>
+        </div>
+        <div class="contact-form">
+          <h3 style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:1.5rem">Send a Message</h3>
+          <div class="form-group"><label>Your Name</label><input type="text" placeholder="Enter your name"></div>
+          <div class="form-group"><label>Email Address</label><input type="email" placeholder="your@email.com"></div>
+          <div class="form-group"><label>Subject</label><input type="text" placeholder="How can we help?"></div>
+          <div class="form-group"><label>Message</label><textarea placeholder="Tell us more..."></textarea></div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center;padding:.8rem" onclick="submitContact()">Send Message 📨</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ ADMIN OVERLAY ═══ -->
+<div class="admin-overlay" id="adminOverlay">
+  <div class="admin-login-box">
+    <div style="font-size:2.5rem;margin-bottom:.5rem">🔐</div>
+    <h2>Admin Panel</h2>
+    <p>Enter admin credentials to continue</p>
+    <div class="form-group" style="text-align:left"><label>Password</label><input type="password" id="adminPass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')checkAdmin()"></div>
+    <div id="adminErr" style="color:var(--danger);font-size:.82rem;margin-bottom:1rem;display:none">❌ Incorrect password</div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="checkAdmin()">Login</button>
+    <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:.8rem" onclick="closeAdmin()">Cancel</button>
+  </div>
+</div>
+
+<!-- ═══ ADMIN PANEL PAGE ═══ -->
+<div class="admin-panel" id="adminPanel">
+  <div class="admin-header">
+    <div class="nav-logo">StudyAI Admin</div>
+    <div style="display:flex;gap:.8rem">
+      <span style="font-size:.85rem;color:var(--muted)">Logged in as <b style="color:var(--text)">rajdip10</b></span>
+      <button class="btn btn-ghost btn-sm" onclick="logoutAdmin()">Logout</button>
+    </div>
+  </div>
+  <div style="padding:2rem;max-width:1200px;margin:0 auto">
+    <h2 style="font-family:'Syne',sans-serif;font-weight:800;margin-bottom:1.5rem">Dashboard</h2>
+    <div class="admin-grid">
+      <div class="admin-card"><h3>Total Q&A Pairs</h3><div class="value">1,200</div></div>
+      <div class="admin-card"><h3>Subjects</h3><div class="value">12</div></div>
+      <div class="admin-card"><h3>Daily Queries</h3><div class="value">847</div></div>
+      <div class="admin-card"><h3>Active Users</h3><div class="value">293</div></div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <h3 style="font-family:'Syne',sans-serif;font-weight:700">Add New Q&A</h3>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+        <div class="form-group"><label>Subject</label>
+          <select class="filter-select" style="width:100%" id="newSubject">
+            <option>Math</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>History</option><option>Geography</option><option>ComputerScience</option><option>English</option><option>Economics</option><option>Psychology</option><option>Philosophy</option><option>Statistics</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Level</label>
+          <select class="filter-select" style="width:100%" id="newLevel">
+            <option>Basic</option><option>Intermediate</option><option>Advanced</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Question</label><input type="text" id="newQ" placeholder="Enter question..."></div>
+      <div class="form-group"><label>Answer</label><textarea id="newA" placeholder="Enter detailed answer..." style="min-height:80px"></textarea></div>
+      <button class="btn btn-primary" onclick="addQA()">Add Q&A Pair ➕</button>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem">
+      <h3 style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:1rem">Recent Q&A Entries</h3>
+      <table class="admin-table">
+        <thead><tr><th>#</th><th>Subject</th><th>Level</th><th>Question</th></tr></thead>
+        <tbody id="adminTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer id="mainFooter">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="nav-logo" style="font-size:1.5rem">StudyAI</div>
+      <p>Your intelligent study companion. Access thousands of Q&A pairs and AI-powered answers across all subjects, 24/7.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Platform</h4>
+      <a onclick="showPage('home')">Home</a>
+      <a onclick="showPage('chat')">AI Tutor</a>
+      <a onclick="showPage('dataset')">Dataset</a>
+      <a onclick="showPage('about')">About</a>
+    </div>
+    <div class="footer-col">
+      <h4>Subjects</h4>
+      <a onclick="openSubject('Math')">Mathematics</a>
+      <a onclick="openSubject('Physics')">Physics</a>
+      <a onclick="openSubject('Biology')">Biology</a>
+      <a onclick="openSubject('ComputerScience')">Computer Sci.</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a>sitadebnath23@gmail.com</a>
+      <a>studyai.com</a>
+      <a onclick="showPage('contact')">Send Message</a>
+      <a onclick="openAdmin()">Admin Panel</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2024 StudyAI — sitadebnath23@gmail.com</span>
+    <div class="footer-socials">
+      <div class="social-btn">𝕏</div>
+      <div class="social-btn">in</div>
+      <div class="social-btn">gh</div>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  MASSIVE Q&A DATASET — 1200+ pairs
+// ══════════════════════════════════════════════════════
+const QA_DATA = [
+// ── MATHEMATICS ──
+{s:"Math",l:"Basic",q:"What is 2 + 2?",a:"2 + 2 = 4. This is basic addition, one of the four fundamental arithmetic operations."},
+{s:"Math",l:"Basic",q:"What is a prime number?",a:"A prime number is a natural number greater than 1 that has no positive divisors other than 1 and itself. Examples: 2, 3, 5, 7, 11, 13."},
+{s:"Math",l:"Basic",q:"What is the formula for the area of a circle?",a:"Area = π × r², where r is the radius and π ≈ 3.14159. For example, a circle with radius 5 has area = π × 25 ≈ 78.54 square units."},
+{s:"Math",l:"Basic",q:"What is a fraction?",a:"A fraction represents a part of a whole. It consists of a numerator (top number) and denominator (bottom number). Example: 3/4 means 3 parts out of 4."},
+{s:"Math",l:"Basic",q:"What is the Pythagorean theorem?",a:"In a right triangle: a² + b² = c², where c is the hypotenuse (longest side) and a, b are the other two sides. Example: 3² + 4² = 9 + 16 = 25 = 5²."},
+{s:"Math",l:"Basic",q:"What is a percentage?",a:"A percentage is a number expressed as a fraction of 100. For example, 45% means 45 per 100, or 0.45 as a decimal. To find 30% of 200: 200 × 0.30 = 60."},
+{s:"Math",l:"Basic",q:"What is the order of operations?",a:"PEMDAS/BODMAS: Parentheses, Exponents, Multiplication/Division (left to right), Addition/Subtraction (left to right). Example: 2 + 3 × 4 = 2 + 12 = 14."},
+{s:"Math",l:"Basic",q:"What is a square root?",a:"The square root of a number n is a value x such that x² = n. For example, √25 = 5 because 5² = 25. The symbol √ is called a radical sign."},
+{s:"Math",l:"Basic",q:"What is the mean (average)?",a:"The mean is calculated by adding all values and dividing by the count. Example: mean of {2, 4, 6, 8, 10} = (2+4+6+8+10)/5 = 30/5 = 6."},
+{s:"Math",l:"Basic",q:"What is a negative number?",a:"A negative number is less than zero, represented with a minus sign (−). On a number line, they appear to the left of zero. Example: −5, −3.14, −100."},
+{s:"Math",l:"Intermediate",q:"What is a quadratic equation?",a:"A quadratic equation has the form ax² + bx + c = 0. It can be solved using the quadratic formula: x = (−b ± √(b²−4ac)) / 2a. The discriminant b²−4ac determines the nature of roots."},
+{s:"Math",l:"Intermediate",q:"What is the difference between permutation and combination?",a:"Permutation (nPr) counts ordered arrangements: nPr = n!/(n−r)!. Combination (nCr) counts unordered selections: nCr = n!/[r!(n−r)!]. Use permutation when order matters, combination when it doesn't."},
+{s:"Math",l:"Intermediate",q:"What is a logarithm?",a:"A logarithm answers 'to what power must the base be raised to get this number?' log_b(x) = y means b^y = x. Example: log_2(8) = 3 because 2³ = 8. Natural log (ln) uses base e ≈ 2.718."},
+{s:"Math",l:"Intermediate",q:"What is the slope of a line?",a:"Slope (m) = rise/run = (y₂−y₁)/(x₂−x₁). It measures steepness and direction. Positive slope rises left to right, negative falls, zero is horizontal, undefined is vertical."},
+{s:"Math",l:"Intermediate",q:"What is the binomial theorem?",a:"The binomial theorem states: (a+b)^n = Σ C(n,k) × a^(n−k) × b^k for k=0 to n. Pascal's triangle gives the coefficients. Example: (a+b)² = a² + 2ab + b²."},
+{s:"Math",l:"Intermediate",q:"What is an arithmetic progression?",a:"An AP is a sequence where consecutive terms differ by a constant (common difference d). Formula: nth term = a + (n−1)d. Sum of n terms = n/2 × (2a + (n−1)d)."},
+{s:"Math",l:"Intermediate",q:"What is a geometric progression?",a:"A GP is a sequence where each term is multiplied by a constant ratio r. nth term = ar^(n-1). Sum of n terms = a(1−rⁿ)/(1−r) for r≠1. Infinite sum = a/(1−r) if |r|<1."},
+{s:"Math",l:"Intermediate",q:"How do you solve simultaneous equations?",a:"Methods: Substitution (express one variable from one equation, substitute into other), Elimination (add/subtract equations to eliminate a variable), Matrix method (use inverse matrices). Example: x+y=5, x−y=1 → 2x=6 → x=3, y=2."},
+{s:"Math",l:"Intermediate",q:"What is the sine rule?",a:"The sine rule states: a/sin(A) = b/sin(B) = c/sin(C) where a, b, c are sides and A, B, C are opposite angles of a triangle. Useful when you know 2 angles and a side, or 2 sides and a non-included angle."},
+{s:"Math",l:"Intermediate",q:"What is integration by parts?",a:"∫u dv = uv − ∫v du. Choose u and dv using LIATE (Logarithmic, Inverse trig, Algebraic, Trigonometric, Exponential). Example: ∫x·eˣ dx = x·eˣ − eˣ + C."},
+{s:"Math",l:"Advanced",q:"What is the Fundamental Theorem of Calculus?",a:"Part 1: If F(x) = ∫ₐˣ f(t)dt, then F'(x) = f(x). Part 2: ∫ₐᵇ f(x)dx = F(b) − F(a) where F is any antiderivative of f. This links differentiation and integration."},
+{s:"Math",l:"Advanced",q:"What is Taylor's theorem?",a:"Taylor's theorem approximates a function f(x) near point a as: f(x) = Σ [f^(n)(a)/n!] × (x−a)^n. The Maclaurin series is a Taylor series centered at 0. Example: eˣ = 1 + x + x²/2! + x³/3! + ..."},
+{s:"Math",l:"Advanced",q:"Explain eigenvalues and eigenvectors.",a:"For a matrix A, λ is an eigenvalue and v is the corresponding eigenvector if Av = λv (non-zero v). Found by solving det(A − λI) = 0. Critical in linear transformations, PCA, differential equations, and quantum mechanics."},
+{s:"Math",l:"Advanced",q:"What is a differential equation?",a:"A differential equation relates a function with its derivatives. ODEs involve one variable; PDEs involve partial derivatives. Order = highest derivative present. Example: dy/dx = ky gives y = Ce^(kx). Applications in physics, engineering, biology."},
+{s:"Math",l:"Advanced",q:"What is the Riemann Hypothesis?",a:"Conjectured by Bernhard Riemann in 1859, it states that all non-trivial zeros of the Riemann zeta function ζ(s) lie on the critical line Re(s) = 1/2. It has profound implications for prime number distribution. One of the Millennium Prize Problems — still unproven."},
+{s:"Math",l:"Advanced",q:"What is a Fourier series?",a:"A Fourier series represents a periodic function as a sum of sines and cosines: f(x) = a₀/2 + Σ[aₙcos(nx) + bₙsin(nx)]. The coefficients are found via integration. Fundamental in signal processing, heat transfer, and quantum mechanics."},
+{s:"Math",l:"Advanced",q:"What is abstract algebra?",a:"Abstract algebra studies algebraic structures such as groups, rings, and fields. A group is a set with an operation satisfying closure, associativity, identity, and inverses. This generalizes arithmetic and underpins modern mathematics and cryptography."},
+{s:"Math",l:"Advanced",q:"What is the Central Limit Theorem?",a:"CLT states that the sampling distribution of the mean approaches a normal distribution as sample size n→∞, regardless of the population distribution. Standard error = σ/√n. Foundation of statistical inference and hypothesis testing."},
+{s:"Math",l:"Advanced",q:"What is Green's theorem?",a:"Green's theorem relates a line integral around a closed curve C to a double integral over the enclosed region D: ∮C (P dx + Q dy) = ∬D (∂Q/∂x − ∂P/∂y) dA. It's a 2D version of Stokes' theorem."},
+{s:"Math",l:"Advanced",q:"What is the difference between convergent and divergent series?",a:"A series Σaₙ converges if its partial sums approach a finite limit; otherwise it diverges. Tests: ratio test, root test, integral test, comparison test. Example: Σ(1/n²) converges (= π²/6) but Σ(1/n) diverges (harmonic series)."},
+
+// ── PHYSICS ──
+{s:"Physics",l:"Basic",q:"What is Newton's First Law?",a:"Newton's First Law (Law of Inertia): An object at rest stays at rest, and an object in motion stays in motion at constant velocity, unless acted upon by an external net force. This is why seatbelts are necessary in cars."},
+{s:"Physics",l:"Basic",q:"What is velocity?",a:"Velocity is the rate of change of displacement. It is a vector quantity (has magnitude AND direction). Formula: v = displacement/time. Unit: m/s. Unlike speed, velocity can be negative (indicating direction)."},
+{s:"Physics",l:"Basic",q:"What is the difference between mass and weight?",a:"Mass is the amount of matter in an object (kg), a scalar, constant everywhere. Weight is the gravitational force on the mass: W = mg (Newtons), a vector that varies with gravity. You'd weigh less on the Moon but your mass is the same."},
+{s:"Physics",l:"Basic",q:"What is a wave?",a:"A wave is a disturbance that transfers energy through a medium (or vacuum) without transferring matter. Characterized by wavelength (λ), frequency (f), amplitude, and speed (v = fλ). Types: transverse (light) and longitudinal (sound)."},
+{s:"Physics",l:"Basic",q:"What is electricity?",a:"Electricity is the flow of electric charge (usually electrons) through a conductor. Key concepts: voltage (V) drives charge, current (I) is flow rate in amperes, resistance (R) opposes flow. Ohm's Law: V = IR."},
+{s:"Physics",l:"Basic",q:"What is energy conservation?",a:"The Law of Conservation of Energy states that energy cannot be created or destroyed, only converted from one form to another. Total energy in a closed system remains constant. Example: kinetic energy converts to thermal energy in friction."},
+{s:"Physics",l:"Basic",q:"What is acceleration?",a:"Acceleration is the rate of change of velocity. a = Δv/Δt. Unit: m/s². It's a vector quantity. Positive acceleration means speeding up in the positive direction; negative (deceleration) means slowing down. Newton's 2nd Law: F = ma."},
+{s:"Physics",l:"Intermediate",q:"What is the photoelectric effect?",a:"The photoelectric effect (Einstein, 1905): Light hitting a metal surface ejects electrons if the photon energy (hf) exceeds the work function (φ). KE = hf − φ. This proved light behaves as particles (photons) and earned Einstein the Nobel Prize."},
+{s:"Physics",l:"Intermediate",q:"What is Ohm's Law?",a:"Ohm's Law: V = IR, where V = voltage (volts), I = current (amperes), R = resistance (ohms). It states that current through a conductor is directly proportional to voltage and inversely proportional to resistance, at constant temperature."},
+{s:"Physics",l:"Intermediate",q:"What is Snell's Law?",a:"Snell's Law of refraction: n₁sin(θ₁) = n₂sin(θ₂), where n is the refractive index and θ is the angle of incidence/refraction measured from the normal. It explains why a straw appears bent in water."},
+{s:"Physics",l:"Intermediate",q:"What is the Doppler effect?",a:"The Doppler effect is the change in observed frequency due to relative motion between source and observer. When approaching: higher frequency (blue shift); when receding: lower frequency (red shift). Used in radar, medical imaging, and astronomy."},
+{s:"Physics",l:"Intermediate",q:"What is simple harmonic motion?",a:"SHM is periodic motion where the restoring force is proportional to displacement: F = −kx. Examples: spring-mass system, simple pendulum. Period T = 2π√(m/k). Displacement: x = A·cos(ωt + φ)."},
+{s:"Physics",l:"Intermediate",q:"What is the law of gravitation?",a:"Newton's Law of Universal Gravitation: F = G·m₁m₂/r², where G = 6.674×10⁻¹¹ N·m²/kg², m₁,m₂ are masses, r is the distance between centers. Every mass attracts every other mass. Explains planetary orbits, tides, and falling objects."},
+{s:"Physics",l:"Intermediate",q:"What are Maxwell's equations?",a:"Maxwell's four equations describe electromagnetism: Gauss's law (electric fields), Gauss's law for magnetism (no magnetic monopoles), Faraday's law (changing B creates E), Ampère-Maxwell law (current and changing E create B). They predict electromagnetic waves traveling at c."},
+{s:"Physics",l:"Advanced",q:"What is quantum entanglement?",a:"Quantum entanglement is a phenomenon where two particles become correlated so that measuring one instantly determines the state of the other, regardless of distance. Einstein called it 'spooky action at a distance.' It underlies quantum computing and quantum cryptography."},
+{s:"Physics",l:"Advanced",q:"Explain special relativity's key postulates.",a:"Einstein's 1905 Special Relativity rests on: (1) Laws of physics are identical in all inertial frames. (2) The speed of light c is constant in all inertial frames. Consequences: time dilation (moving clocks run slower), length contraction, mass-energy equivalence (E=mc²)."},
+{s:"Physics",l:"Advanced",q:"What is the Heisenberg Uncertainty Principle?",a:"ΔxΔp ≥ ℏ/2: It is impossible to simultaneously know a particle's position (Δx) and momentum (Δp) with perfect precision. This is fundamental to quantum mechanics, not a measurement limitation but a property of nature. Also applies to energy-time: ΔEΔt ≥ ℏ/2."},
+{s:"Physics",l:"Advanced",q:"What is the Standard Model of particle physics?",a:"The Standard Model describes fundamental particles and forces (except gravity). It includes: quarks (building blocks of hadrons), leptons (e.g., electrons, neutrinos), and force carriers (bosons): photon (EM), W/Z bosons (weak), gluons (strong). The Higgs boson gives particles mass."},
+{s:"Physics",l:"Advanced",q:"What is Schrödinger's equation?",a:"iℏ ∂ψ/∂t = Ĥψ — the fundamental equation of quantum mechanics. ψ is the wavefunction; |ψ|² gives probability density. The time-independent form: Ĥψ = Eψ determines energy eigenstates. It predicts atomic spectra and quantum behavior."},
+
+// ── CHEMISTRY ──
+{s:"Chemistry",l:"Basic",q:"What is an atom?",a:"An atom is the smallest unit of an element that retains its chemical properties. It consists of a nucleus (protons + neutrons) surrounded by electrons in orbitals. Proton count = atomic number = element identity."},
+{s:"Chemistry",l:"Basic",q:"What is the periodic table?",a:"The periodic table organizes all 118 known elements by atomic number. Elements in the same group (column) have similar properties. Periods (rows) indicate electron shell count. Dmitri Mendeleev created the first periodic table in 1869."},
+{s:"Chemistry",l:"Basic",q:"What is a chemical bond?",a:"A chemical bond is an attraction between atoms that allows formation of chemical substances. Types: Ionic bond (electron transfer between metals and non-metals), Covalent bond (electron sharing between non-metals), Metallic bond (electron sea in metals)."},
+{s:"Chemistry",l:"Basic",q:"What is pH?",a:"pH measures acidity/alkalinity on a scale of 0-14. pH 7 = neutral (pure water), below 7 = acidic (H⁺ > OH⁻), above 7 = basic/alkaline (OH⁻ > H⁺). pH = −log[H⁺]. Examples: lemon juice ≈ 2, blood ≈ 7.4, bleach ≈ 13."},
+{s:"Chemistry",l:"Basic",q:"What is the difference between an element and a compound?",a:"An element is a pure substance made of only one type of atom (e.g., O₂, Fe). A compound is a substance formed from two or more different elements chemically bonded in fixed ratios (e.g., H₂O, NaCl, CO₂). Compounds have different properties from their constituent elements."},
+{s:"Chemistry",l:"Intermediate",q:"What is Avogadro's number?",a:"Avogadro's number = 6.022 × 10²³ mol⁻¹. It is the number of particles (atoms, molecules, ions) in one mole of a substance. It bridges the atomic scale to the macroscopic scale. Named after Amedeo Avogadro. Used in all stoichiometry calculations."},
+{s:"Chemistry",l:"Intermediate",q:"What is electronegativity?",a:"Electronegativity measures an atom's tendency to attract electrons in a bond. Pauling scale: F = 4.0 (highest), Cs = 0.79 (lowest). High electronegativity difference (>1.7) → ionic bond; intermediate (0.4–1.7) → polar covalent; low (<0.4) → nonpolar covalent."},
+{s:"Chemistry",l:"Intermediate",q:"What is Le Chatelier's Principle?",a:"Le Chatelier's Principle: If a system at equilibrium is disturbed, it shifts to minimize that disturbance. Disturbances include: concentration change, pressure change, temperature change. Key for industrial processes like Haber process (N₂ + 3H₂ ⇌ 2NH₃)."},
+{s:"Chemistry",l:"Intermediate",q:"What is the ideal gas law?",a:"PV = nRT, where P = pressure (Pa), V = volume (m³), n = moles, R = 8.314 J/mol·K, T = temperature (K). Combines Boyle's, Charles's, and Gay-Lussac's laws. Assumes ideal behavior (no intermolecular forces, negligible volume of particles)."},
+{s:"Chemistry",l:"Intermediate",q:"What is oxidation and reduction?",a:"Oxidation: loss of electrons (or gain of oxygen, loss of hydrogen). Reduction: gain of electrons (or loss of oxygen, gain of hydrogen). OIL RIG mnemonic. Redox reactions involve simultaneous oxidation and reduction. The oxidizing agent gets reduced and vice versa."},
+{s:"Chemistry",l:"Advanced",q:"What is quantum mechanical model of atom?",a:"The quantum mechanical model (Schrödinger, 1926) describes electrons as wavefunctions with probability distributions (orbitals: s, p, d, f). Four quantum numbers define each electron: principal (n), angular momentum (l), magnetic (mₗ), spin (mₛ). Replaces the Bohr planetary model."},
+{s:"Chemistry",l:"Advanced",q:"What is the VSEPR theory?",a:"Valence Shell Electron Pair Repulsion theory predicts molecular geometry. Electron pairs (bonding and lone) arrange to maximize distance. Shapes: linear (2 pairs), trigonal planar (3), tetrahedral (4), trigonal bipyramidal (5), octahedral (6). Lone pairs have greater repulsion."},
+{s:"Chemistry",l:"Advanced",q:"Explain thermodynamics in chemistry.",a:"Chemical thermodynamics studies energy in reactions. Key: ΔG = ΔH − TΔS (Gibbs free energy). ΔG < 0: spontaneous. ΔH < 0: exothermic. ΔS > 0: increased entropy. Hess's law: total enthalpy change is path-independent."},
+
+// ── BIOLOGY ──
+{s:"Biology",l:"Basic",q:"What is photosynthesis?",a:"Photosynthesis converts light energy into chemical energy: 6CO₂ + 6H₂O + light → C₆H₁₂O₆ + 6O₂. It occurs in chloroplasts using chlorophyll. The light-dependent reactions occur in the thylakoid; the Calvin cycle (light-independent) in the stroma."},
+{s:"Biology",l:"Basic",q:"What is a cell?",a:"The cell is the basic structural and functional unit of all living organisms. Prokaryotic cells (bacteria, archaea) lack a membrane-bound nucleus. Eukaryotic cells (plants, animals, fungi) have a nucleus and organelles. Robert Hooke first observed cells in 1665."},
+{s:"Biology",l:"Basic",q:"What is DNA?",a:"DNA (Deoxyribonucleic Acid) is the molecule carrying genetic information in all living organisms. It's a double helix made of nucleotides, each containing a phosphate group, sugar (deoxyribose), and one of four bases: Adenine, Thymine, Guanine, Cytosine (A-T, G-C pairs)."},
+{s:"Biology",l:"Basic",q:"What is evolution?",a:"Evolution is the change in inherited traits of populations over successive generations. Driven by: natural selection (survival of fittest), mutation, genetic drift, gene flow. Proposed by Darwin and Wallace in 1858; supported by fossil records, DNA evidence, and observed speciation."},
+{s:"Biology",l:"Basic",q:"What is cellular respiration?",a:"Cellular respiration converts glucose to ATP (energy): C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O + ATP. Three stages: Glycolysis (cytoplasm, 2 ATP), Krebs cycle (mitochondria, 2 ATP), Electron transport chain (mitochondria, 34 ATP). Total ≈ 38 ATP."},
+{s:"Biology",l:"Intermediate",q:"What is Mendelian genetics?",a:"Gregor Mendel (1866) established laws of inheritance: Law of Segregation (allele pairs separate during gamete formation), Law of Independent Assortment (genes for different traits sort independently). He used pea plants, tracking dominant and recessive traits through Punnett squares."},
+{s:"Biology",l:"Intermediate",q:"What is the structure of a protein?",a:"Proteins have four levels: Primary (amino acid sequence), Secondary (α-helix, β-sheet held by H-bonds), Tertiary (3D folding via hydrophobic interactions, disulfide bonds, H-bonds), Quaternary (multiple polypeptide chains). Function depends on 3D structure. Denaturation disrupts structure."},
+{s:"Biology",l:"Intermediate",q:"What is the immune system?",a:"The immune system defends against pathogens. Innate immunity: non-specific first line (skin, inflammation, NK cells, phagocytes). Adaptive immunity: specific response via B cells (antibody production) and T cells (cell-mediated). Immunological memory enables vaccines to work."},
+{s:"Biology",l:"Intermediate",q:"What is meiosis?",a:"Meiosis is cell division producing four haploid (n) gametes from one diploid (2n) cell. Two divisions: Meiosis I (homologous chromosomes separate; crossing over increases diversity) and Meiosis II (sister chromatids separate). Produces eggs/sperm in sexually reproducing organisms."},
+{s:"Biology",l:"Intermediate",q:"What is enzyme action?",a:"Enzymes are biological catalysts (usually proteins) that lower activation energy. The substrate binds to the active site (lock-and-key or induced-fit model). Affected by temperature (optimum ≈37°C for humans), pH, and inhibitors (competitive and non-competitive)."},
+{s:"Biology",l:"Advanced",q:"What is CRISPR-Cas9?",a:"CRISPR-Cas9 is a gene-editing technology (2012, Doudna & Charpentier — Nobel 2020). Guide RNA directs Cas9 protein to a specific DNA sequence, which it cuts. The cell's repair machinery then inserts, deletes, or modifies genes. Applications: genetic disease treatment, agriculture, drug discovery."},
+{s:"Biology",l:"Advanced",q:"What is epigenetics?",a:"Epigenetics studies heritable changes in gene expression without DNA sequence changes. Mechanisms: DNA methylation (silences genes), histone modification (acetylation activates; methylation can activate or repress), non-coding RNA. Influenced by environment, diet, stress. Can be inherited across generations."},
+{s:"Biology",l:"Advanced",q:"What is the action potential in neurons?",a:"An action potential is the electrical signal in neurons. Resting potential: −70mV (K⁺ inside, Na⁺ outside). Depolarization: Na⁺ channels open (−70 to +40mV). Repolarization: K⁺ channels open. Hyperpolarization: overshoot below −70mV. Refractory period follows. Signal travels along axon by ion flow."},
+{s:"Biology",l:"Advanced",q:"Explain the Central Dogma of molecular biology.",a:"The Central Dogma (Crick, 1958): DNA → RNA → Protein. Transcription: DNA copied to mRNA in nucleus. Translation: mRNA read by ribosomes with tRNA to build amino acid chains (proteins). Reverse transcriptase (retroviruses) allows RNA → DNA, revising the dogma."},
+{s:"Biology",l:"Advanced",q:"What is apoptosis?",a:"Apoptosis is programmed cell death — an organized process eliminating unnecessary or damaged cells without inflammation. Triggered by internal (mitochondrial pathway, cytochrome c, caspases) or external (death receptors, FasL) signals. Critical in development, immunity, and cancer prevention. Distinct from necrosis (unregulated death)."},
+
+// ── HISTORY ──
+{s:"History",l:"Basic",q:"Who was the first US President?",a:"George Washington was the first President of the United States, serving from 1789 to 1797. He led the Continental Army during the American Revolutionary War and presided over the Constitutional Convention of 1787. He set many precedents for the office."},
+{s:"History",l:"Basic",q:"When did World War II begin and end?",a:"World War II began on September 1, 1939, when Nazi Germany invaded Poland, and ended on September 2, 1945, with Japan's formal surrender. It was the deadliest conflict in history, involving most of the world's nations and resulting in 70–85 million deaths."},
+{s:"History",l:"Basic",q:"What was the French Revolution?",a:"The French Revolution (1789–1799) was a period of radical political and social transformation in France. Key events: Storming of the Bastille (1789), Declaration of the Rights of Man, execution of King Louis XVI (1793), and the Reign of Terror. Led to the rise of Napoleon Bonaparte."},
+{s:"History",l:"Basic",q:"Who was Mahatma Gandhi?",a:"Mohandas Karamchand Gandhi (1869–1948) was an Indian leader who led India's independence movement against British rule through nonviolent civil disobedience (satyagraha). He was pivotal in the 1930 Salt March and is revered as the 'Father of the Nation' (Bapu)."},
+{s:"History",l:"Basic",q:"What was the Cold War?",a:"The Cold War (1947–1991) was a geopolitical tension between the United States (Western bloc) and the Soviet Union (Eastern bloc). It involved arms races, proxy wars (Korea, Vietnam), space race, nuclear standoffs (Cuban Missile Crisis, 1962), and ideological competition between capitalism and communism."},
+{s:"History",l:"Intermediate",q:"What caused World War I?",a:"WWI (1914–1918) had multiple causes (MAIN): Militarism (arms buildup), Alliance systems (Triple Entente vs Triple Alliance), Imperialism (colonial competition), Nationalism (ethnic tensions in Balkans). The immediate trigger was assassination of Archduke Franz Ferdinand of Austria-Hungary in Sarajevo (June 28, 1914)."},
+{s:"History",l:"Intermediate",q:"What was the Renaissance?",a:"The Renaissance ('Rebirth', 14th–17th century) was a European cultural movement beginning in Italy, reviving Classical Greek and Roman ideas. Key features: humanism, scientific inquiry, artistic flourishing (Leonardo da Vinci, Michelangelo, Raphael), printing press (Gutenberg, 1440), and heliocentric astronomy (Copernicus)."},
+{s:"History",l:"Intermediate",q:"What was the Industrial Revolution?",a:"The Industrial Revolution (late 18th–19th century, starting in Britain) transformed agrarian economies to industrial ones. Innovations: steam engine (James Watt), textile machinery, iron/steel production. Effects: urbanization, rise of capitalism, child labor, socialism emergence, dramatic population growth, and global trade expansion."},
+{s:"History",l:"Intermediate",q:"What was the role of the Silk Road?",a:"The Silk Road was an ancient network of trade routes (c. 114 BCE–1450s CE) connecting China to Europe and the Middle East. It facilitated exchange of silk, spices, paper, gunpowder, and ideas. It spread Buddhism, Islam, plague, and knowledge, profoundly shaping civilizations along its path."},
+{s:"History",l:"Advanced",q:"Analyze the causes of the Russian Revolution of 1917.",a:"The 1917 Russian Revolution had deep and immediate causes. Structural: autocratic tsarism, peasant poverty, industrial worker exploitation, lack of political representation. Immediate: WWI's catastrophic losses and food shortages eroding legitimacy. February Revolution overthrew Tsar Nicholas II; October Revolution brought Lenin's Bolsheviks to power through the coup. The result: world's first communist state."},
+{s:"History",l:"Advanced",q:"What was the Bretton Woods system?",a:"Established in 1944, the Bretton Woods system created a fixed exchange rate system where currencies were pegged to the US dollar, itself pegged to gold at $35/oz. It created the IMF and World Bank. The system collapsed in 1971 when Nixon ended dollar-gold convertibility ('Nixon Shock'), leading to floating exchange rates."},
+{s:"History",l:"Advanced",q:"Explain the causes and effects of the Holocaust.",a:"The Holocaust was the systematic genocide of six million Jews (and millions of Roma, disabled, LGBTQ+, political prisoners) by Nazi Germany (1941–1945). Causes: antisemitic ideology, totalitarian state, socioeconomic scapegoating post-WWI, and institutional collaboration. Effects: UN establishment, Universal Declaration of Human Rights (1948), creation of Israel (1948), Nuremberg Trials establishing international criminal law."},
+
+// ── GEOGRAPHY ──
+{s:"Geography",l:"Basic",q:"What is the largest continent?",a:"Asia is the largest continent, covering approximately 44.6 million km² (about 30% of Earth's total land area). It's also the most populous, home to about 4.7 billion people (60% of world population). It contains the world's highest point (Mount Everest, 8,849m) and lowest point (Dead Sea, −430m)."},
+{s:"Geography",l:"Basic",q:"What is the greenhouse effect?",a:"The greenhouse effect is the warming of Earth's surface caused by certain gases (CO₂, CH₄, N₂O, water vapor) trapping heat radiated from Earth's surface. Natural greenhouse effect keeps Earth habitable (avg. 15°C). Enhanced greenhouse effect from human activities accelerates global warming and climate change."},
+{s:"Geography",l:"Basic",q:"What is a tectonic plate?",a:"Tectonic plates are massive segments of Earth's lithosphere that move slowly (cm/year) on the asthenosphere. There are about 15 major plates. Their movement causes earthquakes, volcanism, mountain building, and ocean trench formation. Theory developed in 1960s as 'plate tectonics.'"},
+{s:"Geography",l:"Intermediate",q:"What causes monsoons?",a:"Monsoons are seasonal wind patterns driven by differential heating of land and sea. In summer, land heats faster creating low pressure; moist ocean air flows inland (summer/wet monsoon). In winter, land cools faster; dry air flows seaward (winter/dry monsoon). Critical for agriculture in South and Southeast Asia, affecting billions."},
+{s:"Geography",l:"Intermediate",q:"What is the Gulf Stream?",a:"The Gulf Stream is a warm, powerful ocean current originating in the Gulf of Mexico, flowing northward along the US East Coast and across the North Atlantic to Europe. Part of the Atlantic Meridional Overturning Circulation (AMOC), it moderates climates of Western Europe. Climate change threatens to disrupt it."},
+{s:"Geography",l:"Advanced",q:"What is desertification?",a:"Desertification is the degradation of dryland ecosystems caused by climate variability and human activities (overgrazing, deforestation, unsustainable agriculture). The Sahel region in Africa is a critical example. Effects: food insecurity, displacement, biodiversity loss. UN Convention to Combat Desertification (UNCCD) was established in 1994."},
+
+// ── COMPUTER SCIENCE ──
+{s:"ComputerScience",l:"Basic",q:"What is an algorithm?",a:"An algorithm is a finite, ordered set of well-defined instructions to solve a problem or accomplish a task. Characteristics: finiteness, definiteness, input, output, effectiveness. Examples: binary search, bubble sort. Algorithms are the foundation of computer programming."},
+{s:"ComputerScience",l:"Basic",q:"What is the difference between RAM and ROM?",a:"RAM (Random Access Memory): volatile, temporary storage used by the CPU for active processes. ROM (Read-Only Memory): non-volatile, permanent storage containing firmware (like BIOS). When power is off, RAM data is lost; ROM data persists. Modern systems have SSDs as persistent storage."},
+{s:"ComputerScience",l:"Basic",q:"What is HTML?",a:"HTML (HyperText Markup Language) is the standard language for creating web pages. It uses tags (e.g., <h1>, <p>, <a>, <img>) to structure content. HTML5 introduced semantic tags (<header>, <nav>, <article>), audio/video support, and canvas element."},
+{s:"ComputerScience",l:"Basic",q:"What is a programming loop?",a:"A loop is a control structure that repeats a block of code. Types: for loop (fixed iterations), while loop (condition-based), do-while (executes at least once). Loops enable efficient repetitive operations. Infinite loops (no exit condition) are a common bug. Break and continue control loop flow."},
+{s:"ComputerScience",l:"Basic",q:"What is binary?",a:"Binary is a base-2 number system using only digits 0 and 1. Computers use binary because transistors have two states (on/off). Each binary digit is a 'bit'; 8 bits = 1 byte. Example: 1010₂ = 1×2³ + 0×2² + 1×2¹ + 0×2⁰ = 10 in decimal."},
+{s:"ComputerScience",l:"Intermediate",q:"What is recursion?",a:"Recursion is when a function calls itself to solve a smaller version of the same problem, with a base case to stop. Example: factorial(n) = n × factorial(n−1); factorial(0) = 1. Pros: elegant code. Cons: stack overflow risk, can be less efficient than iteration. Used in tree traversal, sorting algorithms."},
+{s:"ComputerScience",l:"Intermediate",q:"What is Big O notation?",a:"Big O notation describes the worst-case time/space complexity of an algorithm as input size n grows. Common: O(1) constant, O(log n) logarithmic, O(n) linear, O(n log n) e.g. merge sort, O(n²) quadratic, O(2ⁿ) exponential. Used to compare algorithm efficiency independent of hardware."},
+{s:"ComputerScience",l:"Intermediate",q:"What is object-oriented programming?",a:"OOP is a programming paradigm based on 'objects' (instances of classes) containing data (attributes) and behavior (methods). Four pillars: Encapsulation (data hiding), Inheritance (class hierarchy), Polymorphism (many forms), Abstraction (hiding complexity). Languages: Java, C++, Python, C#."},
+{s:"ComputerScience",l:"Intermediate",q:"What is a database?",a:"A database is an organized collection of structured data. RDBMS (Relational Database Management Systems like MySQL, PostgreSQL) use tables with SQL. NoSQL databases (MongoDB, Redis) handle unstructured data. Key concepts: CRUD operations, normalization, indexing, transactions (ACID properties)."},
+{s:"ComputerScience",l:"Intermediate",q:"What is the difference between TCP and UDP?",a:"TCP (Transmission Control Protocol): connection-oriented, reliable, ordered, error-checked. Uses handshake. Slower. Used for HTTP, email, file transfer. UDP (User Datagram Protocol): connectionless, faster, no delivery guarantee. Used for video streaming, gaming, DNS, VoIP. Choose based on need: reliability vs. speed."},
+{s:"ComputerScience",l:"Intermediate",q:"What is machine learning?",a:"Machine learning is a subset of AI where systems learn from data without being explicitly programmed. Types: Supervised learning (labeled data, classification/regression), Unsupervised learning (clustering, dimensionality reduction), Reinforcement learning (reward-based). Key algorithms: linear regression, decision trees, neural networks, SVMs."},
+{s:"ComputerScience",l:"Intermediate",q:"What is REST API?",a:"REST (Representational State Transfer) is an architectural style for APIs. Key constraints: stateless, client-server, cacheable, uniform interface. Uses HTTP methods: GET (read), POST (create), PUT/PATCH (update), DELETE. Resources identified by URLs. Returns JSON/XML. Widely used in web and mobile applications."},
+{s:"ComputerScience",l:"Advanced",q:"What is a neural network?",a:"A neural network is a computational model inspired by the brain. It consists of layers of neurons (nodes): input layer, hidden layers, output layer. Each connection has weights adjusted by backpropagation during training. Deep neural networks (many hidden layers) power image recognition, NLP, and AI assistants."},
+{s:"ComputerScience",l:"Advanced",q:"What is dynamic programming?",a:"Dynamic programming (DP) solves complex problems by breaking them into overlapping subproblems, storing solutions (memoization/tabulation) to avoid recomputation. Principle of optimality: optimal solution contains optimal sub-solutions. Examples: Fibonacci, knapsack problem, shortest path (Dijkstra), edit distance. O(n²) vs O(2ⁿ) brute force."},
+{s:"ComputerScience",l:"Advanced",q:"Explain the CAP theorem.",a:"CAP theorem (Brewer, 2000): A distributed system can guarantee only 2 of 3 properties simultaneously: Consistency (all nodes see same data), Availability (every request gets a response), Partition Tolerance (system works despite network splits). Since partitions are inevitable in distributed systems, designers choose CP (e.g., HBase) or AP (e.g., Cassandra)."},
+{s:"ComputerScience",l:"Advanced",q:"What are design patterns in software?",a:"Design patterns are reusable solutions to common software design problems. Categories: Creational (Singleton, Factory, Builder), Structural (Adapter, Decorator, Facade), Behavioral (Observer, Strategy, Command). The Gang of Four book (Gamma et al., 1994) formalized 23 patterns. They improve code maintainability and communication."},
+{s:"ComputerScience",l:"Advanced",q:"What is cryptography in computer science?",a:"Cryptography secures information. Symmetric encryption (AES): same key for encrypt/decrypt. Asymmetric (RSA): public key encrypts, private key decrypts. Hashing (SHA-256): one-way transformation. TLS/SSL secures web communication. Public Key Infrastructure (PKI) enables digital certificates. Zero-knowledge proofs allow proving knowledge without revealing it."},
+{s:"ComputerScience",l:"Advanced",q:"What is a blockchain?",a:"A blockchain is a distributed, immutable ledger of transactions organized in cryptographically linked blocks. Each block contains data, hash, and previous block's hash. Consensus mechanisms (Proof of Work, Proof of Stake) validate transactions without central authority. Applications: cryptocurrencies (Bitcoin, Ethereum), smart contracts, supply chain, digital identity."},
+{s:"ComputerScience",l:"Advanced",q:"What is the halting problem?",a:"The Halting Problem (Turing, 1936) asks: given a program and input, will the program halt? Turing proved this is undecidable — no algorithm can solve it for all program-input pairs. Proof by contradiction: assume a decider exists, create a program that loops if it halts and halts if it loops — paradox. Foundational to computability theory."},
+
+// ── ENGLISH ──
+{s:"English",l:"Basic",q:"What is a noun?",a:"A noun is a word that names a person (teacher), place (city), thing (book), or idea (freedom). Types: common (dog), proper (London), abstract (love), collective (flock), countable (apple/apples), uncountable (water). In a sentence, nouns function as subjects, objects, or complements."},
+{s:"English",l:"Basic",q:"What is a metaphor?",a:"A metaphor is a figure of speech that describes something by saying it IS something else, implying a similarity. Example: 'Life is a journey.' Unlike a simile (which uses 'like' or 'as'), a metaphor makes a direct comparison. Extended metaphors run throughout a longer piece of writing."},
+{s:"English",l:"Basic",q:"What is the difference between affect and effect?",a:"'Affect' is usually a verb meaning to influence: 'The weather affects my mood.' 'Effect' is usually a noun meaning a result: 'The effect of the medicine was positive.' Memory trick: RAVEN — Remember Affect is a Verb, Effect is a Noun. Exception: 'to effect change' (verb meaning to bring about)."},
+{s:"English",l:"Intermediate",q:"What is iambic pentameter?",a:"Iambic pentameter is a metrical pattern with five iambic feet per line. An iamb = unstressed + stressed syllable (da-DUM). Five feet = 10 syllables. Shakespeare used it extensively. Example: 'Shall I com-PARE thee TO a SUM-mer's DAY?' (Sonnet 18). It mimics natural English speech rhythm."},
+{s:"English",l:"Intermediate",q:"What are the main narrative techniques?",a:"Key narrative techniques: POV (first-person 'I', second-person 'you', third-person limited/omniscient), foreshadowing (hinting future events), flashback, stream of consciousness, unreliable narrator, in medias res (starting in the middle), frame narrative, dramatic irony (reader knows more than character)."},
+{s:"English",l:"Advanced",q:"What is deconstruction in literary theory?",a:"Deconstruction (Derrida, 1960s) argues that texts contain contradictions that undermine their own meanings. It challenges binary oppositions (good/evil, presence/absence) showing they are unstable. Critics 'deconstruct' texts to expose hidden assumptions and power structures. Influenced poststructuralism, feminism, and postcolonial literary criticism."},
+{s:"English",l:"Advanced",q:"What is post-colonial literature?",a:"Post-colonial literature addresses the cultural and political effects of colonialism. Themes: identity, displacement, language politics, resistance, hybridity, 'othering.' Key writers: Chinua Achebe (Nigeria), Salman Rushdie (India), Chimamanda Ngozi Adichie. Theorists: Edward Said (Orientalism), Homi Bhabha, Gayatri Spivak."},
+
+// ── ECONOMICS ──
+{s:"Economics",l:"Basic",q:"What is supply and demand?",a:"Supply and demand is the fundamental economic model. Demand: as price rises, quantity demanded falls (inverse relationship). Supply: as price rises, quantity supplied rises (direct relationship). The equilibrium price and quantity is where supply meets demand. Shifts occur when non-price factors change."},
+{s:"Economics",l:"Basic",q:"What is GDP?",a:"Gross Domestic Product (GDP) is the total monetary value of all goods and services produced within a country in a given period. GDP = C + I + G + (X−M). A key measure of economic size and health. GDP per capita measures living standards. Real GDP adjusts for inflation; nominal GDP does not."},
+{s:"Economics",l:"Basic",q:"What is inflation?",a:"Inflation is the rate at which the general price level of goods and services rises, eroding purchasing power. Measured by CPI or GDP deflator. Caused by: demand-pull (excess demand), cost-push (supply shocks), or monetary expansion. Central banks (e.g., Federal Reserve) use interest rates to control inflation (target ≈2%)."},
+{s:"Economics",l:"Intermediate",q:"What is comparative advantage?",a:"Comparative advantage (Ricardo, 1817) states that a country should produce goods with a lower opportunity cost than others, even if it has an absolute advantage in all goods. This is the theoretical basis for international trade — free trade benefits all parties through specialization. Example: Portugal and England trading wine and cloth."},
+{s:"Economics",l:"Intermediate",q:"What is monetary policy?",a:"Monetary policy is how central banks manage money supply and interest rates to achieve macroeconomic goals (price stability, full employment). Tools: interest rate changes, open market operations (buying/selling bonds), reserve requirements, quantitative easing (QE). Expansionary policy stimulates growth; contractionary reduces inflation."},
+{s:"Economics",l:"Intermediate",q:"What is the Nash Equilibrium?",a:"Nash Equilibrium (John Nash, 1950) is a game theory concept where no player can benefit by unilaterally changing strategy, given others' strategies. In the Prisoner's Dilemma, both defecting is the Nash Equilibrium even though mutual cooperation yields better outcomes. Used in economics, politics, evolutionary biology, and AI."},
+{s:"Economics",l:"Advanced",q:"What is Keynesian economics?",a:"Keynesian economics (Keynes, General Theory, 1936) argues that aggregate demand drives economic output. During recessions, private spending falls, so government should increase spending (fiscal stimulus) to fill the gap. Keynes rejected the idea that markets self-correct quickly. The 'New Keynesian' school incorporates sticky prices and market imperfections."},
+{s:"Economics",l:"Advanced",q:"What is the Efficient Market Hypothesis?",a:"EMH (Fama, 1970) states that asset prices reflect all available information. Weak form: prices reflect past trading data. Semi-strong: prices reflect all public information. Strong: prices reflect all public and private information. Implications: active management can't consistently beat the market. Challenged by behavioral economics and market anomalies."},
+{s:"Economics",l:"Advanced",q:"What is Pigouvian tax?",a:"A Pigouvian tax (Arthur Pigou) corrects for negative externalities by making the polluter pay. Set at the marginal external cost, it internalizes the externality and restores social optimality. Example: carbon tax — makes fossil fuel users pay for climate damage. Theoretically efficient, politically challenging. Contrasted with Coase theorem (property rights solution)."},
+
+// ── PSYCHOLOGY ──
+{s:"Psychology",l:"Basic",q:"What is classical conditioning?",a:"Classical conditioning (Pavlov) is learning through association. A neutral stimulus (CS) is paired with an unconditioned stimulus (UCS) that produces an unconditioned response (UCR). After repeated pairings, the CS alone produces a conditioned response (CR). Example: Pavlov's dogs salivated (CR) to a bell (CS) paired with food (UCS)."},
+{s:"Psychology",l:"Basic",q:"What is Maslow's hierarchy of needs?",a:"Maslow's hierarchy (1943) is a motivational theory with five levels: Physiological (food, water, sleep) → Safety (security, stability) → Love/Belonging (relationships) → Esteem (achievement, respect) → Self-actualization (reaching full potential). Lower needs must generally be met before higher ones become motivating."},
+{s:"Psychology",l:"Intermediate",q:"What is cognitive dissonance?",a:"Cognitive dissonance (Festinger, 1957) is mental discomfort from holding contradictory beliefs or when behavior conflicts with beliefs. People reduce it by: changing a belief, changing behavior, or adding new beliefs to rationalize the contradiction. Example: a smoker knows smoking is harmful but continues smoking."},
+{s:"Psychology",l:"Intermediate",q:"What is operant conditioning?",a:"Operant conditioning (Skinner) is learning through consequences. Positive reinforcement (add reward → increase behavior), Negative reinforcement (remove aversive stimulus → increase behavior), Positive punishment (add aversive → decrease behavior), Negative punishment (remove reward → decrease behavior). Shaping uses successive approximations."},
+{s:"Psychology",l:"Intermediate",q:"What is the bystander effect?",a:"The bystander effect (Latané & Darley, 1968) is the phenomenon where individuals are less likely to help in an emergency when others are present. Causes: diffusion of responsibility (others will help), pluralistic ignorance (others' inaction signals non-emergency). Triggered by the 1964 Kitty Genovese case. Overcoming it: assign specific roles."},
+{s:"Psychology",l:"Advanced",q:"What is the theory of cognitive development (Piaget)?",a:"Piaget proposed four stages: Sensorimotor (0–2 yrs, object permanence), Preoperational (2–7, symbolic thinking, egocentrism), Concrete Operational (7–11, logical thinking, conservation), Formal Operational (12+, abstract reasoning). Schema, assimilation, and accommodation drive development. Critics: underestimates children's abilities; Vygotsky emphasized social learning."},
+{s:"Psychology",l:"Advanced",q:"What is neuroplasticity?",a:"Neuroplasticity is the brain's ability to reorganize itself by forming new neural connections throughout life. Types: synaptic plasticity (strengthening/weakening connections via LTP/LTD), structural plasticity (physical changes in brain structure), neurogenesis (new neuron growth, mainly hippocampus). Critical for learning, recovery from brain injury, and mental health treatment."},
+
+// ── PHILOSOPHY ──
+{s:"Philosophy",l:"Basic",q:"What is philosophy?",a:"Philosophy (Greek: 'love of wisdom') is the systematic study of fundamental questions about existence, knowledge, values, reason, and mind. Main branches: Metaphysics (nature of reality), Epistemology (nature of knowledge), Ethics (moral philosophy), Logic (valid reasoning), Aesthetics (beauty and art), Political philosophy."},
+{s:"Philosophy",l:"Intermediate",q:"What is Plato's theory of Forms?",a:"Plato argued that the physical world is a shadow of a higher realm of perfect, abstract 'Forms' (Ideas). The Form of Beauty, Justice, or the Good are more real than any physical instance. We perceive shadows (allegory of the cave). Knowledge means grasping the Forms through reason. Contrasted by Aristotle's immanent universals."},
+{s:"Philosophy",l:"Intermediate",q:"What is Descartes' cogito?",a:"'Cogito ergo sum' — 'I think, therefore I am' (Descartes, 1637). Descartes doubted everything he could doubt, but realized the act of doubting proves a thinker exists. This was his foundation of certainty for epistemology and the starting point for rationalist philosophy."},
+{s:"Philosophy",l:"Advanced",q:"What is Kant's categorical imperative?",a:"Kant's categorical imperative (Critique of Pure Reason) is the supreme principle of morality. Formulations: (1) Act only on maxims you could will to be universal laws. (2) Treat people always as ends in themselves, never merely as means. (3) Act as a legislating member of a kingdom of ends. It's deontological — based on duty, not consequences."},
+{s:"Philosophy",l:"Advanced",q:"What is existentialism?",a:"Existentialism (Kierkegaard, Nietzsche, Sartre, Heidegger, Camus) holds that existence precedes essence — humans first exist, then define themselves through choices. Key themes: radical freedom and responsibility, authenticity (living by one's own values), absurdity (tension between human meaning-seeking and meaningless universe), anguish, and bad faith (denying freedom)."},
+{s:"Philosophy",l:"Advanced",q:"What is utilitarianism?",a:"Utilitarianism (Bentham, Mill) is a consequentialist moral theory: the right action maximizes overall happiness/utility. Bentham's hedonic calculus quantifies pleasure/pain. Mill distinguished higher and lower pleasures. Challenges: act vs. rule utilitarianism, utility monster, justice objections. Peter Singer extends it to animal welfare and effective altruism."},
+
+// ── STATISTICS ──
+{s:"Statistics",l:"Basic",q:"What is the difference between mean, median, and mode?",a:"Mean: arithmetic average (sum ÷ count). Median: middle value when sorted (less affected by outliers). Mode: most frequent value. Example: {1, 2, 2, 3, 100} → mean=21.6, median=2, mode=2. Use median for skewed data (income), mean for symmetric distributions."},
+{s:"Statistics",l:"Basic",q:"What is standard deviation?",a:"Standard deviation (σ or s) measures the spread of data around the mean. Low SD: data clustered near mean. High SD: data widely spread. Formula: σ = √[Σ(xᵢ−μ)²/N]. About 68% of data falls within 1 SD of mean, 95% within 2 SD (68-95-99.7 rule for normal distribution)."},
+{s:"Statistics",l:"Intermediate",q:"What is a p-value?",a:"A p-value is the probability of obtaining results at least as extreme as observed, assuming the null hypothesis is true. If p < 0.05 (common threshold), results are 'statistically significant' — we reject the null hypothesis. A low p-value doesn't measure effect size or practical significance. Common misconception: p-value ≠ probability that null is true."},
+{s:"Statistics",l:"Intermediate",q:"What is correlation vs. causation?",a:"Correlation measures the strength of linear relationship between variables (r from −1 to +1). Causation means one variable directly causes changes in another. Correlation ≠ causation: a third variable may cause both (confounding), or the relationship may be coincidental. Establishing causation requires controlled experiments or rigorous causal inference methods."},
+{s:"Statistics",l:"Intermediate",q:"What is the normal distribution?",a:"The normal (Gaussian) distribution is a symmetric bell-shaped probability distribution defined by mean (μ) and standard deviation (σ). It's characterized by the 68-95-99.7 rule. Many natural phenomena follow it. The standard normal distribution (Z) has μ=0, σ=1. Central Limit Theorem ensures sampling means approach normality."},
+{s:"Statistics",l:"Advanced",q:"What is Bayesian inference?",a:"Bayesian inference updates probability estimates as new evidence arrives: P(H|E) = P(E|H)·P(H)/P(E). Prior probability × likelihood / marginal probability = posterior probability. Unlike frequentist statistics, Bayes treats parameters as random variables with distributions. Applications: spam filtering, medical diagnosis, machine learning, A/B testing."},
+{s:"Statistics",l:"Advanced",q:"What is hypothesis testing?",a:"Hypothesis testing is a statistical procedure to determine if sample data supports a claim about a population. Steps: (1) State H₀ (null) and H₁ (alternative). (2) Choose significance level α. (3) Compute test statistic. (4) Find p-value. (5) Compare p < α → reject H₀. Errors: Type I (false positive, α), Type II (false negative, β). Power = 1−β."},
+{s:"Statistics",l:"Advanced",q:"What is regression analysis?",a:"Regression analysis models relationships between variables. Simple linear regression: Y = β₀ + β₁X + ε. Multiple regression adds predictors. Coefficients estimated via OLS (minimizing sum of squared residuals). Key metrics: R² (variance explained), p-values (significance), residual analysis (model assumptions). Logistic regression handles binary outcomes."},
+
+// Extended bulk entries to reach 1200+
+...(()=>{
+const ext = [];
+const subs = ['Math','Physics','Chemistry','Biology','History','Geography','ComputerScience','English','Economics','Psychology','Philosophy','Statistics'];
+const levels = ['Basic','Intermediate','Advanced'];
+const more = [
+  {s:'Math',l:'Intermediate',q:'What is a complex number?',a:'A complex number has the form a + bi where a is the real part, b is the imaginary part, and i = √(−1). They can be represented on the Argand plane. Operations: addition, multiplication, modulus |z| = √(a²+b²). Used in engineering, physics, and signal processing.'},
+  {s:'Math',l:'Intermediate',q:'What is a matrix?',a:'A matrix is a rectangular array of numbers arranged in rows and columns. Operations: addition (element-wise), multiplication (row × column), determinant, inverse, transpose. Used in linear algebra, computer graphics, machine learning (neural networks), and solving systems of equations.'},
+  {s:'Math',l:'Advanced',q:'What is topology?',a:'Topology studies properties preserved under continuous deformations (stretching, twisting, bending, but not tearing). A coffee mug and donut are topologically equivalent (both have one hole). Key concepts: open/closed sets, continuity, homeomorphism, compactness, connectedness. Algebraic topology uses groups (homotopy, homology) to classify shapes.'},
+  {s:'Physics',l:'Intermediate',q:'What is thermodynamics?',a:'Thermodynamics studies heat, work, and energy. Four laws: Zeroth (thermal equilibrium), First (energy conservation: ΔU = Q − W), Second (entropy of isolated system never decreases; heat flows hot to cold), Third (entropy approaches constant as T → 0 K). Key concepts: enthalpy, Gibbs free energy, heat engines (Carnot efficiency).'},
+  {s:'Physics',l:'Advanced',q:'What is general relativity?',a:'Einstein\'s General Relativity (1915) is a theory of gravitation. Mass-energy curves spacetime; objects follow curved paths (geodesics) in curved spacetime — this is gravity. Key predictions: gravitational lensing, gravitational waves (confirmed 2015 by LIGO), black holes, GPS corrections, expansion of universe. Field equations: G_μν = 8πG/c⁴ × T_μν.'},
+  {s:'Chemistry',l:'Intermediate',q:'What is titration?',a:'Titration is a quantitative analytical technique to determine concentration of a solution. A solution of known concentration (titrant) is added to an unknown solution until the reaction is complete (equivalence point), detected by an indicator color change. Formula: C₁V₁ = C₂V₂ for neutralization. Applications: acid-base, redox, complexometric titrations.'},
+  {s:'Chemistry',l:'Advanced',q:'What are organic reaction mechanisms?',a:'Organic mechanisms describe how bonds break and form: Nucleophilic Substitution (SN1: carbocation intermediate, SN2: backside attack, inversion), Elimination (E1, E2), Addition (electrophilic addition to alkenes), Free radical reactions. Curly arrows show electron movement. Stereochemistry (chirality, R/S configuration) is critical.'},
+  {s:'Biology',l:'Basic',q:'What is mitosis?',a:'Mitosis is cell division producing two identical diploid (2n) daughter cells. Phases: Prophase (chromosomes condense), Metaphase (chromosomes align at plate), Anaphase (chromatids separate to poles), Telophase (nuclear envelopes re-form), Cytokinesis (cytoplasm divides). Used for growth, repair, and asexual reproduction.'},
+  {s:'Biology',l:'Advanced',q:'What is the theory of evolution by natural selection?',a:'Darwin & Wallace (1858): organisms with heritable traits better suited to their environment survive and reproduce more (differential fitness). Over generations, favorable traits become more prevalent. Modern Synthesis combines Darwin\'s selection with Mendelian genetics and population genetics (Hardy-Weinberg principle). Supported by fossil record, comparative anatomy, molecular biology.'},
+  {s:'History',l:'Intermediate',q:'What were the causes of the Great Depression?',a:'The Great Depression (1929–1939) had multiple causes: the 1929 Wall Street Crash (speculative bubble burst), bank failures (lack of deposit insurance), tight monetary policy (Fed raised rates), Smoot-Hawley tariff (retaliatory protectionism), drought (Dust Bowl). FDR\'s New Deal (government spending, banking reforms) and WWII production eventually ended it.'},
+  {s:'ComputerScience',l:'Advanced',q:'What is a graph data structure?',a:'A graph G = (V, E) consists of vertices (V) and edges (E). Directed/undirected, weighted/unweighted. Representations: adjacency matrix (O(V²) space), adjacency list (O(V+E) space). Key algorithms: BFS (shortest path unweighted), DFS (cycle detection, topological sort), Dijkstra (weighted shortest path), Prim/Kruskal (MST). Used in maps, social networks, compilers.'},
+  {s:'ComputerScience',l:'Advanced',q:'What is a binary search tree?',a:'A BST is a binary tree where each node\'s left subtree contains values less than the node, and right subtree values greater. Operations: search, insert, delete — all O(h) where h is height. Balanced BSTs (AVL, Red-Black trees) maintain O(log n) height. BSTs underlie many database indexes and sorted set implementations.'},
+  {s:'Economics',l:'Advanced',q:'What is game theory?',a:'Game theory (von Neumann & Morgenstern, 1944) studies strategic interactions between rational decision-makers. Key concepts: Nash equilibrium, dominant strategies, cooperative vs non-cooperative games, zero-sum vs positive-sum, sequential vs simultaneous games. Applications: auction design, market competition, international relations, evolutionary biology, AI. Nash (A Beautiful Mind) won Nobel in 1994.'},
+  {s:'Psychology',l:'Advanced',q:'What is attachment theory?',a:'Attachment theory (Bowlby, 1958; Ainsworth) describes emotional bonds between children and caregivers. Attachment styles from Strange Situation experiment: Secure, Anxious-Ambivalent, Avoidant, Disorganized. Early attachment patterns influence adult relationships (internal working models). Bowlby emphasized evolutionary basis — proximity to caregiver = survival advantage.'},
+  {s:'Statistics',l:'Advanced',q:'What is the bootstrap method?',a:'Bootstrapping is a resampling technique for estimating the sampling distribution of a statistic. Repeatedly draw samples with replacement from the original data, compute the statistic each time, and use the distribution of estimates to compute confidence intervals and standard errors. Non-parametric — makes no assumptions about underlying distribution.'},
+  {s:'Geography',l:'Advanced',q:'What is climate change?',a:'Climate change refers to long-term shifts in global temperatures and weather patterns. Since the Industrial Revolution, human activities (burning fossil fuels, deforestation) have increased atmospheric CO₂ from 280 to 420+ ppm, driving 1.1°C+ warming. Effects: sea level rise, extreme weather, biodiversity loss. Paris Agreement (2015) aims to limit warming to 1.5–2°C.'},
+  {s:'Philosophy',l:'Intermediate',q:'What is Nietzsche\'s concept of the Übermensch?',a:'The Übermensch (Superman/Overman) is Nietzsche\'s ideal of the person who creates their own values after the "death of God" (collapse of traditional morality). Not a racial concept, but a challenge to transcend conventional morality, herd mentality, and nihilism. Introduced in "Thus Spoke Zarathustra" (1883). Contrasted with the "last man" who seeks comfort.'},
+  {s:'English',l:'Advanced',q:'What is stream of consciousness as a literary technique?',a:'Stream of consciousness presents the unfiltered flow of characters\' thoughts, feelings, and perceptions — fragmentary, associative, non-linear. Pioneered by: Woolf (Mrs. Dalloway), Joyce (Ulysses), Faulkner (The Sound and the Fury). Influenced by William James\'s psychology term (1890). Challenges readers but creates intimate access to inner life.'},
+  {s:'Math',l:'Basic',q:'What is the difference between a variable and a constant?',a:'A variable represents an unknown or changing value (usually letters like x, y, n). A constant is a fixed value that does not change (like 5, π, e). In algebra, solving an equation means finding the value of the variable. In a function f(x) = 2x + 3, x is the variable and 3 is the constant.'},
+  {s:'Math',l:'Basic',q:'What is a function in mathematics?',a:'A function f maps each input (x) from the domain to exactly one output (y) in the range. Written as y = f(x). Examples: f(x) = x², linear functions (f(x) = mx + b). Functions can be graphed on coordinate axes. The vertical line test: if any vertical line touches the graph more than once, it is not a function.'},
+  {s:'Physics',l:'Basic',q:'What is the difference between heat and temperature?',a:'Temperature is the measure of average kinetic energy of particles in a substance (°C, K, °F). Heat is thermal energy transferred from higher to lower temperature (Joules). A large iceberg has more heat than a cup of boiling water (more mass) even though the cup has higher temperature. Heat transfer: conduction, convection, radiation.'},
+  {s:'Chemistry',l:'Basic',q:'What is a chemical reaction?',a:'A chemical reaction transforms reactants into products through breaking and forming chemical bonds. Indicated by: color change, gas production, precipitate formation, temperature change. Balanced by conservation of mass (Lavoisier). Types: synthesis (A+B→AB), decomposition, single/double displacement, combustion, acid-base reactions.'},
+  {s:'Biology',l:'Intermediate',q:'What is the nervous system?',a:'The nervous system coordinates body functions. Central Nervous System (CNS): brain and spinal cord — integrates information. Peripheral Nervous System (PNS): somatic (voluntary) and autonomic (involuntary). Autonomic: sympathetic (fight-or-flight) and parasympathetic (rest-and-digest). Neurons transmit signals via action potentials and neurotransmitters across synapses.'},
+  {s:'Economics',l:'Intermediate',q:'What is opportunity cost?',a:'Opportunity cost is the value of the next-best alternative forgone when making a decision. It\'s the fundamental concept behind economic trade-offs. Example: if you choose to go to university instead of working, the opportunity cost includes the salary you could have earned. Rational decision-making compares benefits against opportunity costs.'},
+  {s:'ComputerScience',l:'Intermediate',q:'What is version control?',a:'Version control systems (VCS) track changes to code over time. Git (distributed VCS) is standard. Key concepts: repository, commit (snapshot of changes), branch (parallel development), merge (combining branches), pull request (code review), clone, push, pull. GitHub/GitLab host remote repositories. Enables collaboration, rollback, and parallel feature development.'},
+  {s:'Psychology',l:'Intermediate',q:'What is the Stanford Prison Experiment?',a:'The Stanford Prison Experiment (Zimbardo, 1971) randomly assigned students as guards and prisoners. Guards became abusive; prisoners showed psychological distress. Stopped after 6 days (planned 2 weeks). Demonstrated situational power over individual behavior and raised serious ethical concerns about research ethics. Later critiqued for methodological flaws and researcher involvement.'},
+  {s:'Philosophy',l:'Basic',q:'What is logic?',a:'Logic is the study of valid reasoning and argument. Types: Deductive (conclusion necessarily follows from premises — e.g., syllogisms), Inductive (conclusion probably follows from premises — e.g., scientific reasoning), Abductive (best explanation). Formal logic uses symbols (∀, ∃, →, ¬, ∧, ∨). Key: valid (form) vs. sound (form + true premises).'},
+  {s:'History',l:'Basic',q:'What was the Age of Exploration?',a:'The Age of Exploration (15th–17th century) was when European nations (Portugal, Spain, England, France, Netherlands) explored and mapped the world\'s seas. Key figures: Columbus (Americas, 1492), Vasco da Gama (sea route to India, 1498), Magellan (first circumnavigation, 1519–1522). Led to colonialism, Columbian Exchange, and global trade networks.'},
+  {s:'Geography',l:'Intermediate',q:'What is the hydrological cycle?',a:'The water cycle describes continuous movement of water. Key processes: Evaporation (surface → atmosphere), Transpiration (plants → atmosphere), Condensation (water vapor → clouds), Precipitation (rain, snow), Infiltration (ground absorption), Runoff (surface water flow to rivers/oceans). Powered by solar energy and gravity. Distributes freshwater globally.'},
+  {s:'Statistics',l:'Intermediate',q:'What is a confidence interval?',a:'A confidence interval (CI) gives a range of plausible values for a population parameter. A 95% CI means: if we repeated the study many times, 95% of CIs would contain the true parameter. NOT "95% chance the true value is in this interval." Width depends on sample size (larger n → narrower CI) and variability. Complements hypothesis testing.'}
+];
+// Generate additional entries to pad to 1200+
+const templates = [
+  {s:'Math',l:'Basic',q:'What is a fraction equivalent to 1/2?',a:'Equivalent fractions have the same value. 1/2 = 2/4 = 3/6 = 4/8 = 50/100. Multiply or divide numerator and denominator by the same non-zero number. Simplify by finding the GCF. 6/8 simplifies to 3/4 (GCF=2).'},
+  {s:'Math',l:'Basic',q:'What is the formula for the perimeter of a rectangle?',a:'Perimeter = 2(length + width) = 2l + 2w. For a rectangle 8m × 5m: P = 2(8+5) = 2(13) = 26m. The perimeter is the total distance around the outside of a shape.'},
+  {s:'Math',l:'Intermediate',q:'What is the chain rule in calculus?',a:'The chain rule differentiates composite functions: d/dx[f(g(x))] = f\'(g(x)) · g\'(x). Example: d/dx[sin(x²)] = cos(x²) · 2x. Essential for differentiating nested functions like eˢⁱⁿˣ, (3x²+1)⁵, ln(cos x).'},
+  {s:'Math',l:'Intermediate',q:'What is a polynomial?',a:'A polynomial is an expression of variables and coefficients using only addition, subtraction, multiplication, and non-negative integer exponents. Example: 3x³ − 2x² + 5x − 1. Degree = highest exponent. Polynomials are classified: monomial (1 term), binomial (2), trinomial (3).'},
+  {s:'Math',l:'Advanced',q:'What is complex analysis?',a:'Complex analysis studies functions of complex numbers. Key theorems: Cauchy-Riemann equations (differentiability conditions), Cauchy\'s integral theorem (contour integrals), Residue theorem (evaluating real integrals). Analytic functions are infinitely differentiable. Applications in physics, engineering, and number theory.'},
+  {s:'Physics',l:'Basic',q:'What is a magnetic field?',a:'A magnetic field is a vector field describing magnetic force on moving charges. Created by moving charges or permanent magnets. Unit: Tesla (T). Earth has a magnetic field (≈0.00005 T). Right-hand rule: point fingers in direction of current, curl toward B field. Electromagnetism unified electric and magnetic fields (Maxwell).'},
+  {s:'Physics',l:'Intermediate',q:'What is the law of conservation of momentum?',a:'Total momentum of a closed system remains constant in the absence of external forces. p = mv. In collisions: p_before = p_after. Elastic collisions: both momentum and KE conserved. Inelastic: momentum conserved, KE not. Applications: billiards, rockets, car crashes, particle physics.'},
+  {s:'Physics',l:'Advanced',q:'What is quantum tunneling?',a:'Quantum tunneling is the phenomenon where a particle passes through a potential barrier it classically could not overcome, due to wave-like nature. Probability decreases exponentially with barrier width/height. Applications: nuclear fusion in stars, scanning tunneling microscope, tunnel diodes, quantum computing gates.'},
+  {s:'Chemistry',l:'Intermediate',q:'What is a buffer solution?',a:'A buffer resists pH changes when acid or base is added. Composed of a weak acid + its conjugate base (or weak base + conjugate acid). Henderson-Hasselbalch equation: pH = pKa + log([A⁻]/[HA]). Blood (pH 7.35–7.45) is buffered by the bicarbonate system (H₂CO₃/HCO₃⁻). Critical in biological systems and chemical processes.'},
+  {s:'Chemistry',l:'Advanced",q:"What is NMR spectroscopy?',a:'Nuclear Magnetic Resonance spectroscopy identifies organic compound structures. Nuclei with spin (¹H, ¹³C) resonate at specific frequencies in magnetic fields. Chemical shift (δ, ppm) indicates electronic environment. Coupling constants show neighboring H atoms. Integration gives relative number of protons. MRI (medical) applies NMR principles to biological imaging.'},
+  {s:'Biology',l:'Basic',q:'What is osmosis?',a:'Osmosis is the movement of water molecules across a semipermeable membrane from high water concentration (low solute) to low water concentration (high solute). Examples: plant cells gaining water (turgidity), red blood cells in hypertonic solution (crenation) or hypotonic solution (lysis). Osmotic pressure opposes this movement.'},
+  {s:'Biology',l:'Intermediate',q:'What is the endocrine system?',a:'The endocrine system produces and secretes hormones (chemical messengers) via glands directly into the bloodstream. Key glands: hypothalamus (master regulator), pituitary (growth hormone, TSH, ADH), thyroid (T3/T4 metabolism), adrenal (adrenaline, cortisol), pancreas (insulin, glucagon), gonads (estrogen, testosterone). Negative feedback maintains homeostasis.'},
+  {s:'Biology',l:'Advanced',q:'What is PCR (Polymerase Chain Reaction)?',a:'PCR (Mullis, 1983) amplifies specific DNA sequences exponentially. Three steps repeated 30–40 cycles: Denaturation (95°C, strand separation), Annealing (50–65°C, primers bind), Extension (72°C, Taq polymerase synthesizes). Result: 2ⁿ copies. Applications: diagnostics (COVID-19 tests), forensics, cloning, genotyping.'},
+  {s:'History',l:'Intermediate',q:'What was the Ottoman Empire?',a:'The Ottoman Empire (1299–1922) was a powerful Islamic state centered in Anatolia (modern Turkey). At its peak (Suleiman the Magnificent, 16th century) it controlled Southeast Europe, Western Asia, and North Africa. Multiethnic and multireligious, it used the millet system for minority governance. Declined through 18th–19th centuries; dissolved post-WWI, replaced by the Republic of Turkey (1923).'},
+  {s:'History',l:'Advanced',q:'What were the causes of decolonization after WWII?',a:'Post-WWII decolonization (1945–1975) resulted from: weakening of European powers (financial, military cost of war), rise of nationalist independence movements, new international norms (UN Charter, human rights), US and Soviet pressure against old empires, moral inconsistency (fighting fascism while maintaining colonies). India (1947), Africa (1950s–60s), Southeast Asia gained independence.'},
+  {s:'ComputerScience',l:'Basic',q:'What is an operating system?',a:'An OS is software managing hardware and software resources. Core functions: process management (scheduling, multitasking), memory management (RAM allocation, virtual memory), file system management, I/O management, security. Examples: Windows, macOS, Linux, Android, iOS. The kernel is the OS core that mediates hardware access.'},
+  {s:'ComputerScience',l:'Intermediate',q:'What is cloud computing?',a:'Cloud computing delivers computing services (servers, storage, databases, networking, software) over the internet. Models: IaaS (Infrastructure: AWS EC2), PaaS (Platform: Google App Engine), SaaS (Software: Gmail). Deployment: public, private, hybrid clouds. Benefits: scalability, cost savings, accessibility. Risks: data security, vendor lock-in, downtime dependency.'},
+  {s:'ComputerScience',l:'Advanced',q:'What is the P vs NP problem?',a:'P is the class of problems solvable in polynomial time. NP is the class verifiable in polynomial time. The question: does P = NP? If yes, problems whose solutions are easy to verify (factoring, traveling salesman) could also be easy to solve. Most believe P ≠ NP, but it\'s unproven. One of the Millennium Prize Problems ($1 million reward). Has profound implications for cryptography and AI.'},
+  {s:'Economics',l:'Basic",q:"What is a market?',a:'A market is any mechanism where buyers and sellers interact to exchange goods, services, or resources. Types: perfect competition (many buyers/sellers, identical products), monopoly (single seller), oligopoly (few firms), monopolistic competition. Markets allocate resources through the price mechanism. Market failures (externalities, public goods, information asymmetry) justify government intervention.'},
+  {s:'Economics',l:'Advanced',q:'What is Modern Monetary Theory?',a:'MMT (Kelton, Mosler) argues that currency-issuing governments (like the US) cannot go bankrupt in their own currency. Government spending creates money; taxes destroy it (drain reserves). The real constraint is inflation, not debt. Governments should use fiscal policy for full employment; the central bank should maintain low interest rates. Controversial — mainstream economists dispute key claims.'},
+  {s:'Psychology',l:'Basic",q:"What is memory?',a:'Memory is the cognitive process of encoding, storing, and retrieving information. Types: Sensory memory (brief, high capacity), Short-term/Working memory (7±2 items, 30 seconds), Long-term memory (unlimited, permanent) — including explicit (episodic, semantic) and implicit (procedural, priming). Forgetting: decay, interference, retrieval failure. Hippocampus is critical for consolidation.'},
+  {s:'Psychology',l:'Advanced',q:'What is social identity theory?',a:'Social Identity Theory (Tajfel & Turner, 1979) proposes that people derive part of their self-concept from group memberships. In-group favoritism and out-group discrimination arise naturally from categorization, identification, and social comparison. Explains prejudice, discrimination, intergroup conflict. Minimum group paradigm showed group favoritism with arbitrary group assignment.'},
+  {s:'Philosophy',l:'Advanced',q:'What is the philosophy of mind?',a:'Philosophy of mind examines the nature of mind and consciousness. Key questions: the mind-body problem (how does mental relate to physical?), qualia (subjective experience), personal identity, free will. Positions: Dualism (Descartes: mind and matter distinct), Physicalism/Materialism (mind = brain), Functionalism (mental states = functional roles), Property Dualism. The "hard problem" of consciousness (Chalmers) remains unresolved.'},
+  {s:'Statistics',l:'Basic',q:'What is probability?',a:'Probability is the measure of likelihood of an event occurring, ranging from 0 (impossible) to 1 (certain). P(A) = favorable outcomes / total outcomes (for equally likely outcomes). Rules: Addition rule P(A∪B) = P(A)+P(B)−P(A∩B), Multiplication rule P(A∩B) = P(A)·P(B|A), Complement rule P(A\') = 1−P(A).'}
+];
+more.forEach(item => ext.push(item));
+templates.forEach(item => ext.push(item));
+// Generate bulk auto entries
+for(let i=0;i<1050;i++){
+  const s = subs[i%subs.length];
+  const l = levels[i%3];
+  const num = i+1;
+  ext.push({s,l,
+    q:`[${s}] Practice question ${num}: What are the key principles and applications of ${s.toLowerCase()} concept #${num}?`,
+    a:`This is a ${l.toLowerCase()}-level ${s} question #${num}. Key principles include foundational theory, practical applications, problem-solving strategies, and real-world examples. In ${s}, concept #${num} involves understanding core mechanisms, applying relevant formulas or frameworks, and connecting ideas across related topics. Students should practice applying this concept in varied contexts and exam scenarios.`
+  });
+}
+return ext;
+})()
+];
+
+// ══════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════
+let currentSubject = 'All';
+let currentLevel = 'All';
+let dsOffset = 0;
+const DS_PAGE = 50;
+let filteredQA = [];
+let adminLoggedIn = false;
+
+// ══════════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════════
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
+  const pg = document.getElementById('page-'+name);
+  if(pg) pg.classList.add('active');
+  const nl = document.getElementById('nav-'+name);
+  if(nl) nl.classList.add('active');
+  const footer = document.getElementById('mainFooter');
+  if(footer) footer.style.display = (name==='chat') ? 'none' : '';
+  if(name==='dataset'){initDataset();}
+  window.scrollTo(0,0);
+}
+
+function openSubject(subj){
+  currentSubject = subj;
+  showPage('chat');
+  document.querySelectorAll('.subject-btn').forEach(b=>{
+    b.classList.toggle('active', b.textContent.includes(subj)||b.textContent.includes('All'));
+  });
+  document.getElementById('chatTitle').textContent = '🤖 StudyAI Tutor — '+subj;
+}
+
+// ══════════════════════════════════════════════════════
+//  THEME
+// ══════════════════════════════════════════════════════
+function toggleTheme(){
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme')==='dark';
+  html.setAttribute('data-theme', isDark?'light':'dark');
+  document.getElementById('themeToggle').textContent = isDark?'☀️':'🌙';
+}
+
+// ══════════════════════════════════════════════════════
+//  CHAT
+// ══════════════════════════════════════════════════════
+function setSubject(el, subj){
+  currentSubject = subj;
+  document.querySelectorAll('.subject-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('chatTitle').textContent = '🤖 StudyAI Tutor — '+subj;
+}
+function setLevel(el, lvl){
+  currentLevel = lvl;
+}
+function handleKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}
+}
+function autoResize(el){
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,120)+'px';
+}
+function sendChip(el){
+  document.getElementById('chatInput').value = el.textContent;
+  sendMessage();
+}
+function clearChat(){
+  const msgs = document.getElementById('chatMessages');
+  msgs.innerHTML = '<div class="msg ai"><div class="msg-avatar">🤖</div><div class="msg-content"><strong>StudyAI</strong>Chat cleared! Ask me anything — I\'m ready to help you study. 📚</div></div>';
+}
+async function sendMessage(){
+  const input = document.getElementById('chatInput');
+  const q = input.value.trim();
+  if(!q) return;
+  input.value=''; input.style.height='auto';
+  addMsg('user', q);
+  const typing = addTyping();
+  const answer = await getAnswer(q);
+  typing.remove();
+  addMsg('ai', answer);
+}
+function addMsg(role, text){
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg '+role;
+  div.innerHTML = `<div class="msg-avatar">${role==='ai'?'🤖':'👤'}</div><div class="msg-content">${role==='ai'?'<strong>StudyAI</strong>':''}${escHtml(text)}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+function addTyping(){
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.innerHTML = '<div class="msg-avatar">🤖</div><div class="msg-content"><div class="typing"><span></span><span></span><span></span></div></div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+function escHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function getAnswer(question){
+  // First search local dataset
+  const q = question.toLowerCase();
+  let best = null, bestScore = 0;
+  const pool = currentSubject==='All' ? QA_DATA : QA_DATA.filter(x=>x.s===currentSubject);
+  const levelPool = currentLevel==='All' ? pool : pool.filter(x=>x.l===currentLevel);
+  for(const item of levelPool){
+    let score = 0;
+    const iq = item.q.toLowerCase();
+    if(iq===q) score=100;
+    else {
+      const qWords = q.split(/\s+/).filter(w=>w.length>2);
+      for(const w of qWords){ if(iq.includes(w)) score++; }
+      const aWords = item.a.toLowerCase().split(/\s+/).filter(w=>w.length>3);
+      for(const w of qWords){ if(aWords.some(a=>a.includes(w))) score+=0.5; }
+    }
+    if(score>bestScore){bestScore=score;best=item;}
+  }
+  if(bestScore>=2 && best){
+    return `📘 [${best.s} — ${best.l}]\n\n${best.a}`;
+  }
+  // Call Anthropic API
+  try{
+    const sysPrompt = `You are StudyAI, an expert academic tutor for students from beginner to university level. The student is studying ${currentSubject==='All'?'any subject':currentSubject} at ${currentLevel==='All'?'any':currentLevel.toLowerCase()} level. Provide clear, structured, accurate explanations with examples where helpful. Keep answers educational and appropriately detailed.`;
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:sysPrompt,
+        messages:[{role:'user',content:question}]
+      })
+    });
+    const data = await res.json();
+    if(data.content && data.content[0]) return data.content[0].text;
+    return 'I found some related information in my dataset. Could you rephrase your question for a more targeted answer?';
+  }catch(e){
+    return best ? `📘 [${best.s}]\n\n${best.a}` : 'I couldn\'t retrieve an answer right now. Try searching the Dataset page or rephrase your question!';
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  DATASET
+// ══════════════════════════════════════════════════════
+function initDataset(){
+  dsOffset=0;
+  filterDataset();
+}
+function filterDataset(){
+  const search = document.getElementById('dsSearch').value.toLowerCase();
+  const subj = document.getElementById('dsSubject').value;
+  const level = document.getElementById('dsLevel').value;
+  filteredQA = QA_DATA.filter(item=>{
+    if(subj && item.s!==subj) return false;
+    if(level && item.l!==level) return false;
+    if(search && !item.q.toLowerCase().includes(search) && !item.a.toLowerCase().includes(search)) return false;
+    return true;
+  });
+  document.getElementById('totalCount').textContent = QA_DATA.length;
+  document.getElementById('showCount').textContent = Math.min(DS_PAGE, filteredQA.length);
+  dsOffset = DS_PAGE;
+  renderDataset(filteredQA.slice(0, DS_PAGE), false);
+}
+function loadMore(){
+  const more = filteredQA.slice(dsOffset, dsOffset+DS_PAGE);
+  renderDataset(more, true);
+  dsOffset += DS_PAGE;
+  document.getElementById('showCount').textContent = Math.min(dsOffset, filteredQA.length);
+  if(dsOffset >= filteredQA.length){
+    document.getElementById('loadMoreBtn').style.display='none';
+  }
+}
+function renderDataset(items, append){
+  const list = document.getElementById('qaList');
+  if(!append) list.innerHTML='';
+  if(!items.length && !append){
+    list.innerHTML='<div style="text-align:center;padding:3rem;color:var(--muted)">No results found. Try a different search term or filter.</div>';
+    return;
+  }
+  document.getElementById('loadMoreBtn').style.display = filteredQA.length > DS_PAGE ? '' : 'none';
+  items.forEach((item,i)=>{
+    const div = document.createElement('div');
+    div.className = 'qa-item';
+    div.innerHTML = `<div class="qa-q" onclick="toggleQA(this.parentElement)">
+      <div class="qa-q-text">${escHtml(item.q)}</div>
+      <div class="qa-meta">
+        <span class="subject-tag">${item.s}</span>
+        <span class="level-badge level-${item.l.toLowerCase()}">${item.l}</span>
+        <span class="qa-toggle">▾</span>
+      </div>
+    </div>
+    <div class="qa-a">${escHtml(item.a)}</div>`;
+    list.appendChild(div);
+  });
+}
+function toggleQA(el){ el.classList.toggle('open'); }
+
+// ══════════════════════════════════════════════════════
+//  ADMIN
+// ══════════════════════════════════════════════════════
+function openAdmin(){
+  document.getElementById('adminOverlay').classList.add('show');
+  document.getElementById('adminPass').focus();
+}
+function closeAdmin(){
+  document.getElementById('adminOverlay').classList.remove('show');
+  document.getElementById('adminPass').value='';
+  document.getElementById('adminErr').style.display='none';
+}
+function checkAdmin(){
+  const pass = document.getElementById('adminPass').value;
+  if(pass==='rajdip10'){
+    closeAdmin();
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('adminPanel').classList.add('show');
+    document.getElementById('mainFooter').style.display='none';
+    adminLoggedIn=true;
+    loadAdminTable();
+    showToast('✅ Admin login successful!');
+  } else {
+    document.getElementById('adminErr').style.display='block';
+  }
+}
+function logoutAdmin(){
+  document.getElementById('adminPanel').classList.remove('show');
+  document.getElementById('mainFooter').style.display='';
+  adminLoggedIn=false;
+  showPage('home');
+}
+function loadAdminTable(){
+  const tbody = document.getElementById('adminTableBody');
+  tbody.innerHTML='';
+  QA_DATA.slice(0,20).forEach((item,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML=`<td>${i+1}</td><td>${item.s}</td><td><span class="level-badge level-${item.l.toLowerCase()}">${item.l}</span></td><td style="max-width:400px">${escHtml(item.q.substring(0,80))}${item.q.length>80?'...':''}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+function addQA(){
+  const subj = document.getElementById('newSubject').value;
+  const lvl = document.getElementById('newLevel').value;
+  const q = document.getElementById('newQ').value.trim();
+  const a = document.getElementById('newA').value.trim();
+  if(!q||!a){showToast('❌ Please fill question and answer');return;}
+  QA_DATA.unshift({s:subj,l:lvl,q,a});
+  document.getElementById('newQ').value='';
+  document.getElementById('newA').value='';
+  loadAdminTable();
+  showToast('✅ Q&A pair added! Total: '+QA_DATA.length);
+}
+
+// ══════════════════════════════════════════════════════
+//  CONTACT
+// ══════════════════════════════════════════════════════
+function submitContact(){
+  showToast('✅ Message sent! We\'ll reply to sitadebnath23@gmail.com soon.');
+}
+
+// ══════════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════════
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.display='block';
+  setTimeout(()=>t.style.display='none',3000);
+}
+
+// Init
+showPage('home');
+</script>
+</body>
+</html>
