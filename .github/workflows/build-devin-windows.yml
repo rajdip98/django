@@ -1,0 +1,41 @@
+name: Build Devin for Windows
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "desktop_assistant/**"
+      - ".github/workflows/build-devin-windows.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build downloadable Devin.exe
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: desktop_assistant
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build dependencies
+        run: python -m pip install --upgrade pip; python -m pip install -r requirements.txt
+
+      - name: Package Devin.exe
+        run: python -m PyInstaller --noconfirm --clean --onefile --windowed --name Devin --hidden-import speech_recognition devin.py
+
+      - name: Upload downloadable executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: Devin-windows-x64
+          path: desktop_assistant/dist/Devin.exe
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,6 @@
+# The app itself uses only Python's standard library and Tkinter.
+# Install this only when building a Windows executable.
+pyinstaller>=6.0,<7.0
+# Optional microphone speech-to-text support (requires a working Windows audio setup).
+SpeechRecognition>=3.10,<4.0
+PyAudio>=0.2.14,<0.3
