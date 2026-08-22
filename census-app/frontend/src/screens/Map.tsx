@@ -62,9 +62,15 @@ export function MapScreen(): JSX.Element {
     [households],
   );
 
+  // The container is only rendered once something can be plotted, so map
+  // creation has to depend on that too: opening the Map tab before any
+  // household had GPS, then syncing some in, used to leave a blank grey box
+  // because the effect never re-ran to initialise Leaflet.
+  const showMap = view === 'map' && mapped.length > 0;
+
   /* Create the map once, then keep markers in sync separately. */
   useEffect(() => {
-    if (view !== 'map') return undefined;
+    if (!showMap) return undefined;
     const container = containerRef.current;
     if (!container || mapRef.current) return undefined;
 
@@ -95,7 +101,7 @@ export function MapScreen(): JSX.Element {
       layerRef.current = null;
       meMarkerRef.current = null;
     };
-  }, [view]);
+  }, [showMap]);
 
   /* Markers */
   useEffect(() => {

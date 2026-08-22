@@ -555,6 +555,21 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
         return outcome;
       } catch (error) {
         console.error('census: sync failed', error);
+
+        // A rejected token means the account was disabled or the session aged
+        // out. Say so plainly instead of showing "sync failed" for ever — the
+        // local data stays on the device either way.
+        if (
+          error instanceof api.ApiError &&
+          (error.status === 401 || error.status === 403)
+        ) {
+          api.setToken(null);
+          setSession(null);
+          await db.deleteMeta(META_SESSION);
+          toast(translate(language, 'error.sessionExpired'), 'error');
+          return { ...empty, failed: 1 };
+        }
+
         if (!options.silent) toast(translate(language, 'sync.failed'), 'error');
         return { ...empty, failed: 1 };
       } finally {

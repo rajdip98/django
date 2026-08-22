@@ -103,10 +103,6 @@ export function isValidPincode(input: string): boolean {
   return /^[1-9]\d{5}$/.test(input.trim());
 }
 
-export function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
-}
-
 /** Structured deep clone with a JSON fallback for older browsers. */
 export function deepClone<T>(value: T): T {
   if (typeof structuredClone === 'function') {
@@ -117,22 +113,6 @@ export function deepClone<T>(value: T): T {
     }
   }
   return JSON.parse(JSON.stringify(value)) as T;
-}
-
-export function debounce<A extends unknown[]>(
-  fn: (...args: A) => void,
-  wait: number,
-): ((...args: A) => void) & { cancel: () => void } {
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  const wrapped = (...args: A) => {
-    if (timer) clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), wait);
-  };
-  wrapped.cancel = () => {
-    if (timer) clearTimeout(timer);
-    timer = undefined;
-  };
-  return wrapped;
 }
 
 /** Base directory the app is served from, used for service-worker registration. */
@@ -164,17 +144,4 @@ export function downloadText(filename: string, text: string, mime = 'text/plain'
 export function percent(part: number, total: number): number {
   if (!total) return 0;
   return Math.round((part / total) * 1000) / 10;
-}
-
-export function titleCase(value: string): string {
-  return value
-    .split(/[\s_]+/)
-    .filter(Boolean)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-}
-
-/** Sum helper that tolerates undefined entries. */
-export function sum(values: Array<number | undefined>): number {
-  return values.reduce<number>((total, value) => total + (value ?? 0), 0);
 }

@@ -27,7 +27,6 @@ import {
 import { useApp } from '../lib/store';
 import type { Household, Member } from '../lib/types';
 import { validateHousehold } from '../lib/validation';
-import { parseSpokenNumber } from '../lib/voice';
 
 export function MemberEditor({
   member,
@@ -303,11 +302,4 @@ export function MemberEditor({
       </div>
     </Sheet>
   );
-}
-
-/** Spoken-age helper exposed for the form's dictation shortcut. */
-export function ageFromSpeech(text: string): number | null {
-  const value = parseSpokenNumber(text);
-  if (value === null) return null;
-  return value >= 0 && value <= 120 ? value : null;
 }

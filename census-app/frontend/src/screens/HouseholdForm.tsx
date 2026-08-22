@@ -81,6 +81,8 @@ export function HouseholdFormScreen(): JSX.Element {
   const [consent, setConsent] = useState(false);
   const [aiIssues, setAiIssues] = useState<api.AiValidationIssue[] | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
+  const [notesTranslation, setNotesTranslation] = useState<string | null>(null);
+  const [translating, setTranslating] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -274,6 +276,22 @@ export function HouseholdFormScreen(): JSX.Element {
       toast(t('common.error'), 'error');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  /** Render the enumerator's notes in English for a supervisor who cannot read
+   *  the language they were written in. The original is never overwritten. */
+  const translateNotes = async () => {
+    if (!draft.notes.trim()) return;
+    setTranslating(true);
+    try {
+      const result = await api.aiTranslate(draft.notes, 'en');
+      setNotesTranslation(result.text);
+    } catch (error) {
+      console.error('census: translation failed', error);
+      toast(t('ai.unavailable'), 'error');
+    } finally {
+      setTranslating(false);
     }
   };
 
@@ -852,15 +870,38 @@ export function HouseholdFormScreen(): JSX.Element {
               ) : null}
             </FormSection>
 
-            <FormSection title={t('form.notes')}>
+            <FormSection
+              title={t('form.notes')}
+              action={
+                backend?.aiEnabled && draft.notes.trim() ? (
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm"
+                    onClick={() => void translateNotes()}
+                    disabled={translating}
+                  >
+                    <SparkleIcon />
+                    {translating ? t('ai.translating') : t('ai.translate')}
+                  </button>
+                ) : undefined
+              }
+            >
               <TextAreaField
                 label={t('form.notes')}
                 value={draft.notes}
                 optional
                 placeholder={t('form.notesPlaceholder')}
-                onChange={(value) => update((current) => ({ ...current, notes: value }))}
+                onChange={(value) => {
+                  setNotesTranslation(null);
+                  update((current) => ({ ...current, notes: value }));
+                }}
                 voice
               />
+              {notesTranslation ? (
+                <Banner kind="info" icon="🌐" title={t('ai.translate')}>
+                  {notesTranslation}
+                </Banner>
+              ) : null}
             </FormSection>
 
             {isCitizen ? (

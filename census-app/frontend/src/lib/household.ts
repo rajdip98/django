@@ -111,11 +111,6 @@ export function shouldQueueForSync(
   return household.status !== 'draft';
 }
 
-/** Total people counted across a set of households. */
-export function countMembers(households: Household[]): number {
-  return households.reduce((total, household) => total + household.members.length, 0);
-}
-
 /* ------------------------------------------------------------------ */
 /* CSV export (works entirely offline)                                 */
 /* ------------------------------------------------------------------ */

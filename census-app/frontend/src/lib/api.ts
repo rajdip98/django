@@ -227,10 +227,6 @@ export async function adminLogin(password: string): Promise<AuthResult> {
   });
 }
 
-export async function currentUser(): Promise<User> {
-  return request<User>('/api/auth/me');
-}
-
 /* ------------------------------------------------------------------ */
 /* Households & sync                                                   */
 /* ------------------------------------------------------------------ */
@@ -293,12 +289,6 @@ export async function reviewHousehold(
   return request<Household>(`/api/households/${encodeURIComponent(id)}/review`, {
     method: 'POST',
     body: { action, text },
-  });
-}
-
-export async function lookupAcknowledgement(code: string): Promise<Household> {
-  return request<Household>(`/api/households/acknowledgement/${encodeURIComponent(code)}`, {
-    auth: false,
   });
 }
 

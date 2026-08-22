@@ -265,14 +265,11 @@ export function SelectField<T extends string>({
   error,
   optional,
   placeholderKey = 'common.select',
-  extraOptions,
 }: BaseProps & {
   value: T | '';
   onChange: (value: T | '') => void;
   options: Option<T>[];
   placeholderKey?: string;
-  /** Plain (already translated) options appended after the translated list. */
-  extraOptions?: Array<{ value: string; label: string }>;
 }): JSX.Element {
   const id = useId();
   const { t } = useApp();
@@ -290,11 +287,6 @@ export function SelectField<T extends string>({
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {t(option.key)}
-          </option>
-        ))}
-        {extraOptions?.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
           </option>
         ))}
       </select>
