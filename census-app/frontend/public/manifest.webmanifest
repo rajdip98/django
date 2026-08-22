@@ -1,0 +1,52 @@
+{
+  "name": "India Census 2026-27",
+  "short_name": "Census 2026",
+  "description": "Household data collection for the Census of India 2026-27 — works offline in the field.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#FF9933",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": ["government", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New household",
+      "short_name": "New",
+      "url": "./index.html#/households/new"
+    },
+    {
+      "name": "My households",
+      "short_name": "Households",
+      "url": "./index.html#/households"
+    }
+  ]
+}

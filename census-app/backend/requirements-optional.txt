@@ -1,0 +1,11 @@
+# Optional capabilities. Install alongside requirements.txt when you need them.
+-r requirements.txt
+
+# MongoDB storage (set MONGODB_URI to activate)
+motor>=3.4,<4.0
+
+# Outbound HTTP for Twilio SMS delivery and the optional AI provider
+httpx>=0.26,<1.0
+
+# Test suite
+pytest>=8.0,<9.0

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="India Census 2026-27">
+  <defs>
+    <clipPath id="rounded">
+      <rect x="0" y="0" width="512" height="512" rx="113" ry="113" />
+    </clipPath>
+  </defs>
+  <g clip-path="url(#rounded)">
+    <rect x="0" y="0" width="512" height="171" fill="#FF9933" />
+    <rect x="0" y="171" width="512" height="170" fill="#FFFFFF" />
+    <rect x="0" y="341" width="512" height="171" fill="#138808" />
+  </g>
+  <g transform="translate(256 256)" fill="none" stroke="#000080">
+    <circle r="94" stroke-width="30" />
+    <circle r="14" fill="#000080" stroke="none" />
+    <g stroke-width="7" stroke-linecap="round">
+      <path d="M0-80V80M80 0H-80M56.6-56.6 -56.6 56.6M56.6 56.6-56.6-56.6" />
+      <g transform="rotate(15)">
+        <path d="M0-80V80M80 0H-80M56.6-56.6 -56.6 56.6M56.6 56.6-56.6-56.6" />
+      </g>
+      <g transform="rotate(30)">
+        <path d="M0-80V80M80 0H-80M56.6-56.6 -56.6 56.6M56.6 56.6-56.6-56.6" />
+      </g>
+    </g>
+  </g>
+</svg>

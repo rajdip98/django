@@ -1,0 +1,10 @@
+# Core — everything the API needs to run.
+fastapi>=0.110,<1.0
+uvicorn[standard]>=0.27,<1.0
+pydantic>=2.6,<3.0
+PyJWT>=2.8,<3.0
+
+# Optional extras. The app starts and runs without any of these:
+#   motor   → MongoDB storage (otherwise an embedded JSON store is used)
+#   httpx   → outbound calls for the optional AI provider and Twilio SMS
+# Install with:  pip install -r requirements-optional.txt

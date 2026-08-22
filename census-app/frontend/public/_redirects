@@ -1,0 +1,3 @@
+# Netlify. Hash routing means the SPA needs no path rewrites, but this keeps a
+# stray deep link from 404-ing if someone links to /households directly.
+/*  /index.html  200

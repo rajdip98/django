@@ -1,0 +1,3 @@
+# Census returns are confidential under the Census Act, 1948.
+User-agent: *
+Disallow: /
