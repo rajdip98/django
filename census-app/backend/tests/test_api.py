@@ -581,3 +581,117 @@ def test_ai_endpoints_report_unavailable_when_unconfigured(client: TestClient) -
     )
     assert response.status_code == 503
     assert "not configured" in response.json()["detail"].lower()
+
+
+# ---------------------------------------------------------------------------
+# Regressions
+# ---------------------------------------------------------------------------
+
+
+def test_query_token_is_only_accepted_for_downloads(client: TestClient) -> None:
+    """Tokens in query strings leak into access logs, so only /api/export takes one."""
+    token = admin_token(client)
+
+    assert client.get(f"/api/export?format=csv&scope=households&token={token}").status_code == 200
+
+    for path in ("/api/households", "/api/audit", "/api/zones", "/api/analytics/summary"):
+        response = client.get(f"{path}?token={token}")
+        assert response.status_code == 401, f"{path} accepted a query-string token"
+
+
+def test_rate_limit_counts_expired_challenges(client: TestClient, monkeypatch) -> None:
+    """The limiter must span the full hour, not just the OTP lifetime.
+
+    Sweeping challenges the moment they expire would silently turn
+    "8 per hour" into "8 per OTP lifetime".
+    """
+    from app import config
+
+    monkeypatch.setenv("OTP_RATE_LIMIT_PER_HOUR", "2")
+    monkeypatch.setenv("OTP_TTL_SECONDS", "0")  # every challenge expires instantly
+    config.reset_settings_cache()
+
+    for _ in range(2):
+        assert (
+            client.post(
+                "/api/auth/otp/request", json={"mobile": "9876500009", "role": "citizen"}
+            ).status_code
+            == 200
+        )
+
+    blocked = client.post(
+        "/api/auth/otp/request", json={"mobile": "9876500009", "role": "citizen"}
+    )
+    assert blocked.status_code == 429
+
+
+def test_push_batch_is_committed_atomically(client: TestClient) -> None:
+    session = sign_in(client, "9876500010", "enumerator", "Ravi")
+    headers = auth(session["token"])
+
+    batch = [household_payload(str(uuid.uuid4())) for _ in range(25)]
+    push = client.post("/api/sync/push", json={"households": batch}, headers=headers)
+
+    assert push.status_code == 200
+    assert all(result["status"] == "accepted" for result in push.json()["results"])
+    assert len(client.get("/api/households", headers=headers).json()["households"]) == 25
+
+
+def test_repeated_id_within_one_batch_is_sequenced(client: TestClient) -> None:
+    """A duplicate id in the same push must see the earlier entry, not the store."""
+    session = sign_in(client, "9876500011", "enumerator", "Ravi")
+    headers = auth(session["token"])
+    household_id = str(uuid.uuid4())
+
+    push = client.post(
+        "/api/sync/push",
+        json={
+            "households": [
+                household_payload(household_id, updatedAt="2026-08-01T09:00:00Z"),
+                household_payload(household_id, rev=1, updatedAt="2026-08-02T09:00:00Z"),
+            ]
+        },
+        headers=headers,
+    )
+
+    results = push.json()["results"]
+    assert [result["status"] for result in results] == ["accepted", "accepted"]
+    assert [result["rev"] for result in results] == [1, 2]
+
+    stored = client.get(f"/api/households/{household_id}", headers=headers).json()
+    assert stored["rev"] == 2
+    assert stored["updatedAt"] == "2026-08-02T09:00:00Z"
+
+
+def test_ownership_cannot_be_reassigned_by_a_payload(client: TestClient) -> None:
+    """A blank or stale enumeratorId on an update must not orphan the record."""
+    session = sign_in(client, "9876500012", "enumerator", "Ravi")
+    headers = auth(session["token"])
+    household_id = str(uuid.uuid4())
+
+    client.post(
+        "/api/sync/push",
+        json={"households": [household_payload(household_id)]},
+        headers=headers,
+    )
+
+    client.post(
+        "/api/sync/push",
+        json={
+            "households": [
+                household_payload(
+                    household_id,
+                    rev=1,
+                    enumeratorId="",
+                    enumeratorName="",
+                    updatedAt="2026-08-03T09:00:00Z",
+                )
+            ]
+        },
+        headers=headers,
+    )
+
+    stored = client.get(f"/api/households/{household_id}", headers=headers)
+    assert stored.status_code == 200, "the record must still belong to its collector"
+    assert stored.json()["enumeratorId"] == session["user"]["id"]
+    assert stored.json()["enumeratorName"] == "Ravi"

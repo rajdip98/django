@@ -29,10 +29,19 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 ADMIN_SUBJECT = "admin"
 
 
-async def _sweep_expired_otps(store: Store) -> None:
-    """Remove challenges that can no longer be used. Cheap and keeps the store tidy."""
+# Challenges are kept for the whole rate-limit window, not just until they
+# expire: the limiter counts them, so sweeping on expiry (5 minutes) would
+# quietly reduce "8 per hour" to "8 per 5 minutes". Verification checks
+# `expiresEpoch` separately, so a kept-but-expired challenge is still refused.
+OTP_RETENTION_SECONDS = 3600
+
+
+async def _sweep_old_otps(store: Store) -> None:
+    """Drop challenges older than the rate-limit window."""
     try:
-        await store.delete_where("otps", {"expiresEpoch": {"$lt": time.time()}})
+        await store.delete_where(
+            "otps", {"createdEpoch": {"$lt": time.time() - OTP_RETENTION_SECONDS}}
+        )
     except Exception as error:  # pragma: no cover - defensive
         print(f"census: OTP sweep failed ({error})")
 
@@ -53,10 +62,10 @@ async def request_otp(
             detail="Administrators sign in with a password, not an OTP",
         )
 
-    await _sweep_expired_otps(store)
+    await _sweep_old_otps(store)
 
     # Rate limit per mobile so the SMS bill (and the recipient) are protected.
-    window_start = time.time() - 3600
+    window_start = time.time() - OTP_RETENTION_SECONDS
     recent = await store.find(
         "otps", {"mobile": payload.mobile, "createdEpoch": {"$gte": window_start}}
     )

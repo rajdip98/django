@@ -92,6 +92,23 @@ export function blankHousehold(options: {
   };
 }
 
+/**
+ * Should this save be pushed to the server?
+ *
+ * Drafts stay on the device until they are submitted, but once a household has
+ * been submitted every later edit has to reach the server — otherwise a
+ * correction to a flagged household would sit on the phone for ever while the
+ * UI showed it as synced.
+ */
+export function shouldQueueForSync(
+  household: Pick<Household, 'status'>,
+  options: { deviceOnly: boolean; explicit?: boolean },
+): boolean {
+  if (options.deviceOnly) return false;
+  if (options.explicit) return true;
+  return household.status !== 'draft';
+}
+
 /** Total people counted across a set of households. */
 export function countMembers(households: Household[]): number {
   return households.reduce((total, household) => total + household.members.length, 0);

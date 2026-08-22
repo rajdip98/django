@@ -17,6 +17,7 @@ import type {
   User,
   Zone,
 } from './types';
+import { appBasePath } from './utils';
 
 const API_BASE_KEY = 'census:apiBase';
 const TOKEN_KEY = 'census:token';
@@ -76,9 +77,13 @@ export function apiUrl(path: string): string {
   const suffix = path.startsWith('/') ? path : `/${path}`;
   const base = getApiBase();
   if (base) return `${base}${suffix}`;
-  // Same-origin: resolve against the directory the app is served from so the
-  // backend can host the SPA from a subfolder.
-  return suffix;
+
+  // Same origin: resolve against the directory the app is served from. Hosting
+  // the app at /census/ then means /census/api/... rather than /api/..., so a
+  // subfolder install never accidentally talks to a different application
+  // sitting at the domain root.
+  const dir = appBasePath();
+  return dir === '/' ? suffix : `${dir.replace(/\/$/, '')}${suffix}`;
 }
 
 export function getToken(): string | null {

@@ -21,7 +21,7 @@ import * as api from './api';
 import * as db from './db';
 import { DEFAULT_LANGUAGE, detectLanguage, isLanguageCode, languageMeta, translate } from '../i18n';
 import type { TranslateValues } from '../i18n';
-import { blankHousehold } from './household';
+import { blankHousehold, shouldQueueForSync } from './household';
 import { validateHousehold } from './validation';
 import type {
   Household,
@@ -139,6 +139,10 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
   // Guards against overlapping syncs without causing re-renders.
   const syncingRef = useRef(false);
   const mountedRef = useRef(true);
+  // Read inside syncNow instead of closing over the state value: if `lastSyncAt`
+  // were a dependency, every completed sync would give syncNow a new identity,
+  // restart the scheduling effect below, and sync again in a loop.
+  const lastSyncAtRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -158,6 +162,10 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
   const dismissToast = useCallback((id: string) => {
     setToasts((current) => current.filter((item) => item.id !== id));
   }, []);
+
+  useEffect(() => {
+    lastSyncAtRef.current = lastSyncAt;
+  }, [lastSyncAt]);
 
   const t = useCallback(
     (key: string, values?: TranslateValues) => translate(language, key, values),
@@ -201,6 +209,7 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
           if (!storedSession.local) api.setToken(storedSession.token);
         }
         setLastSyncAt(storedSync);
+        lastSyncAtRef.current = storedSync;
         if (Array.isArray(storedZones)) setZonesState(storedZones);
         if (Array.isArray(storedUsers)) setUsersState(storedUsers);
         setHouseholds(rows);
@@ -308,21 +317,30 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
   const saveHousehold = useCallback(
     async (household: Household, options: { queue?: boolean } = {}) => {
       const deviceOnly = session?.local ?? !backend;
+
+      const shouldQueue = shouldQueueForSync(household, {
+        deviceOnly,
+        explicit: options.queue,
+      });
+
       const next: Household = {
         ...household,
         updatedAt: nowIso(),
         flags: validateHousehold(household),
-        sync: deviceOnly ? 'local' : options.queue ? 'pending' : household.sync,
+        sync: deviceOnly ? 'local' : shouldQueue ? 'pending' : household.sync,
       };
 
       await db.saveHousehold(next);
       upsertLocal(next);
 
-      if (options.queue && !deviceOnly) {
+      if (shouldQueue) {
+        const existing = (await db.listOutbox()).find((item) => item.id === next.id);
         const item: OutboxItem = {
           id: next.id,
           householdId: next.id,
-          queuedAt: nowIso(),
+          // Keep the original queue time so the outbox stays FIFO while a
+          // household is being edited repeatedly.
+          queuedAt: existing?.queuedAt ?? nowIso(),
           attempts: 0,
         };
         await db.enqueueOutbox(item);
@@ -459,7 +477,7 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
 
         /* Pull ------------------------------------------------------- */
         try {
-          const pulled = await api.pullChanges(lastSyncAt);
+          const pulled = await api.pullChanges(lastSyncAtRef.current);
           if (pulled.households.length) {
             const merged = pulled.households.map(
               (household): Household => ({ ...household, sync: 'synced' }),
@@ -471,6 +489,7 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
           if (pulled.users.length) setUsers(pulled.users);
 
           const stamp = pulled.serverTime || nowIso();
+          lastSyncAtRef.current = stamp;
           setLastSyncAt(stamp);
           await db.setMeta(META_LAST_SYNC, stamp);
         } catch (error) {
@@ -510,7 +529,7 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
         if (mountedRef.current) setSyncing(false);
       }
     },
-    [language, lastSyncAt, online, refreshPendingCount, session, setUsers, setZones, toast],
+    [language, online, refreshPendingCount, session, setUsers, setZones, toast],
   );
 
   // Opportunistic background sync: on reconnect and every few minutes.

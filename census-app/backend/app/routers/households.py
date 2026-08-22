@@ -172,9 +172,15 @@ async def sync_push(
 ) -> SyncPushOut:
     results: list[SyncPushResult] = []
 
+    # Writes are collected and committed in one batch at the end. The embedded
+    # JSON store rewrites its whole file on every write, so saving each of 200
+    # households individually would be quadratic; `put_many` flushes once.
+    pending: dict[str, dict[str, Any]] = {}
+
     for item in payload.households:
         incoming = item.model_dump()
-        existing = await store.get("households", incoming["id"])
+        # An earlier entry in this same batch counts as existing.
+        existing = pending.get(incoming["id"]) or await store.get("households", incoming["id"])
 
         if not _can_write(principal, existing):
             results.append(
@@ -187,8 +193,14 @@ async def sync_push(
             )
             continue
 
-        # Enumerators cannot reassign a record to someone else.
-        if existing is None and not principal.is_supervisor:
+        # Ownership is decided by the server, never by the payload. Without this,
+        # a client sending a stale or blank enumeratorId on an update would
+        # orphan the record — it would stop being visible to the person who
+        # collected it, with no way to get it back.
+        if existing is not None:
+            incoming["enumeratorId"] = existing.get("enumeratorId", "")
+            incoming["enumeratorName"] = existing.get("enumeratorName", "")
+        elif not principal.is_supervisor:
             incoming["enumeratorId"] = principal.id
             incoming["enumeratorName"] = principal.name or incoming.get("enumeratorName", "")
 
@@ -199,23 +211,25 @@ async def sync_push(
 
         if existing is None:
             incoming["rev"] = 1
-            saved = await store.put("households", incoming)
-            results.append(SyncPushResult(id=saved["id"], rev=saved["rev"], status="accepted"))
+            pending[incoming["id"]] = incoming
+            results.append(SyncPushResult(id=incoming["id"], rev=1, status="accepted"))
             continue
 
         if int(existing.get("rev", 0)) == int(incoming.get("rev", 0)):
             incoming["rev"] = int(existing.get("rev", 0)) + 1
             incoming["createdAt"] = existing.get("createdAt", incoming["createdAt"])
-            saved = await store.put("households", incoming)
-            results.append(SyncPushResult(id=saved["id"], rev=saved["rev"], status="accepted"))
+            pending[incoming["id"]] = incoming
+            results.append(
+                SyncPushResult(id=incoming["id"], rev=incoming["rev"], status="accepted")
+            )
             continue
 
         # Divergent revisions: newest edit wins, with the review trail preserved.
         if str(incoming.get("updatedAt", "")) > str(existing.get("updatedAt", "")):
             merged = _merge(existing, incoming)
             merged["rev"] = int(existing.get("rev", 0)) + 1
-            saved = await store.put("households", merged)
-            results.append(SyncPushResult(id=saved["id"], rev=saved["rev"], status="accepted"))
+            pending[merged["id"]] = merged
+            results.append(SyncPushResult(id=merged["id"], rev=merged["rev"], status="accepted"))
         else:
             results.append(
                 SyncPushResult(
@@ -226,6 +240,9 @@ async def sync_push(
                     household=existing,
                 )
             )
+
+    if pending:
+        await store.put_many("households", list(pending.values()))
 
     await record_audit(
         store,

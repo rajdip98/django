@@ -44,43 +44,36 @@ class Principal:
         return self.role in ("supervisor", "admin")
 
 
-def _extract_token(authorization: str | None, token_query: str | None) -> str:
-    # The query fallback exists for file downloads, where a browser-initiated
-    # navigation cannot carry an Authorization header.
-    if authorization:
-        scheme, _, value = authorization.partition(" ")
-        if scheme.lower() == "bearer" and value.strip():
-            return value.strip()
-    if token_query:
-        return token_query.strip()
-    raise HTTPException(
+def _bearer(authorization: str | None) -> str | None:
+    if not authorization:
+        return None
+    scheme, _, value = authorization.partition(" ")
+    if scheme.lower() == "bearer" and value.strip():
+        return value.strip()
+    return None
+
+
+def _unauthorised(detail: str) -> HTTPException:
+    return HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Sign in to continue",
+        detail=detail,
         headers={"WWW-Authenticate": "Bearer"},
     )
 
 
-async def current_principal(
-    store: Annotated[Store, Depends(get_store)],
-    settings: Annotated[Settings, Depends(settings_dep)],
-    authorization: Annotated[str | None, Header()] = None,
-    token: Annotated[str | None, Query()] = None,
-) -> Principal:
-    raw = _extract_token(authorization, token)
+async def _resolve(raw: str | None, store: Store, settings: Settings) -> Principal:
+    if not raw:
+        raise _unauthorised("Sign in to continue")
 
     try:
         payload = decode_token(raw, settings.secret_key)
     except TokenError as error:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=str(error),
-            headers={"WWW-Authenticate": "Bearer"},
-        ) from error
+        raise _unauthorised(str(error)) from error
 
     subject = payload.get("sub")
     role = payload.get("role")
     if not isinstance(subject, str) or not isinstance(role, str):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Malformed token")
+        raise _unauthorised("Malformed token")
 
     # The built-in administrator is not a stored user.
     if role == "admin" and subject == "admin":
@@ -88,10 +81,7 @@ async def current_principal(
 
     record = await store.get("users", subject)
     if record is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="This account no longer exists",
-        )
+        raise _unauthorised("This account no longer exists")
     if not record.get("active", True):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Account is disabled")
 
@@ -101,6 +91,33 @@ async def current_principal(
         name=record.get("name", ""),
         zone_ids=list(record.get("zoneIds", [])),
     )
+
+
+async def current_principal(
+    store: Annotated[Store, Depends(get_store)],
+    settings: Annotated[Settings, Depends(settings_dep)],
+    authorization: Annotated[str | None, Header()] = None,
+) -> Principal:
+    """Standard authentication — the Authorization header only.
+
+    Tokens are deliberately not accepted from the query string here: query
+    strings end up in access logs, proxy logs and browser history.
+    """
+    return await _resolve(_bearer(authorization), store, settings)
+
+
+async def download_principal(
+    store: Annotated[Store, Depends(get_store)],
+    settings: Annotated[Settings, Depends(settings_dep)],
+    authorization: Annotated[str | None, Header()] = None,
+    token: Annotated[str | None, Query()] = None,
+) -> Principal:
+    """Authentication for file downloads only.
+
+    A browser-initiated download cannot set an Authorization header, so `?token=`
+    is accepted here — and nowhere else.
+    """
+    return await _resolve(_bearer(authorization) or (token.strip() if token else None), store, settings)
 
 
 CurrentUser = Annotated[Principal, Depends(current_principal)]
@@ -118,8 +135,23 @@ def require_roles(*roles: Role):
     return guard
 
 
+def require_download_roles(*roles: Role):
+    async def guard(
+        principal: Annotated[Principal, Depends(download_principal)],
+    ) -> Principal:
+        if principal.role not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to do that",
+            )
+        return principal
+
+    return guard
+
+
 RequireAdmin = Annotated[Principal, Depends(require_roles("admin"))]
 RequireSupervisor = Annotated[Principal, Depends(require_roles("supervisor", "admin"))]
+RequireDownloader = Annotated[Principal, Depends(require_download_roles("supervisor", "admin"))]
 
 
 async def record_audit(

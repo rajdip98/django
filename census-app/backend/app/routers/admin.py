@@ -11,7 +11,14 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
 from ..analytics import compute_summary
-from ..deps import CurrentUser, RequireAdmin, RequireSupervisor, get_store, record_audit
+from ..deps import (
+    CurrentUser,
+    RequireAdmin,
+    RequireDownloader,
+    RequireSupervisor,
+    get_store,
+    record_audit,
+)
 from ..models import AuditEntryOut, UserIn, UserOut, ZoneIn, ZoneOut, now_iso
 from ..store import Store
 
@@ -493,7 +500,7 @@ def _member_rows(household: dict[str, Any]) -> list[dict[str, Any]]:
 
 @router.get("/export")
 async def export_data(
-    principal: RequireSupervisor,
+    principal: RequireDownloader,
     store: Annotated[Store, Depends(get_store)],
     export_format: Annotated[str, Query(alias="format")] = "csv",
     scope: Annotated[str, Query()] = "households",

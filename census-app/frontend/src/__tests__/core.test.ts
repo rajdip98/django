@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import { computeAnalytics, needsAttention, sexRatio } from '../lib/analytics';
 import { digestsMatch, sha256Hex } from '../lib/hash';
-import { blankHousehold, blankMember } from '../lib/household';
+import { apiUrl, setApiBase } from '../lib/api';
+import { blankHousehold, blankMember, shouldQueueForSync } from '../lib/household';
 import { boundsOf, distanceMeters, geoErrorKey } from '../lib/geo';
 import { LANGUAGES, translate, translationCoverage } from '../i18n';
 import { en } from '../i18n/locales/en';
@@ -306,5 +307,52 @@ describe('percent', () => {
     expect(percent(1, 3)).toBe(33.3);
     expect(percent(5, 0)).toBe(0);
     expect(percent(0, 10)).toBe(0);
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/* Regressions                                                         */
+/* ------------------------------------------------------------------ */
+
+describe('sync queueing', () => {
+  it('keeps drafts on the device', () => {
+    expect(shouldQueueForSync({ status: 'draft' }, { deviceOnly: false })).toBe(false);
+  });
+
+  it('queues every edit once a household has been submitted', () => {
+    // Regression: a correction to a flagged household used to stay on the phone
+    // for ever while the UI reported it as synced.
+    for (const status of ['submitted', 'approved', 'flagged'] as const) {
+      expect(shouldQueueForSync({ status }, { deviceOnly: false })).toBe(true);
+    }
+  });
+
+  it('queues a draft when submission asks explicitly', () => {
+    expect(shouldQueueForSync({ status: 'draft' }, { deviceOnly: false, explicit: true })).toBe(true);
+  });
+
+  it('never queues in device-only mode', () => {
+    expect(shouldQueueForSync({ status: 'submitted' }, { deviceOnly: true })).toBe(false);
+    expect(
+      shouldQueueForSync({ status: 'draft' }, { deviceOnly: true, explicit: true }),
+    ).toBe(false);
+  });
+});
+
+describe('api base resolution', () => {
+  it('uses an explicit server address when one is configured', () => {
+    setApiBase('https://census.example.in/');
+    expect(apiUrl('/api/health')).toBe('https://census.example.in/api/health');
+    setApiBase(null);
+  });
+
+  it('stays inside the subfolder the app is served from', () => {
+    // Otherwise an install at /census/ would probe /api/health and could reach
+    // an entirely different application at the domain root.
+    window.history.replaceState({}, '', '/census/index.html');
+    expect(apiUrl('/api/health')).toBe('/census/api/health');
+
+    window.history.replaceState({}, '', '/');
+    expect(apiUrl('/api/health')).toBe('/api/health');
   });
 });
