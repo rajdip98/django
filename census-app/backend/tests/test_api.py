@@ -1029,6 +1029,32 @@ def test_quality_report_finds_the_same_address_twice(client: TestClient) -> None
     assert report["counts"]["missingLocation"] == 2
 
 
+def test_quality_report_does_not_double_count_a_household_in_two_clusters(
+    client: TestClient,
+) -> None:
+    """A household caught by both location and address matching counts once."""
+    session = sign_in(client, "9876512015", "enumerator", "Ravi")
+
+    # Same house number and village on all three, so every pair is an address
+    # match. Only the first two are also ~11 m apart, so they additionally form
+    # a location cluster — the third has no GPS at all.
+    first = household_payload(str(uuid.uuid4()))
+    first["location"] = {"lat": 22.5726, "lng": 88.3639, "accuracy": 8.0}
+    second = household_payload(str(uuid.uuid4()))
+    second["location"] = {"lat": 22.5727, "lng": 88.3639, "accuracy": 8.0}
+    third = household_payload(str(uuid.uuid4()))
+    third["location"] = None
+
+    client.post(
+        "/api/sync/push",
+        json={"households": [first, second, third]},
+        headers=auth(session["token"]),
+    )
+
+    report = client.get("/api/quality/report", headers=auth(admin_token(client))).json()
+    assert report["counts"]["duplicateHouseholds"] == 3
+
+
 def test_quality_report_uses_its_own_checks_not_client_flags(client: TestClient) -> None:
     """A client that uploads an empty flag list must not hide a broken record."""
     session = sign_in(client, "9876512020", "enumerator", "Ravi")
@@ -1150,6 +1176,33 @@ def test_reassignment_is_admin_only_and_checks_the_target(client: TestClient) ->
         json={"enumeratorId": "no-such-user"},
         headers=auth(admin_token(client)),
     ).status_code == 404
+
+
+def test_reassignment_rejects_a_disabled_user(client: TestClient) -> None:
+    """A deactivated account must not become the new owner of a household."""
+    owner = sign_in(client, "9876513040", "enumerator", "Ravi")
+    disabled = sign_in(client, "9876513041", "enumerator", "Left The Team")
+    admin = auth(admin_token(client))
+
+    client.patch(
+        f"/api/users/{disabled['user']['id']}",
+        json={"active": False},
+        headers=admin,
+    )
+
+    household_id = str(uuid.uuid4())
+    client.post(
+        "/api/sync/push",
+        json={"households": [household_payload(household_id)]},
+        headers=auth(owner["token"]),
+    )
+
+    response = client.post(
+        f"/api/households/{household_id}/reassign",
+        json={"enumeratorId": disabled["user"]["id"]},
+        headers=admin,
+    )
+    assert response.status_code == 400
 
 
 def test_export_carries_a_google_maps_link(client: TestClient) -> None:

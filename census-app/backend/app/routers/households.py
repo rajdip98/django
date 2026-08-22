@@ -202,6 +202,11 @@ async def reassign_household(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Households can only be assigned to field staff",
         )
+    if not target.get("active", True):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="That user's account is disabled",
+        )
 
     previous = record.get("enumeratorName") or record.get("enumeratorId") or "unassigned"
     record["enumeratorId"] = target["id"]

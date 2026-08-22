@@ -284,9 +284,14 @@ def build_report(
         if not all(item["id"] in located_ids for item in cluster["households"])
     ]
 
-    duplicate_household_count = len(located_ids) + sum(
-        len(cluster["households"]) for cluster in address_clusters
+    # A household can survive in an address cluster while also sitting in a
+    # location cluster (the address cluster is only dropped when *every*
+    # member was already caught by location) — count it once either way.
+    duplicate_ids = set(located_ids)
+    duplicate_ids.update(
+        item["id"] for cluster in address_clusters for item in cluster["households"]
     )
+    duplicate_household_count = len(duplicate_ids)
 
     return {
         "generatedAt": None,  # filled in by the router, which owns the clock
