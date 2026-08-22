@@ -16,6 +16,9 @@ backend/data/
 !.env.example
 .secret_key
 
+# Test artefacts
+frontend/e2e-*.png
+
 # Tooling
 .pytest_cache/
 .DS_Store

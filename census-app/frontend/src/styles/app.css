@@ -553,7 +553,11 @@ a {
   gap: 12px;
 }
 
-@media (max-width: 380px) {
+/* Paired fields go full width on ordinary phones. Two columns at 390px (an
+   iPhone 12–15) leaves each input barely wide enough for a village name, and
+   narrower still when a dictation button sits beside it. Side-by-side is only
+   worth it on a tablet. */
+@media (max-width: 480px) {
   .field-row {
     grid-template-columns: 1fr;
   }

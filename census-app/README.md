@@ -134,6 +134,19 @@ cd frontend && npm test                                # 61 unit tests
 cd frontend && npm run build                           # typecheck + production build
 ```
 
+There is also a browser smoke test that drives the whole journey on a
+phone-sized viewport — boot, language switch, OTP login, filling the schedule,
+surviving a reload, admin login — and fails on any console error or failed
+request. It needs a running server and is opt-in, so it does not slow the normal
+test run:
+
+```bash
+cd frontend && npm run build && cp -r dist ../backend/static
+cd ../backend && .venv/bin/uvicorn app.main:app --port 8123 &
+cd ../frontend && npm i -D playwright && npx playwright install chromium
+node e2e/smoke.mjs
+```
+
 ## Project layout
 
 ```
