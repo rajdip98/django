@@ -54,6 +54,7 @@ class Settings:
     token_ttl_hours: int
     cors_origins: list[str]
     static_dir: Path | None
+    max_request_bytes: int
 
     # Twilio (SMS delivery). Without all three the API returns the OTP in the
     # response body instead, which keeps the flow usable in development.
@@ -137,6 +138,9 @@ def load_settings() -> Settings:
         token_ttl_hours=_env_int("TOKEN_TTL_HOURS", 24 * 14),
         cors_origins=_split(os.getenv("CORS_ORIGINS")) or ["*"],
         static_dir=_resolve_static_dir(),
+        # A sync push may legitimately carry photographs, but not unbounded
+        # ones: 200 households × 6 photos would otherwise be gigabytes.
+        max_request_bytes=_env_int("MAX_REQUEST_BYTES", 32 * 1024 * 1024),
         twilio_account_sid=os.getenv("TWILIO_ACCOUNT_SID") or None,
         twilio_auth_token=os.getenv("TWILIO_AUTH_TOKEN") or None,
         twilio_from_number=os.getenv("TWILIO_FROM_NUMBER") or None,

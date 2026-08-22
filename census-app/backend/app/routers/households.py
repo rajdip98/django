@@ -21,6 +21,11 @@ from ..store import Store
 
 router = APIRouter(prefix="/api", tags=["households"])
 
+# A pull is capped so the first sync on an administrator's device cannot try to
+# stream every household (with photographs) in one response. The client keeps
+# calling with the returned `serverTime` until `hasMore` is false.
+PULL_PAGE_SIZE = 500
+
 # Statuses a supervisor may set through the review endpoint.
 REVIEW_STATUS = {
     "approved": "approved",
@@ -278,6 +283,19 @@ async def sync_pull(
 
     households.sort(key=lambda row: row.get("updatedAt", ""))
 
+    has_more = False
+    cursor: str | None = None
+    if len(households) > PULL_PAGE_SIZE:
+        cutoff = str(households[PULL_PAGE_SIZE - 1].get("updatedAt", ""))
+        # Extend the page to cover every record sharing the cutoff timestamp:
+        # the next request filters with a strict `>`, so a tie split across the
+        # boundary would silently skip records.
+        page = [row for row in households if str(row.get("updatedAt", "")) <= cutoff]
+        if len(page) < len(households):
+            households = page
+            has_more = True
+            cursor = cutoff
+
     zones = await store.find("zones")
     users = await store.find("users") if principal.is_supervisor else []
 
@@ -301,7 +319,10 @@ async def sync_pull(
         households=households,
         zones=zones,
         users=safe_users,
-        serverTime=now_iso(),
+        # When paging, the cursor is the last timestamp included rather than the
+        # clock, so the next request resumes exactly where this one stopped.
+        serverTime=cursor or now_iso(),
+        hasMore=has_more,
     )
 
 

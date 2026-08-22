@@ -45,6 +45,9 @@ export const ADMIN_HASH_SALT = 'india-census-2026';
 export const ADMIN_PASSWORD_DIGEST =
   '1f0411e3725e578758a7ff1eb6b6425625d4b32e78fa9c0cd39f5023a6130402';
 
+/** Upper bound on pages followed in one sync, so a pull can never run away. */
+const MAX_PULL_PAGES = 20;
+
 const META_LANGUAGE = 'language';
 const META_SESSION = 'session';
 const META_LAST_SYNC = 'lastSyncAt';
@@ -499,21 +502,29 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
 
         /* Pull ------------------------------------------------------- */
         try {
-          const pulled = await api.pullChanges(lastSyncAtRef.current);
-          if (pulled.households.length) {
-            const merged = pulled.households.map(
-              (household): Household => ({ ...household, sync: 'synced' }),
-            );
-            await db.saveHouseholds(merged);
-            outcome.received = merged.length;
-          }
-          if (pulled.zones.length) setZones(pulled.zones);
-          if (pulled.users.length) setUsers(pulled.users);
+          // The server pages large pulls. Follow the cursor rather than waiting
+          // for the next scheduled sync, but stop after a sane number of pages
+          // so one call can never run away.
+          for (let page = 0; page < MAX_PULL_PAGES; page += 1) {
+            const pulled = await api.pullChanges(lastSyncAtRef.current);
 
-          const stamp = pulled.serverTime || nowIso();
-          lastSyncAtRef.current = stamp;
-          setLastSyncAt(stamp);
-          await db.setMeta(META_LAST_SYNC, stamp);
+            if (pulled.households.length) {
+              const merged = pulled.households.map(
+                (household): Household => ({ ...household, sync: 'synced' }),
+              );
+              await db.saveHouseholds(merged);
+              outcome.received += merged.length;
+            }
+            if (pulled.zones.length) setZones(pulled.zones);
+            if (pulled.users.length) setUsers(pulled.users);
+
+            const stamp = pulled.serverTime || nowIso();
+            lastSyncAtRef.current = stamp;
+            setLastSyncAt(stamp);
+            await db.setMeta(META_LAST_SYNC, stamp);
+
+            if (!pulled.hasMore) break;
+          }
         } catch (error) {
           // A push that succeeded is still progress — report but do not throw.
           console.warn('census: pull failed', error);

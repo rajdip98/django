@@ -256,7 +256,10 @@ export interface PullResult {
   households: Household[];
   zones: Zone[];
   users: User[];
+  /** Cursor to pass as `since` on the next pull. */
   serverTime: string;
+  /** More records are waiting behind this page. */
+  hasMore?: boolean;
 }
 
 export async function pullChanges(since?: string): Promise<PullResult> {

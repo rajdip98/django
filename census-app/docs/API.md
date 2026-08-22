@@ -151,12 +151,21 @@ decision.
   "households": [ … ],
   "zones": [ … ],
   "users": [ … ],
-  "serverTime": "2026-08-22T09:15:00Z"
+  "serverTime": "2026-08-22T09:15:00Z",
+  "hasMore": false
 }
 ```
 
 `users` is populated only for supervisors and administrators. Store `serverTime`
 and pass it as the next `since`.
+
+**Paging.** A pull returns at most 500 households so a first sync on an
+administrator's device cannot try to stream the whole dataset (with
+photographs) in one response. When `hasMore` is true, `serverTime` is the last
+timestamp included rather than the clock — call again with it as `since` until
+`hasMore` is false. Records sharing the cutoff timestamp are always kept in the
+same page, because the next request filters with a strict `>` and a split tie
+would be skipped.
 
 ---
 
@@ -221,3 +230,6 @@ Standard HTTP status codes with a FastAPI body:
 ```
 
 `422` carries Pydantic's structured validation detail.
+
+`413` means the request body exceeded `MAX_REQUEST_BYTES` (32 MB by default).
+A sync push carries inlined photographs, so send fewer households per batch.

@@ -10,7 +10,7 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from typing import Annotated, AsyncIterator
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -44,6 +44,34 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         yield
     finally:
         await store.close()
+
+
+def add_body_limit(application: FastAPI, max_bytes: int) -> None:
+    """Reject oversized request bodies before they are buffered.
+
+    FastAPI has no body-size limit of its own, and a sync push carries inlined
+    photographs, so without this a single request could exhaust the server's
+    memory.
+
+    This checks the declared Content-Length, which every browser sets for a JSON
+    body. A chunked upload that declares no length is not counted here — put a
+    reverse proxy in front for that (the nginx example in docs/DEPLOYMENT.md
+    sets `client_max_body_size`).
+    """
+
+    @application.middleware("http")
+    async def limit_body(request: Request, call_next):
+        declared = request.headers.get("content-length")
+        if declared is not None:
+            try:
+                if int(declared) > max_bytes:
+                    return JSONResponse(
+                        {"detail": "Request body is too large"},
+                        status_code=413,
+                    )
+            except ValueError:
+                return JSONResponse({"detail": "Invalid Content-Length"}, status_code=400)
+        return await call_next(request)
 
 
 def mount_frontend(application: FastAPI, settings: Settings) -> None:
@@ -83,6 +111,8 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
         allow_headers=["Authorization", "Content-Type", "Accept"],
     )
+
+    add_body_limit(application, settings.max_request_bytes)
 
     application.include_router(auth.router)
     application.include_router(households.router)

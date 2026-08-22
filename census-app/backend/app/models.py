@@ -327,6 +327,8 @@ class SyncPullOut(Strict):
     zones: list[dict[str, Any]]
     users: list[dict[str, Any]]
     serverTime: str
+    """Cursor for the next pull — the clock, or the last timestamp of a page."""
+    hasMore: bool = False
 
 
 class ReviewIn(Strict):

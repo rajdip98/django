@@ -759,3 +759,73 @@ def test_supervisor_can_push_an_offline_review(client: TestClient) -> None:
     ).json()
     assert len(stored["reviews"]) == 1
     assert stored["reviews"][0]["text"] == "GPS looks wrong"
+
+
+def test_oversized_request_body_is_refused(client: TestClient) -> None:
+    session = sign_in(client, "9876500016", "enumerator", "Ravi")
+    response = client.post(
+        "/api/sync/push",
+        content=b"x" * 16,
+        headers={
+            **auth(session["token"]),
+            "Content-Type": "application/json",
+            # Claim a body far larger than the 32 MB default.
+            "Content-Length": str(64 * 1024 * 1024),
+        },
+    )
+    assert response.status_code == 413
+
+
+def test_pull_is_paged_and_resumable(client: TestClient, monkeypatch) -> None:
+    """A first sync must not try to stream the whole dataset in one response."""
+    from app.routers import households as households_router
+
+    monkeypatch.setattr(households_router, "PULL_PAGE_SIZE", 3)
+
+    session = sign_in(client, "9876500017", "enumerator", "Ravi")
+    headers = auth(session["token"])
+
+    batch = [
+        household_payload(str(uuid.uuid4()), updatedAt=f"2026-08-{day:02d}T09:00:00Z")
+        for day in range(1, 9)
+    ]
+    client.post("/api/sync/push", json={"households": batch}, headers=headers)
+
+    seen: set[str] = set()
+    cursor: str | None = None
+    for _ in range(10):
+        query = f"?since={cursor}" if cursor else ""
+        page = client.get(f"/api/sync/pull{query}", headers=headers).json()
+        seen.update(row["householdNumber"] + row["updatedAt"] for row in page["households"])
+        cursor = page["serverTime"]
+        if not page["hasMore"]:
+            break
+
+    # Every household is delivered exactly once across the pages.
+    assert len(seen) == 8
+
+
+def test_pull_page_keeps_identical_timestamps_together(client: TestClient, monkeypatch) -> None:
+    """A tie split across a page boundary would be skipped by the next `since`."""
+    from app.routers import households as households_router
+
+    monkeypatch.setattr(households_router, "PULL_PAGE_SIZE", 2)
+
+    session = sign_in(client, "9876500018", "enumerator", "Ravi")
+    headers = auth(session["token"])
+
+    # Four households sharing one timestamp, then a later one.
+    batch = [
+        household_payload(str(uuid.uuid4()), updatedAt="2026-08-01T09:00:00Z") for _ in range(4)
+    ]
+    batch.append(household_payload(str(uuid.uuid4()), updatedAt="2026-08-02T09:00:00Z"))
+    client.post("/api/sync/push", json={"households": batch}, headers=headers)
+
+    first = client.get("/api/sync/pull", headers=headers).json()
+    # The page grew past PULL_PAGE_SIZE rather than splitting the tie.
+    assert len(first["households"]) == 4
+    assert first["hasMore"] is True
+
+    second = client.get(f"/api/sync/pull?since={first['serverTime']}", headers=headers).json()
+    assert len(second["households"]) == 1
+    assert second["hasMore"] is False
