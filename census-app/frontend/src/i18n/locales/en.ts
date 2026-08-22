@@ -5,7 +5,7 @@ export const en: Record<string, string> = {
   'app.title': 'India Census 2026-27',
   'app.shortTitle': 'Census 2026',
   'app.tagline': 'Counting every household, honestly and accurately',
-  'app.govt': 'Office of the Registrar General & Census Commissioner',
+  'app.govt': 'Household schedule for the Census of India 2026-27',
 
   'nav.home': 'Home',
   'nav.households': 'Households',

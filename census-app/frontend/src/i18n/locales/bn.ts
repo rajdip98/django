@@ -4,7 +4,7 @@ export const bn: Record<string, string> = {
   'app.title': 'ভারত জনগণনা ২০২৬-২৭',
   'app.shortTitle': 'জনগণনা ২০২৬',
   'app.tagline': 'প্রতিটি পরিবারের সঠিক ও সৎ গণনা',
-  'app.govt': 'মহানিবন্ধক ও জনগণনা কমিশনারের কার্যালয়',
+  'app.govt': 'ভারতের জনগণনা ২০২৬-২৭-এর পরিবার তালিকা',
 
   'nav.home': 'হোম',
   'nav.households': 'পরিবার',

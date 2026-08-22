@@ -5,7 +5,7 @@ import { HashRouter } from 'react-router-dom';
 import { App } from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AppProvider } from './lib/store';
-import { appBasePath } from './lib/utils';
+import { appBasePath, isAndroidApp } from './lib/utils';
 import './styles/app.css';
 import 'leaflet/dist/leaflet.css';
 
@@ -26,9 +26,16 @@ createRoot(container).render(
   </StrictMode>,
 );
 
-/* Progressive Web App registration. Skipped on file:// where service workers
-   are unavailable — the app still runs, just without background caching. */
-if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+/* Progressive Web App registration.
+ *
+ * Skipped on file:// where service workers are unavailable, and inside the
+ * Android APK where the assets are already local and requests are answered
+ * from the package rather than the network. The app runs either way. */
+if (
+  'serviceWorker' in navigator &&
+  window.location.protocol.startsWith('http') &&
+  !isAndroidApp()
+) {
   window.addEventListener('load', () => {
     const base = appBasePath();
     navigator.serviceWorker.register(`${base}sw.js`, { scope: base }).catch((error) => {

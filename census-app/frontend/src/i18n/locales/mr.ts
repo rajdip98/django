@@ -4,7 +4,7 @@ export const mr: Record<string, string> = {
   'app.title': 'भारत जनगणना २०२६-२७',
   'app.shortTitle': 'जनगणना २०२६',
   'app.tagline': 'प्रत्येक कुटुंबाची अचूक आणि प्रामाणिक गणना',
-  'app.govt': 'महानिबंधक व जनगणना आयुक्त कार्यालय',
+  'app.govt': 'भारताच्या जनगणना २०२६-२७ साठी कुटुंब अनुसूची',
 
   'nav.home': 'मुख्यपृष्ठ',
   'nav.households': 'कुटुंबे',

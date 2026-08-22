@@ -123,7 +123,40 @@ export function appBasePath(): string {
   return dir || '/';
 }
 
+/** Bridge exposed by the Android wrapper (see android/MainActivity.java). */
+interface AndroidBridge {
+  saveFile: (fileName: string, base64: string, mime: string) => void;
+  platform?: () => string;
+}
+
+function androidBridge(): AndroidBridge | null {
+  const bridge = (window as unknown as { AndroidCensus?: AndroidBridge }).AndroidCensus;
+  return bridge && typeof bridge.saveFile === 'function' ? bridge : null;
+}
+
+/** True when running inside the Android APK rather than a browser. */
+export function isAndroidApp(): boolean {
+  return androidBridge() !== null;
+}
+
 export function downloadBlob(filename: string, blob: Blob): void {
+  // A WebView ignores `<a download>` and cannot pull a blob: URL through the
+  // download manager, so inside the APK the bytes are handed to the app, which
+  // writes the file and offers a share sheet.
+  const bridge = androidBridge();
+  if (bridge) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = String(reader.result ?? '');
+      const comma = dataUrl.indexOf(',');
+      if (comma === -1) return;
+      bridge.saveFile(filename, dataUrl.slice(comma + 1), blob.type || 'application/octet-stream');
+    };
+    reader.onerror = () => console.error('census: could not read export for saving');
+    reader.readAsDataURL(blob);
+    return;
+  }
+
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;

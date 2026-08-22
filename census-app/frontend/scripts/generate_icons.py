@@ -133,11 +133,35 @@ def write_png(path: pathlib.Path, size: int, *, maskable: bool = False) -> None:
     print(f"wrote {path} ({len(png):,} bytes)")
 
 
+# Android launcher buckets. One source of truth for web and app icons.
+ANDROID_DENSITIES = {
+    "mdpi": 48,
+    "hdpi": 72,
+    "xhdpi": 96,
+    "xxhdpi": 144,
+    "xxxhdpi": 192,
+}
+
+
+def write_android_icons(res_dir: pathlib.Path) -> None:
+    """Emit res/mipmap-*/ic_launcher.png for the Android wrapper."""
+    for density, size in ANDROID_DENSITIES.items():
+        write_png(res_dir / f"mipmap-{density}" / "ic_launcher.png", size)
+        # Round icons are what launchers pick on most modern devices; the
+        # rounded-square artwork already reads correctly when masked.
+        write_png(res_dir / f"mipmap-{density}" / "ic_launcher_round.png", size)
+
+
 def main() -> None:
-    icons = pathlib.Path(__file__).resolve().parent.parent / "public" / "icons"
+    root = pathlib.Path(__file__).resolve().parent.parent
+    icons = root / "public" / "icons"
     write_png(icons / "icon-192.png", 192)
     write_png(icons / "icon-512.png", 512)
     write_png(icons / "icon-maskable-512.png", 512, maskable=True)
+
+    android_res = root.parent / "android" / "res"
+    if android_res.parent.is_dir():
+        write_android_icons(android_res)
 
 
 if __name__ == "__main__":

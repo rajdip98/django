@@ -76,5 +76,16 @@ PY
 
 rm -rf "$RELEASE/staging"
 
+# --- Android app (optional) -------------------------------------------------
+if command -v aapt >/dev/null && command -v dalvik-exchange >/dev/null; then
+  say "Android toolchain found — building the APK too"
+  SKIP_WEB_BUILD=1 "$ROOT/android/build-apk.sh" >/dev/null 2>&1 \
+    && cp "$ROOT/android/dist/india-census-2026-27.apk" "$RELEASE/" \
+    && echo "    india-census-2026-27.apk" \
+    || echo "    (APK build failed — run ./android/build-apk.sh to see why)"
+else
+  echo "    (skipping the APK: see docs/ANDROID.md for the build tools)"
+fi
+
 say "Done — files are in ./release"
 ls -lh "$RELEASE"

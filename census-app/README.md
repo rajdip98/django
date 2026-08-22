@@ -36,6 +36,15 @@ enumerator's offline edit.
 
 ## Quick start
 
+### Android app
+
+```bash
+./android/build-apk.sh          # → android/dist/india-census-2026-27.apk (~270 KB)
+```
+
+One installable file with the whole app inside — no server, no network. Copy it
+to a phone and open it. See [docs/ANDROID.md](docs/ANDROID.md).
+
 ### Just the app (no server)
 
 ```bash
@@ -110,6 +119,7 @@ recognition (`hi-IN`, `bn-IN`, `ta-IN`, …) — no API key, no audio upload.
 | | |
 | --- | --- |
 | Frontend | React 18 + TypeScript, Vite, installable PWA, hash routing |
+| Android | WebView wrapper, assets bundled in the APK, built without Gradle |
 | Offline | IndexedDB with a localStorage fallback, outbox sync engine |
 | Backend | FastAPI (Python 3.11+), JWT auth, PBKDF2 password hashing |
 | Database | MongoDB, or a built-in JSON store when `MONGODB_URI` is unset |
@@ -160,7 +170,8 @@ census-app/
 │   ├── app/routers/     auth, households/sync, admin, ai
 │   ├── app/store.py     MongoDB and embedded JSON stores
 │   └── tests/           API test suite
-├── docs/                deployment, hosting, security, API reference
+├── android/             Android wrapper (WebView host + aapt/dx build script)
+├── docs/                deployment, hosting, security, Android, API reference
 ├── docker-compose.yml
 └── build-release.sh
 ```
@@ -168,6 +179,7 @@ census-app/
 ## Documentation
 
 * [Hosting quick start](docs/HOSTING-QUICKSTART.md) — upload it to your domain
+* [Android app](docs/ANDROID.md) — installing, building and signing the APK
 * [Deployment guide](docs/DEPLOYMENT.md) — Docker, VPS, split hosting, config
 * [Security and privacy](docs/SECURITY.md) — read before collecting real data
 * [API reference](docs/API.md) — endpoints and the sync protocol

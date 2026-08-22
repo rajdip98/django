@@ -4,7 +4,7 @@ export const gu: Record<string, string> = {
   'app.title': 'ભારત વસ્તી ગણતરી 2026-27',
   'app.shortTitle': 'વસ્તી ગણતરી 2026',
   'app.tagline': 'દરેક કુટુંબની સચોટ અને પ્રામાણિક ગણતરી',
-  'app.govt': 'મહાનિબંધક અને વસ્તી ગણતરી કમિશનર કાર્યાલય',
+  'app.govt': 'ભારતની વસ્તી ગણતરી 2026-27 માટે કુટુંબ પત્રક',
 
   'nav.home': 'હોમ',
   'nav.households': 'કુટુંબો',
