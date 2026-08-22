@@ -1,4 +1,19 @@
-# Django
+# India Census 2026-27 — household data collection app
+
+> **The census application lives in [`census-app/`](census-app/).**
+> Start with [`census-app/README.md`](census-app/README.md), or go straight to
+> [hosting it on your own domain](census-app/docs/HOSTING-QUICKSTART.md).
+>
+> ```bash
+> cd census-app && docker compose up --build     # everything, on http://localhost:8000
+> cd census-app && ./build-release.sh            # downloadable zips in census-app/release/
+> ```
+
+---
+
+## Upstream template
+
+The rest of this repository is the Defang Django sample it was created from.
 
 [![1-click-deploy](https://raw.githubusercontent.com/DefangLabs/defang-assets/main/Logos/Buttons/SVG/deploy-with-defang.svg)](https://portal.defang.dev/redirect?url=https%3A%2F%2Fgithub.com%2Fnew%3Ftemplate_name%3Dsample-django-template%26template_owner%3DDefangSamples)
 

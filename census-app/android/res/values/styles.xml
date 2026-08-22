@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- No action bar: the web app draws its own header, including the
+         tricolour strip. The status bar takes the saffron of that strip. -->
+    <style name="CensusTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/surface</item>
+        <item name="android:statusBarColor">@color/saffron</item>
+        <item name="android:navigationBarColor">@color/surface</item>
+        <item name="android:colorPrimary">@color/saffron</item>
+        <item name="android:colorAccent">@color/green</item>
+    </style>
+</resources>

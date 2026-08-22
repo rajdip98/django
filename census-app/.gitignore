@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+
+# Build output
+frontend/dist/
+frontend/*.tsbuildinfo
+backend/static/
+release/
+android/build/
+android/assets/
+android/dist/
+
+# Collected data and secrets — never commit these
+backend/data/
+# The Android signing key. Android only accepts an update signed with the same
+# key, so back this up somewhere safe — but never in version control.
+android/keystore/
+*.env
+!.env.example
+.secret_key
+
+# Test artefacts
+frontend/e2e-*.png
+
+# Tooling
+.pytest_cache/
+.DS_Store
+*.log

@@ -1,0 +1,59 @@
+# Full stack: MongoDB plus the API serving the installable PWA.
+#
+#   docker compose up --build       → http://localhost:8000
+#
+# To run without MongoDB (the embedded JSON store is used instead), comment out
+# the `mongo` service and the MONGODB_URI environment variable below.
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      # Change these before putting the app on a public domain.
+      SECRET_KEY: "change-me-to-a-long-random-string"
+      ADMIN_PASSWORD: "rajdip100@"
+
+      MONGODB_URI: "mongodb://mongo:27017"
+      MONGODB_DB: "india_census_2026"
+
+      # Restrict this to your own domain once the frontend is hosted separately.
+      CORS_ORIGINS: "*"
+
+      # Set to false once every enumerator has been added in the admin panel.
+      ALLOW_SELF_REGISTRATION: "true"
+
+      # Optional — SMS delivery for real OTPs.
+      # TWILIO_ACCOUNT_SID: ""
+      # TWILIO_AUTH_TOKEN: ""
+      # TWILIO_FROM_NUMBER: ""
+
+      # Optional — AI validation and translation.
+      # AI_BASE_URL: "https://generativelanguage.googleapis.com/v1beta/openai"
+      # AI_API_KEY: ""
+      # AI_MODEL: "gemini-2.0-flash"
+    volumes:
+      - census-data:/data
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+volumes:
+  census-data:
+  mongo-data:

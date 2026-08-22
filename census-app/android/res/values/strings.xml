@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Launcher label: kept short so it is not truncated under the icon. -->
+    <string name="app_name">Census 2026-27</string>
+    <string name="choose_photo">House photograph</string>
+    <string name="saved_to">Saved: %1$s</string>
+    <string name="save_failed">Could not save the file</string>
+    <string name="share_export">Share census export</string>
+    <string name="location_denied">Location permission is needed to geo-tag a household</string>
+    <string name="exit_hint">Press back again to close</string>
+</resources>
