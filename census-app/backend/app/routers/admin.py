@@ -11,6 +11,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
 from ..analytics import compute_summary
+from ..quality import DUPLICATE_RADIUS_M, build_report
 from ..deps import (
     CurrentUser,
     RequireAdmin,
@@ -334,6 +335,35 @@ async def analytics_summary(
 
 
 # --------------------------------------------------------------------------
+# Data quality
+# --------------------------------------------------------------------------
+
+
+@router.get("/quality/report")
+async def quality_report(
+    principal: RequireSupervisor,
+    store: Annotated[Store, Depends(get_store)],
+    zone_id: Annotated[str | None, Query(alias="zone_id")] = None,
+    radius: Annotated[float, Query(ge=5, le=500)] = DUPLICATE_RADIUS_M,
+) -> dict[str, Any]:
+    """Double counting, coverage gaps and structural errors.
+
+    Scoped the same way everything else is: a supervisor sees their zones, an
+    administrator sees everything.
+    """
+    households = await store.find("households")
+    if not principal.is_admin and principal.zone_ids:
+        households = [row for row in households if row.get("zoneId") in principal.zone_ids]
+    if zone_id:
+        households = [row for row in households if row.get("zoneId") == zone_id]
+
+    zones = await store.find("zones")
+    report = build_report(households, zones, radius)
+    report["generatedAt"] = now_iso()
+    return report
+
+
+# --------------------------------------------------------------------------
 # Export
 # --------------------------------------------------------------------------
 
@@ -347,6 +377,7 @@ HOUSEHOLD_COLUMNS = [
     "latitude",
     "longitude",
     "gps_accuracy_m",
+    "google_maps_url",
     "house_number",
     "building_name",
     "street",
@@ -418,6 +449,14 @@ def _household_row(household: dict[str, Any]) -> dict[str, Any]:
     housing = household.get("housing", {}) or {}
     location = household.get("location") or {}
     accuracy = location.get("accuracy")
+    latitude, longitude = location.get("lat"), location.get("lng")
+    # A clickable link in the spreadsheet: whoever verifies the data in Excel
+    # can jump straight to the doorstep instead of copying coordinates around.
+    maps_url = (
+        f"https://www.google.com/maps/search/?api=1&query={latitude},{longitude}"
+        if isinstance(latitude, (int, float)) and isinstance(longitude, (int, float))
+        else ""
+    )
     return {
         "household_number": household.get("householdNumber", ""),
         "acknowledgement_id": household.get("acknowledgementId") or "",
@@ -428,6 +467,7 @@ def _household_row(household: dict[str, Any]) -> dict[str, Any]:
         "latitude": location.get("lat", ""),
         "longitude": location.get("lng", ""),
         "gps_accuracy_m": round(accuracy) if isinstance(accuracy, (int, float)) else "",
+        "google_maps_url": maps_url,
         "house_number": address.get("houseNumber", ""),
         "building_name": address.get("buildingName", ""),
         "street": address.get("street", ""),

@@ -23,7 +23,7 @@ from typing import Any, Iterable, Protocol
 
 Document = dict[str, Any]
 
-COLLECTIONS = ("users", "households", "zones", "otps", "audit")
+COLLECTIONS = ("users", "households", "zones", "otps", "audit", "notices")
 
 
 class Store(Protocol):
@@ -257,6 +257,7 @@ class MongoStore:
         await self._db.households.create_index("acknowledgementId", sparse=True)
         await self._db.users.create_index([("mobile", 1), ("role", 1)])
         await self._db.audit.create_index("at")
+        await self._db.notices.create_index("active")
         # Expiry is stored as an epoch number (portable across both stores), so
         # sweeping is done in the auth router rather than by a Mongo TTL index.
         await self._db.otps.create_index("expiresEpoch")

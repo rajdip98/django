@@ -15,12 +15,31 @@ import { computeAnalytics, sexRatio } from '../lib/analytics';
 import { householdsToCsv, makeBackup, membersToCsv } from '../lib/household';
 import { useApp } from '../lib/store';
 import type { AnalyticsSummary, AuditEntry, Role, User, Zone } from '../lib/types';
+import { LookupTab } from './admin/LookupTab';
+import { MapLinksTab } from './admin/MapLinksTab';
+import { NoticesTab } from './admin/NoticesTab';
+import { QualityTab } from './admin/QualityTab';
 import { downloadText, formatDateTime, isValidMobile, percent, todayKey } from '../lib/utils';
 
-type Tab = 'analytics' | 'users' | 'zones' | 'export' | 'audit';
+type Tab =
+  | 'analytics'
+  | 'quality'
+  | 'maps'
+  | 'notices'
+  | 'lookup'
+  | 'users'
+  | 'zones'
+  | 'export'
+  | 'audit';
 
+// Ordered by how often an administrator reaches for them during a live census:
+// the numbers first, then the things that need acting on, then configuration.
 const TABS: Array<{ value: Tab; labelKey: string }> = [
   { value: 'analytics', labelKey: 'admin.tab.analytics' },
+  { value: 'quality', labelKey: 'admin.tab.quality' },
+  { value: 'maps', labelKey: 'admin.tab.maps' },
+  { value: 'notices', labelKey: 'admin.tab.notices' },
+  { value: 'lookup', labelKey: 'admin.tab.lookup' },
   { value: 'users', labelKey: 'admin.tab.users' },
   { value: 'zones', labelKey: 'admin.tab.zones' },
   { value: 'export', labelKey: 'admin.tab.export' },
@@ -52,6 +71,10 @@ export function AdminScreen(): JSX.Element {
         </div>
 
         {tab === 'analytics' ? <AnalyticsTab /> : null}
+        {tab === 'quality' ? <QualityTab /> : null}
+        {tab === 'maps' ? <MapLinksTab /> : null}
+        {tab === 'notices' ? <NoticesTab /> : null}
+        {tab === 'lookup' ? <LookupTab /> : null}
         {tab === 'users' ? <UsersTab /> : null}
         {tab === 'zones' ? <ZonesTab /> : null}
         {tab === 'export' ? <ExportTab /> : null}

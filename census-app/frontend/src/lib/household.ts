@@ -1,5 +1,6 @@
 /** Household factory helpers and local export/import. */
 
+import { googleMapsUrl } from './maps';
 import type { Household, LanguageCode, Member } from './types';
 import { nowIso, shortCode, uuid } from './utils';
 
@@ -141,6 +142,7 @@ export const HOUSEHOLD_COLUMNS = [
   'latitude',
   'longitude',
   'gps_accuracy_m',
+  'google_maps_url',
   'house_number',
   'building_name',
   'street',
@@ -185,6 +187,9 @@ export function householdRow(household: Household): Record<string, unknown> {
     longitude: household.location?.lng ?? '',
     gps_accuracy_m:
       household.location?.accuracy === undefined ? '' : Math.round(household.location.accuracy),
+    // Clickable straight from the spreadsheet, so whoever verifies the data can
+    // jump to the doorstep instead of copying coordinates around.
+    google_maps_url: household.location ? googleMapsUrl(household.location) : '',
     house_number: household.address.houseNumber,
     building_name: household.address.buildingName,
     street: household.address.street,

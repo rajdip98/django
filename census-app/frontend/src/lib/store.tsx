@@ -26,6 +26,7 @@ import { validateHousehold } from './validation';
 import type {
   Household,
   LanguageCode,
+  Notice,
   OutboxItem,
   Role,
   Session,
@@ -53,6 +54,7 @@ const META_SESSION = 'session';
 const META_LAST_SYNC = 'lastSyncAt';
 const META_ZONES = 'zones';
 const META_USERS = 'users';
+const META_NOTICES = 'notices';
 
 export interface Toast {
   id: string;
@@ -82,8 +84,12 @@ interface AppContextValue {
   households: Household[];
   zones: Zone[];
   users: User[];
+  /** Announcements from the administrator, cached so they show offline. */
+  notices: Notice[];
   setZones: (zones: Zone[]) => void;
   setUsers: (users: User[]) => void;
+  setNotices: (notices: Notice[]) => void;
+  refreshNotices: () => Promise<void>;
 
   getHousehold: (id: string) => Household | undefined;
   saveHousehold: (household: Household, options?: { queue?: boolean }) => Promise<Household>;
@@ -129,6 +135,7 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
   const [households, setHouseholds] = useState<Household[]>([]);
   const [zones, setZonesState] = useState<Zone[]>([]);
   const [users, setUsersState] = useState<User[]>([]);
+  const [notices, setNoticesState] = useState<Notice[]>([]);
   const [online, setOnline] = useState<boolean>(
     typeof navigator === 'undefined' ? true : navigator.onLine,
   );
@@ -192,15 +199,23 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
 
     (async () => {
       try {
-        const [storedLanguage, storedSession, storedSync, storedZones, storedUsers, rows] =
-          await Promise.all([
-            db.getMeta<string>(META_LANGUAGE),
-            db.getMeta<Session>(META_SESSION),
-            db.getMeta<string>(META_LAST_SYNC),
-            db.getMeta<Zone[]>(META_ZONES),
-            db.getMeta<User[]>(META_USERS),
-            db.listHouseholds(),
-          ]);
+        const [
+          storedLanguage,
+          storedSession,
+          storedSync,
+          storedZones,
+          storedUsers,
+          storedNotices,
+          rows,
+        ] = await Promise.all([
+          db.getMeta<string>(META_LANGUAGE),
+          db.getMeta<Session>(META_SESSION),
+          db.getMeta<string>(META_LAST_SYNC),
+          db.getMeta<Zone[]>(META_ZONES),
+          db.getMeta<User[]>(META_USERS),
+          db.getMeta<Notice[]>(META_NOTICES),
+          db.listHouseholds(),
+        ]);
 
         if (cancelled) return;
 
@@ -215,6 +230,7 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
         lastSyncAtRef.current = storedSync;
         if (Array.isArray(storedZones)) setZonesState(storedZones);
         if (Array.isArray(storedUsers)) setUsersState(storedUsers);
+        if (Array.isArray(storedNotices)) setNoticesState(storedNotices);
         setHouseholds(rows);
         await refreshPendingCount();
       } catch (error) {
@@ -426,6 +442,21 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
     void db.setMeta(META_USERS, next);
   }, []);
 
+  const setNotices = useCallback((next: Notice[]) => {
+    setNoticesState(next);
+    void db.setMeta(META_NOTICES, next);
+  }, []);
+
+  /** Pull notices directly — used by the admin panel after publishing one. */
+  const refreshNotices = useCallback(async () => {
+    if (!backend || session?.local) return;
+    try {
+      setNotices(await api.listNotices());
+    } catch (error) {
+      console.warn('census: could not refresh notices', error);
+    }
+  }, [backend, session, setNotices]);
+
   /* ---------------------------------------------------------------- */
   /* Sync engine                                                       */
   /* ---------------------------------------------------------------- */
@@ -517,6 +548,8 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
             }
             if (pulled.zones.length) setZones(pulled.zones);
             if (pulled.users.length) setUsers(pulled.users);
+            // Replace rather than merge: a withdrawn notice has to disappear.
+            if (pulled.notices) setNotices(pulled.notices);
 
             const stamp = pulled.serverTime || nowIso();
             lastSyncAtRef.current = stamp;
@@ -577,7 +610,7 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
         if (mountedRef.current) setSyncing(false);
       }
     },
-    [language, online, refreshPendingCount, session, setUsers, setZones, toast],
+    [language, online, refreshPendingCount, session, setNotices, setUsers, setZones, toast],
   );
 
   // Opportunistic background sync: on reconnect and every few minutes.
@@ -606,8 +639,11 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
       households,
       zones,
       users,
+      notices,
       setZones,
       setUsers,
+      setNotices,
+      refreshNotices,
       getHousehold,
       saveHousehold,
       submitHousehold,
@@ -642,12 +678,15 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
       language,
       lastSyncAt,
       locale,
+      notices,
       online,
       pendingCount,
       ready,
+      refreshNotices,
       saveHousehold,
       session,
       setLanguage,
+      setNotices,
       setUsers,
       setZones,
       signIn,

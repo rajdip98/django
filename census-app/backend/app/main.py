@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from .config import APP_VERSION, Settings, get_settings
 from .deps import settings_dep
 from .models import HealthOut, now_iso
-from .routers import admin, ai_routes, auth, households
+from .routers import admin, ai_routes, auth, households, notices
 from .store import build_store, warn_if_multiprocess
 
 
@@ -119,6 +119,7 @@ def create_app() -> FastAPI:
     application.include_router(auth.router)
     application.include_router(households.router)
     application.include_router(admin.router)
+    application.include_router(notices.router)
     application.include_router(ai_routes.router)
 
     @application.get("/api/health", response_model=HealthOut, tags=["meta"])

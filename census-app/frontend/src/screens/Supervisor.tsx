@@ -11,6 +11,7 @@ import { Sheet } from '../components/Sheet';
 import * as api from '../lib/api';
 import { computeAnalytics, needsAttention, sexRatio } from '../lib/analytics';
 import { householdsToCsv } from '../lib/household';
+import { googleDirectionsUrl, googleMapsUrl, googleStreetViewUrl } from '../lib/maps';
 import { useApp } from '../lib/store';
 import type { Household, ReviewNote } from '../lib/types';
 import { downloadText, nowIso, relativeTime, todayKey, uuid } from '../lib/utils';
@@ -350,6 +351,35 @@ function ReviewSheet({
             tone={household.location ? 'green' : 'danger'}
           />
         </div>
+
+        {household.location ? (
+          <div className="row-wrap">
+            <a
+              className="btn btn-outline btn-sm"
+              href={googleMapsUrl(household.location)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t('maps.view')}
+            </a>
+            <a
+              className="btn btn-outline btn-sm"
+              href={googleDirectionsUrl(household.location)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t('maps.directions')}
+            </a>
+            <a
+              className="btn btn-ghost btn-sm"
+              href={googleStreetViewUrl(household.location)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t('maps.streetView')}
+            </a>
+          </div>
+        ) : null}
 
         <FlagList flags={household.flags} household={household} />
 

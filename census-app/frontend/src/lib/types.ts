@@ -247,6 +247,64 @@ export interface Household {
   rev: number;
 }
 
+export type NoticeAudience = 'all' | 'enumerator' | 'supervisor';
+export type NoticeLevel = 'info' | 'important' | 'urgent';
+
+/** An announcement from the administrator to the people in the field. */
+export interface Notice {
+  id: string;
+  title: string;
+  body: string;
+  audience: NoticeAudience;
+  level: NoticeLevel;
+  active: boolean;
+  createdAt: string;
+  createdBy: string;
+  createdByName: string;
+  updatedAt?: string | null;
+}
+
+/** One household as it appears in a data-quality listing. */
+export interface QualityHousehold {
+  id: string;
+  householdNumber: string;
+  status: HouseholdStatus;
+  zoneId: string;
+  enumeratorId: string;
+  enumeratorName: string;
+  houseNumber: string;
+  locality: string;
+  district: string;
+  members: number;
+  location: GeoPoint | null;
+  updatedAt: string;
+  /** Server-side check codes, present only in the `withIssues` list. */
+  issues?: string[];
+}
+
+export interface DuplicateCluster {
+  reason: 'location' | 'address';
+  distanceMeters: number | null;
+  households: QualityHousehold[];
+}
+
+export interface QualityReport {
+  generatedAt: string | null;
+  radiusMeters: number;
+  counts: {
+    reviewed: number;
+    missingLocation: number;
+    unassigned: number;
+    withIssues: number;
+    duplicateClusters: number;
+    duplicateHouseholds: number;
+  };
+  missingLocation: QualityHousehold[];
+  unassigned: QualityHousehold[];
+  withIssues: QualityHousehold[];
+  duplicates: DuplicateCluster[];
+}
+
 export interface AuditEntry {
   id: string;
   at: string;

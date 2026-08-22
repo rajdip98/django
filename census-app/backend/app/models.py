@@ -326,6 +326,9 @@ class SyncPullOut(Strict):
     households: list[dict[str, Any]]
     zones: list[dict[str, Any]]
     users: list[dict[str, Any]]
+    # Carried on the sync so a notice still reaches an enumerator who is offline
+    # by the time they next open the app.
+    notices: list[dict[str, Any]] = Field(default_factory=list)
     serverTime: str
     """Cursor for the next pull — the clock, or the last timestamp of a page."""
     hasMore: bool = False
@@ -334,6 +337,56 @@ class SyncPullOut(Strict):
 class ReviewIn(Strict):
     action: ReviewAction
     text: str = ""
+
+
+class ReassignIn(Strict):
+    """Move a household to a different enumerator when staff change."""
+
+    enumeratorId: str
+    reason: str = ""
+
+
+# --------------------------------------------------------------------------
+# Field notices
+# --------------------------------------------------------------------------
+
+NoticeAudience = Literal["all", "enumerator", "supervisor"]
+NoticeLevel = Literal["info", "important", "urgent"]
+
+
+class NoticeIn(Strict):
+    title: str | None = None
+    body: str | None = None
+    audience: NoticeAudience | None = None
+    level: NoticeLevel | None = None
+    active: bool | None = None
+
+    @field_validator("title")
+    @classmethod
+    def _check_title(cls, value: str | None) -> str | None:
+        if value is not None and len(value) > 120:
+            raise ValueError("Keep the title under 120 characters")
+        return value
+
+    @field_validator("body")
+    @classmethod
+    def _check_body(cls, value: str | None) -> str | None:
+        if value is not None and len(value) > 2000:
+            raise ValueError("Keep the notice under 2000 characters")
+        return value
+
+
+class NoticeOut(Strict):
+    id: str
+    title: str
+    body: str
+    audience: NoticeAudience = "all"
+    level: NoticeLevel = "info"
+    active: bool = True
+    createdAt: str
+    createdBy: str = ""
+    createdByName: str = ""
+    updatedAt: str | None = None
 
 
 class AuditEntryOut(Strict):

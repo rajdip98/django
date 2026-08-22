@@ -8,7 +8,7 @@ import { DownloadIcon, PlusIcon, SyncIcon } from '../components/Icons';
 import { AppShell, Banner, EmptyState } from '../components/Layout';
 import { useInstallPrompt } from '../lib/install';
 import { useApp } from '../lib/store';
-import type { Household } from '../lib/types';
+import type { Household, Notice } from '../lib/types';
 import { formatDateTime, relativeTime, todayKey } from '../lib/utils';
 
 function HouseholdRow({ household }: { household: Household }): JSX.Element {
@@ -44,6 +44,7 @@ export function HomeScreen(): JSX.Element {
     session,
     households,
     zones,
+    notices,
     pendingCount,
     syncNow,
     syncing,
@@ -103,6 +104,8 @@ export function HomeScreen(): JSX.Element {
             {t('sync.deviceOnlyHint')}
           </Banner>
         ) : null}
+
+        <NoticeBoard notices={notices} />
 
         {role === 'citizen' ? (
           <CitizenPanel household={myHousehold} />
@@ -194,6 +197,31 @@ export function HomeScreen(): JSX.Element {
         </section>
       </div>
     </AppShell>
+  );
+}
+
+/** Announcements from the administrator, urgent first. */
+function NoticeBoard({ notices }: { notices: Notice[] }): JSX.Element | null {
+  const { t, locale } = useApp();
+  const active = notices.filter((notice) => notice.active);
+  if (!active.length) return null;
+
+  const tone = (notice: Notice): 'error' | 'warning' | 'info' =>
+    notice.level === 'urgent' ? 'error' : notice.level === 'important' ? 'warning' : 'info';
+
+  return (
+    <section className="stack-sm">
+      <span className="section-label">{t('notices.forYou')}</span>
+      {active.slice(0, 4).map((notice) => (
+        <Banner key={notice.id} kind={tone(notice)} icon="📣" title={notice.title}>
+          <span style={{ whiteSpace: 'pre-wrap' }}>{notice.body}</span>
+          <div className="tiny" style={{ marginTop: 4 }}>
+            {t('notices.from', { name: notice.createdByName || t('role.admin') })} ·{' '}
+            {formatDateTime(notice.createdAt, locale)}
+          </div>
+        </Banner>
+      ))}
+    </section>
   );
 }
 

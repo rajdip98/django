@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from ..deps import CurrentUser, Principal, get_store, record_audit
 from ..models import (
     HouseholdIn,
+    ReassignIn,
     ReviewIn,
     SyncPullOut,
     SyncPushIn,
@@ -18,6 +19,7 @@ from ..models import (
     now_iso,
 )
 from ..store import Store
+from . import notices as notices_router
 
 router = APIRouter(prefix="/api", tags=["households"])
 
@@ -127,6 +129,97 @@ async def lookup_acknowledgement(
         "submittedAt": record.get("submittedAt"),
         "members": len(record.get("members", [])),
     }
+
+
+@router.get("/households/lookup")
+async def lookup_household(
+    principal: CurrentUser,
+    store: Annotated[Store, Depends(get_store)],
+    q: Annotated[str, Query(min_length=2, max_length=64)] = "",
+) -> dict[str, list[dict[str, Any]]]:
+    """Find a household by number, acknowledgement id, house number or name.
+
+    The support-desk query: a citizen rings up with an acknowledgement number,
+    or an enumerator reports a household they cannot find on their device.
+    """
+    needle = q.strip().lower()
+    if not needle:
+        return {"households": []}
+
+    rows = await store.find("households")
+    matches: list[dict[str, Any]] = []
+
+    for row in rows:
+        if not _visible_to(principal, row):
+            continue
+        address = row.get("address", {}) or {}
+        haystack = " ".join(
+            str(value).lower()
+            for value in (
+                row.get("householdNumber", ""),
+                row.get("acknowledgementId", "") or "",
+                address.get("houseNumber", ""),
+                address.get("village", ""),
+                address.get("locality", ""),
+                row.get("enumeratorName", ""),
+                *[member.get("name", "") for member in row.get("members", []) or []],
+            )
+        )
+        if needle in haystack:
+            matches.append(row)
+
+    matches.sort(key=lambda row: row.get("updatedAt", ""), reverse=True)
+    return {"households": matches[:50]}
+
+
+@router.post("/households/{household_id}/reassign")
+async def reassign_household(
+    household_id: str,
+    payload: ReassignIn,
+    principal: CurrentUser,
+    store: Annotated[Store, Depends(get_store)],
+) -> dict[str, Any]:
+    """Move a household to another enumerator.
+
+    Staff leave mid-survey, or a record lands on the wrong device. Without this
+    the household stays invisible to everyone but its original collector.
+    """
+    if not principal.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only administrators can reassign a household",
+        )
+
+    record = await store.get("households", household_id)
+    if record is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Household not found")
+
+    target = await store.get("users", payload.enumeratorId)
+    if target is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="That user does not exist")
+    if target.get("role") not in ("enumerator", "supervisor", "admin"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Households can only be assigned to field staff",
+        )
+
+    previous = record.get("enumeratorName") or record.get("enumeratorId") or "unassigned"
+    record["enumeratorId"] = target["id"]
+    record["enumeratorName"] = target.get("name", "")
+    record["updatedAt"] = now_iso()
+    record["rev"] = int(record.get("rev", 0)) + 1
+
+    saved = await store.put("households", record)
+    await record_audit(
+        store,
+        actor_id=principal.id,
+        actor_name=principal.name,
+        action="household.reassign",
+        target=saved.get("householdNumber", household_id),
+        detail=f"{previous} -> {target.get('name', '')}"
+        + (f" ({payload.reason.strip()[:120]})" if payload.reason.strip() else ""),
+    )
+    return saved
 
 
 @router.get("/households/{household_id}")
@@ -299,6 +392,12 @@ async def sync_pull(
     zones = await store.find("zones")
     users = await store.find("users") if principal.is_supervisor else []
 
+    # Carried on every sync so a notice posted while a team was in the field
+    # still reaches them the moment their phones come back online.
+    notice_rows = await store.find("notices")
+    notices = [row for row in notice_rows if notices_router.visible_to(row, principal.role)]
+    notices_router.sort_notices(notices)
+
     # Never ship anything sensitive in the cached user list.
     safe_users = [
         {
@@ -319,6 +418,7 @@ async def sync_pull(
         households=households,
         zones=zones,
         users=safe_users,
+        notices=notices,
         # When paging, the cursor is the last timestamp included rather than the
         # clock, so the next request resumes exactly where this one stopped.
         serverTime=cursor or now_iso(),

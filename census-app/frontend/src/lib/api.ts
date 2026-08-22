@@ -13,6 +13,8 @@ import type {
   AnalyticsSummary,
   AuditEntry,
   Household,
+  Notice,
+  QualityReport,
   Role,
   User,
   Zone,
@@ -252,6 +254,7 @@ export interface PullResult {
   households: Household[];
   zones: Zone[];
   users: User[];
+  notices?: Notice[];
   /** Cursor to pass as `since` on the next pull. */
   serverTime: string;
   /** More records are waiting behind this page. */
@@ -332,6 +335,62 @@ export async function saveUser(user: Partial<User> & { id?: string }): Promise<U
 
 export async function deleteUser(id: string): Promise<void> {
   await request<{ ok: boolean }>(`/api/users/${encodeURIComponent(id)}`, { method: 'DELETE' });
+}
+
+/* ------------------------------------------------------------------ */
+/* Field notices                                                       */
+/* ------------------------------------------------------------------ */
+
+export async function listNotices(includeInactive = false): Promise<Notice[]> {
+  const query = includeInactive ? '?include_inactive=true' : '';
+  const payload = await request<{ notices: Notice[] }>(`/api/notices${query}`);
+  return payload.notices;
+}
+
+export async function saveNotice(notice: Partial<Notice> & { id?: string }): Promise<Notice> {
+  if (notice.id) {
+    return request<Notice>(`/api/notices/${encodeURIComponent(notice.id)}`, {
+      method: 'PATCH',
+      body: notice,
+    });
+  }
+  return request<Notice>('/api/notices', { method: 'POST', body: notice });
+}
+
+export async function deleteNotice(id: string): Promise<void> {
+  await request<{ ok: boolean }>(`/api/notices/${encodeURIComponent(id)}`, { method: 'DELETE' });
+}
+
+/* ------------------------------------------------------------------ */
+/* Data quality, lookup and reassignment                               */
+/* ------------------------------------------------------------------ */
+
+export async function qualityReport(options: { zoneId?: string; radius?: number } = {}): Promise<QualityReport> {
+  const search = new URLSearchParams();
+  if (options.zoneId) search.set('zone_id', options.zoneId);
+  if (options.radius) search.set('radius', String(options.radius));
+  const query = search.toString();
+  return request<QualityReport>(`/api/quality/report${query ? `?${query}` : ''}`, {
+    timeoutMs: 45000,
+  });
+}
+
+export async function lookupHouseholds(query: string): Promise<Household[]> {
+  const payload = await request<{ households: Household[] }>(
+    `/api/households/lookup?q=${encodeURIComponent(query)}`,
+  );
+  return payload.households;
+}
+
+export async function reassignHousehold(
+  id: string,
+  enumeratorId: string,
+  reason = '',
+): Promise<Household> {
+  return request<Household>(`/api/households/${encodeURIComponent(id)}/reassign`, {
+    method: 'POST',
+    body: { enumeratorId, reason },
+  });
 }
 
 export async function analytics(zoneId?: string): Promise<AnalyticsSummary> {

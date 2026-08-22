@@ -851,3 +851,317 @@ def test_multi_worker_with_embedded_store_warns(tmp_path, monkeypatch, capsys) -
 
     warn_if_multiprocess(MongoStore("mongodb://example", "db"))
     assert capsys.readouterr().out == ""
+
+
+# ---------------------------------------------------------------------------
+# Field notices
+# ---------------------------------------------------------------------------
+
+
+def test_notice_lifecycle_and_audience(client: TestClient) -> None:
+    admin = auth(admin_token(client))
+
+    created = client.post(
+        "/api/notices",
+        json={
+            "title": "Zone WB-04 reopens Monday",
+            "body": "Resume house listing from door 41 onwards.",
+            "audience": "enumerator",
+            "level": "important",
+        },
+        headers=admin,
+    )
+    assert created.status_code == 200, created.text
+    notice = created.json()
+    assert notice["audience"] == "enumerator"
+    assert notice["createdByName"] == "Administrator"
+
+    client.post(
+        "/api/notices",
+        json={"title": "Weekly review at 5pm", "body": "All supervisors.", "audience": "supervisor"},
+        headers=admin,
+    )
+
+    enumerator = sign_in(client, "9876511001", "enumerator", "Ravi")
+    supervisor = sign_in(client, "9876511002", "supervisor", "Sunita")
+
+    enumerator_titles = [
+        n["title"] for n in client.get("/api/notices", headers=auth(enumerator["token"])).json()["notices"]
+    ]
+    supervisor_titles = [
+        n["title"] for n in client.get("/api/notices", headers=auth(supervisor["token"])).json()["notices"]
+    ]
+
+    assert "Zone WB-04 reopens Monday" in enumerator_titles
+    assert "Weekly review at 5pm" not in enumerator_titles
+    assert "Weekly review at 5pm" in supervisor_titles
+    assert "Zone WB-04 reopens Monday" not in supervisor_titles
+
+
+def test_notice_addressed_to_all_reaches_everyone(client: TestClient) -> None:
+    admin = auth(admin_token(client))
+    client.post(
+        "/api/notices",
+        json={"title": "Census week begins", "body": "Start on 1 April.", "audience": "all"},
+        headers=admin,
+    )
+    for mobile, role in (("9876511010", "enumerator"), ("9876511011", "supervisor")):
+        session = sign_in(client, mobile, role, "Someone")
+        titles = [n["title"] for n in client.get("/api/notices", headers=auth(session["token"])).json()["notices"]]
+        assert "Census week begins" in titles
+
+
+def test_withdrawn_notice_disappears_from_the_field(client: TestClient) -> None:
+    admin = auth(admin_token(client))
+    notice = client.post(
+        "/api/notices", json={"title": "Temporary", "body": "Ignore this."}, headers=admin
+    ).json()
+
+    enumerator = sign_in(client, "9876511020", "enumerator", "Ravi")
+    assert len(client.get("/api/notices", headers=auth(enumerator["token"])).json()["notices"]) == 1
+
+    client.patch(f"/api/notices/{notice['id']}", json={"active": False}, headers=admin)
+    assert client.get("/api/notices", headers=auth(enumerator["token"])).json()["notices"] == []
+
+    # An administrator can still review what was withdrawn.
+    withdrawn = client.get("/api/notices?include_inactive=true", headers=admin).json()["notices"]
+    assert len(withdrawn) == 1
+
+
+def test_only_admin_publishes_notices(client: TestClient) -> None:
+    supervisor = sign_in(client, "9876511030", "supervisor", "Sunita")
+    response = client.post(
+        "/api/notices",
+        json={"title": "Nope", "body": "Not allowed"},
+        headers=auth(supervisor["token"]),
+    )
+    assert response.status_code == 403
+
+    assert (
+        client.get("/api/notices?include_inactive=true", headers=auth(supervisor["token"])).status_code
+        == 403
+    )
+
+
+def test_urgent_notices_sort_first(client: TestClient) -> None:
+    admin = auth(admin_token(client))
+    for title, level in (("Routine", "info"), ("Evacuate zone 3", "urgent"), ("Read this", "important")):
+        client.post("/api/notices", json={"title": title, "body": "x", "level": level}, headers=admin)
+
+    enumerator = sign_in(client, "9876511040", "enumerator", "Ravi")
+    titles = [n["title"] for n in client.get("/api/notices", headers=auth(enumerator["token"])).json()["notices"]]
+    assert titles == ["Evacuate zone 3", "Read this", "Routine"]
+
+
+def test_notices_ride_along_with_sync(client: TestClient) -> None:
+    """An enumerator who is offline must still get the notice on next contact."""
+    admin = auth(admin_token(client))
+    client.post(
+        "/api/notices",
+        json={"title": "Ages in completed years", "body": "Not birth years.", "audience": "all"},
+        headers=admin,
+    )
+
+    enumerator = sign_in(client, "9876511050", "enumerator", "Ravi")
+    pulled = client.get("/api/sync/pull", headers=auth(enumerator["token"])).json()
+    assert [n["title"] for n in pulled["notices"]] == ["Ages in completed years"]
+
+
+def test_notice_requires_title_and_body(client: TestClient) -> None:
+    admin = auth(admin_token(client))
+    assert client.post("/api/notices", json={"title": "  ", "body": "x"}, headers=admin).status_code == 400
+    assert client.post("/api/notices", json={"title": "x", "body": " "}, headers=admin).status_code == 400
+
+
+# ---------------------------------------------------------------------------
+# Data quality
+# ---------------------------------------------------------------------------
+
+
+def test_quality_report_finds_households_recorded_twice(client: TestClient) -> None:
+    """The census failure that matters: the same house counted by two people."""
+    first = sign_in(client, "9876512001", "enumerator", "Ravi")
+    second = sign_in(client, "9876512002", "enumerator", "Priya")
+
+    # Roughly 11 m apart — the same doorstep, recorded twice.
+    a = household_payload(str(uuid.uuid4()))
+    a["location"] = {"lat": 22.5726, "lng": 88.3639, "accuracy": 8.0}
+    b = household_payload(str(uuid.uuid4()))
+    b["location"] = {"lat": 22.5727, "lng": 88.3639, "accuracy": 8.0}
+    b["address"] = {**b["address"], "houseNumber": "12B"}
+
+    # ~200 m away: a genuine neighbour, not a duplicate.
+    far = household_payload(str(uuid.uuid4()))
+    far["location"] = {"lat": 22.5744, "lng": 88.3639, "accuracy": 8.0}
+    far["address"] = {**far["address"], "houseNumber": "77"}
+
+    client.post("/api/sync/push", json={"households": [a, far]}, headers=auth(first["token"]))
+    client.post("/api/sync/push", json={"households": [b]}, headers=auth(second["token"]))
+
+    report = client.get("/api/quality/report", headers=auth(admin_token(client))).json()
+
+    assert report["counts"]["duplicateClusters"] == 1
+    cluster = report["duplicates"][0]
+    assert cluster["reason"] == "location"
+    assert len(cluster["households"]) == 2
+    assert 0 < cluster["distanceMeters"] < 25
+    numbers = {h["householdNumber"] for h in cluster["households"]}
+    assert far["householdNumber"] not in numbers
+
+
+def test_quality_report_finds_the_same_address_twice(client: TestClient) -> None:
+    session = sign_in(client, "9876512010", "enumerator", "Ravi")
+
+    # Same house number and village, no GPS on either — the paper-form case.
+    first = household_payload(str(uuid.uuid4()))
+    first["location"] = None
+    second = household_payload(str(uuid.uuid4()))
+    second["location"] = None
+    second["address"] = {**second["address"], "houseNumber": "12-a"}   # normalises to the same key
+
+    client.post(
+        "/api/sync/push", json={"households": [first, second]}, headers=auth(session["token"])
+    )
+
+    report = client.get("/api/quality/report", headers=auth(admin_token(client))).json()
+    reasons = {cluster["reason"] for cluster in report["duplicates"]}
+    assert "address" in reasons
+    assert report["counts"]["missingLocation"] == 2
+
+
+def test_quality_report_uses_its_own_checks_not_client_flags(client: TestClient) -> None:
+    """A client that uploads an empty flag list must not hide a broken record."""
+    session = sign_in(client, "9876512020", "enumerator", "Ravi")
+
+    broken = household_payload(str(uuid.uuid4()))
+    broken["members"] = []          # no members at all
+    broken["flags"] = []            # and claims everything is fine
+    client.post("/api/sync/push", json={"households": [broken]}, headers=auth(session["token"]))
+
+    report = client.get("/api/quality/report", headers=auth(admin_token(client))).json()
+    assert report["counts"]["withIssues"] == 1
+    assert "no_members" in report["withIssues"][0]["issues"]
+
+
+def test_quality_report_ignores_drafts(client: TestClient) -> None:
+    session = sign_in(client, "9876512030", "enumerator", "Ravi")
+    draft = household_payload(str(uuid.uuid4()), status="draft")
+    draft["members"] = []
+    client.post("/api/sync/push", json={"households": [draft]}, headers=auth(session["token"]))
+
+    report = client.get("/api/quality/report", headers=auth(admin_token(client))).json()
+    assert report["counts"]["reviewed"] == 0
+    assert report["counts"]["withIssues"] == 0
+
+
+def test_quality_report_needs_a_supervisor(client: TestClient) -> None:
+    enumerator = sign_in(client, "9876512040", "enumerator", "Ravi")
+    assert client.get("/api/quality/report", headers=auth(enumerator["token"])).status_code == 403
+
+
+# ---------------------------------------------------------------------------
+# Lookup and reassignment
+# ---------------------------------------------------------------------------
+
+
+def test_lookup_finds_a_household_by_number_or_acknowledgement(client: TestClient) -> None:
+    session = sign_in(client, "9876513001", "enumerator", "Ravi")
+    household = household_payload(str(uuid.uuid4()), acknowledgementId="CEN26-LOOKUP01")
+    client.post("/api/sync/push", json={"households": [household]}, headers=auth(session["token"]))
+
+    admin = auth(admin_token(client))
+    by_number = client.get(
+        f"/api/households/lookup?q={household['householdNumber']}", headers=admin
+    ).json()["households"]
+    assert len(by_number) == 1
+
+    by_ack = client.get("/api/households/lookup?q=CEN26-LOOKUP01", headers=admin).json()["households"]
+    assert len(by_ack) == 1
+
+    by_member = client.get("/api/households/lookup?q=Asha", headers=admin).json()["households"]
+    assert len(by_member) == 1
+
+    assert client.get("/api/households/lookup?q=nothing-here", headers=admin).json()["households"] == []
+
+
+def test_lookup_respects_what_the_caller_may_see(client: TestClient) -> None:
+    owner = sign_in(client, "9876513010", "enumerator", "Ravi")
+    other = sign_in(client, "9876513011", "enumerator", "Priya")
+
+    household = household_payload(str(uuid.uuid4()))
+    client.post("/api/sync/push", json={"households": [household]}, headers=auth(owner["token"]))
+
+    found = client.get(
+        f"/api/households/lookup?q={household['householdNumber']}", headers=auth(other["token"])
+    ).json()["households"]
+    assert found == []
+
+
+def test_reassigning_a_household_moves_it_to_the_new_enumerator(client: TestClient) -> None:
+    leaver = sign_in(client, "9876513020", "enumerator", "Ravi")
+    successor = sign_in(client, "9876513021", "enumerator", "Priya")
+    admin = auth(admin_token(client))
+
+    household_id = str(uuid.uuid4())
+    client.post(
+        "/api/sync/push",
+        json={"households": [household_payload(household_id)]},
+        headers=auth(leaver["token"]),
+    )
+
+    moved = client.post(
+        f"/api/households/{household_id}/reassign",
+        json={"enumeratorId": successor["user"]["id"], "reason": "Ravi left the team"},
+        headers=admin,
+    )
+    assert moved.status_code == 200, moved.text
+    assert moved.json()["enumeratorName"] == "Priya"
+
+    # The new owner can see it; the old one no longer can.
+    assert client.get(
+        f"/api/households/{household_id}", headers=auth(successor["token"])
+    ).status_code == 200
+    assert client.get(
+        f"/api/households/{household_id}", headers=auth(leaver["token"])
+    ).status_code == 404
+
+    actions = {e["action"] for e in client.get("/api/audit", headers=admin).json()["entries"]}
+    assert "household.reassign" in actions
+
+
+def test_reassignment_is_admin_only_and_checks_the_target(client: TestClient) -> None:
+    owner = sign_in(client, "9876513030", "enumerator", "Ravi")
+    supervisor = sign_in(client, "9876513031", "supervisor", "Sunita")
+    household_id = str(uuid.uuid4())
+    client.post(
+        "/api/sync/push",
+        json={"households": [household_payload(household_id)]},
+        headers=auth(owner["token"]),
+    )
+
+    assert client.post(
+        f"/api/households/{household_id}/reassign",
+        json={"enumeratorId": owner["user"]["id"]},
+        headers=auth(supervisor["token"]),
+    ).status_code == 403
+
+    assert client.post(
+        f"/api/households/{household_id}/reassign",
+        json={"enumeratorId": "no-such-user"},
+        headers=auth(admin_token(client)),
+    ).status_code == 404
+
+
+def test_export_carries_a_google_maps_link(client: TestClient) -> None:
+    session = sign_in(client, "9876514001", "enumerator", "Ravi")
+    client.post(
+        "/api/sync/push",
+        json={"households": [household_payload(str(uuid.uuid4()))]},
+        headers=auth(session["token"]),
+    )
+
+    csv_text = client.get(
+        "/api/export?format=csv&scope=households", headers=auth(admin_token(client))
+    ).text
+    assert "google_maps_url" in csv_text
+    assert "https://www.google.com/maps/search/?api=1&query=22.5726,88.3639" in csv_text

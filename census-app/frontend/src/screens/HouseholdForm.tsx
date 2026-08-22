@@ -32,6 +32,7 @@ import { ConfirmSheet } from '../components/Sheet';
 import * as api from '../lib/api';
 import { capturePosition, formatCoordinate, geoErrorKey, GeoError } from '../lib/geo';
 import { blankMember } from '../lib/household';
+import { googleDirectionsUrl, googleMapsUrl } from '../lib/maps';
 import {
   ASSET_OPTIONS,
   BUILDING_OPTIONS,
@@ -507,6 +508,24 @@ export function HouseholdFormScreen(): JSX.Element {
                       {t('form.gps.accuracy', { meters: Math.round(draft.location.accuracy) })}
                     </div>
                   ) : null}
+                  <div className="row-wrap" style={{ marginTop: 8 }}>
+                    <a
+                      className="btn btn-outline btn-sm"
+                      href={googleMapsUrl(draft.location)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {t('maps.view')}
+                    </a>
+                    <a
+                      className="btn btn-outline btn-sm"
+                      href={googleDirectionsUrl(draft.location)}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {t('maps.directions')}
+                    </a>
+                  </div>
                 </Banner>
               ) : (
                 <p className="muted">{t('validation.location_missing')}</p>
