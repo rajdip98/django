@@ -1,0 +1,44 @@
+{% extends 'club/base.html' %}
+
+{% block content %}
+<div class="page-header">
+  <div class="wrap">
+    <h1>Notifications</h1>
+    <p>Announcements, deadlines, meeting reminders and important notices.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="wrap">
+    {% if announcements %}
+      <div class="table-scroll">
+        <table class="gov-table">
+          <caption>All active notices, most recent first.</caption>
+          <thead>
+            <tr><th style="width:120px">Date</th><th>Notice</th><th style="width:130px">Type</th><th style="width:110px">Action</th></tr>
+          </thead>
+          <tbody>
+            {% for note in announcements %}
+              <tr>
+                <td>{{ note.published_at|date:"d M Y" }}</td>
+                <td>
+                  <strong>{{ note.title }}</strong>{% if note.is_new %}<span class="tag-new">NEW</span>{% endif %}
+                  {% if note.body %}<br><span style="font-size:.85rem;color:var(--ink-soft)">{{ note.body }}</span>{% endif %}
+                </td>
+                <td><span class="chip">{{ note.get_kind_display }}</span></td>
+                <td><a class="btn btn-sm btn-ghost" href="{{ note.target_url }}">Open</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% include 'club/partials/pagination.html' with page_obj=announcements %}
+    {% else %}
+      <div class="empty-state">
+        <span class="glyph" aria-hidden="true">🔔</span>
+        <p>There are no active notifications at present.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

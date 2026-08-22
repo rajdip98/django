@@ -1,0 +1,55 @@
+{% extends 'club/base.html' %}
+{% load club_extras %}
+
+{% block content %}
+<div class="page-header">
+  <div class="wrap">
+    <h1>Events &amp; Programmes</h1>
+    <p>{{ upcoming_count }} upcoming and {{ past_count }} concluded programmes on record.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="wrap">
+    <div class="filterbar">
+      <form action="" method="get" role="search">
+        <label class="sr-only" for="event-search">Search events</label>
+        <input class="gov-input" type="search" id="event-search" name="q" value="{{ query }}"
+               placeholder="Search by title, venue or description">
+        {% if scope %}<input type="hidden" name="scope" value="{{ scope }}">{% endif %}
+        {% if active_category %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
+        <button class="btn btn-primary" type="submit">Search</button>
+      </form>
+      <div class="pill-row">
+        <a class="pill {% if scope == 'upcoming' %}active{% endif %}" href="{% query_replace scope='upcoming' %}">Upcoming</a>
+        <a class="pill {% if scope == 'past' %}active{% endif %}" href="{% query_replace scope='past' %}">Past</a>
+        <a class="pill {% if scope == 'all' %}active{% endif %}" href="{% query_replace scope='all' %}">All</a>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="{% url 'club:calendar' %}">🗓 Calendar view</a>
+    </div>
+
+    {% if categories %}
+    <div class="pill-row" style="margin-bottom:24px">
+      <a class="pill {% if not active_category %}active{% endif %}" href="{% query_replace category='' %}">All categories</a>
+      {% for category in categories %}
+        <a class="pill {% if active_category == category.slug %}active{% endif %}"
+           href="{% query_replace category=category.slug %}">{{ category.name }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if events %}
+      <div class="grid cols-3">
+        {% for event in events %}{% include 'club/partials/event_card.html' %}{% endfor %}
+      </div>
+      {% include 'club/partials/pagination.html' with page_obj=events %}
+    {% else %}
+      <div class="empty-state">
+        <span class="glyph" aria-hidden="true">🔍</span>
+        <p>No events match your filters{% if query %} for “{{ query }}”{% endif %}.</p>
+        <a class="btn btn-ghost btn-sm" href="{% url 'club:events' %}">Clear filters</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

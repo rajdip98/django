@@ -1,0 +1,13 @@
+{% load static %}{% if org.emblem %}
+<img src="{{ org.emblem.url }}" alt="{{ org.organization_name }} emblem" class="emblem keep-color">
+{% else %}
+<svg class="emblem" viewBox="0 0 100 100" role="img" aria-label="{{ org.organization_name }} emblem">
+  <circle cx="50" cy="50" r="47" fill="#123a6d"/>
+  <circle cx="50" cy="50" r="41" fill="none" stroke="#c8901d" stroke-width="2"/>
+  <circle cx="50" cy="50" r="34" fill="#0d2b52"/>
+  <path d="M50 22c5 9 11 12 19 13-6 5-8 12-7 20-5-5-12-6-19-3 2-8-1-16-7-21 8 0 14-3 14-9z" fill="#c8901d"/>
+  <path d="M50 44l4.6 9.3 10.3 1.5-7.4 7.3 1.7 10.2L50 67.5l-9.2 4.8 1.7-10.2-7.4-7.3 10.3-1.5z" fill="#ffffff"/>
+  <text x="50" y="90" text-anchor="middle" font-family="Georgia, serif" font-size="9"
+        fill="#c8901d" letter-spacing="1">{{ org.established }}</text>
+</svg>
+{% endif %}

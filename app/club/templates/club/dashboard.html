@@ -1,0 +1,136 @@
+{% extends 'club/base.html' %}
+
+{% block content %}
+<section class="section">
+  <div class="wrap">
+    <div class="dash-head">
+      <div class="avatar">
+        {% include 'club/partials/thumb.html' with image=profile.photo label=profile.display_name alt=profile.display_name %}
+      </div>
+      <div style="flex:1;min-width:220px">
+        <h1>Welcome, {{ profile.display_name }}</h1>
+        <div class="id-line">Membership ID: {{ profile.membership_id }} ·
+          Status: {{ profile.get_status_display }} · Member since {{ profile.joined_on|date:"F Y" }}</div>
+      </div>
+      <div class="hero-actions" style="margin:0">
+        <a class="btn btn-gold" href="{% url 'club:profile' %}">Edit profile</a>
+        <a class="btn btn-outline on-dark" href="{% url 'club:events' %}">Browse events</a>
+      </div>
+    </div>
+
+    <nav class="dash-tabs" aria-label="Member portal">
+      <a class="active" href="{% url 'club:dashboard' %}">Overview</a>
+      <a href="{% url 'club:profile' %}">Profile</a>
+      <a href="{% url 'club:my_events' %}">My Events</a>
+      <a href="{% url 'club:my_certificates' %}">Certificates</a>
+      <a href="{% url 'club:resources' %}">Documents</a>
+      <a href="{% url 'club:notifications' %}">Announcements</a>
+    </nav>
+
+    {% if profile.status == 'pending' %}
+      <div class="notice-strip warn" style="margin-bottom:22px">
+        Your membership is pending verification by the office. You can still register for open events.
+      </div>
+    {% endif %}
+
+    <div class="layout-sidebar">
+      <div class="stack">
+        <div class="panel">
+          <div class="panel-head">Membership Card</div>
+          <div class="panel-body">
+            <dl class="kv">
+              <dt>Name</dt><dd>{{ profile.display_name }}</dd>
+              <dt>Membership ID</dt><dd>{{ profile.membership_id }}</dd>
+              <dt>Status</dt><dd>{{ profile.get_status_display }}</dd>
+              <dt>Department / class</dt><dd>{{ profile.department|default:"—" }}</dd>
+              <dt>Phone</dt><dd>{{ profile.phone|default:"—" }}</dd>
+              <dt>E-mail</dt><dd>{{ user.email|default:"—" }}</dd>
+              <dt>Joined on</dt><dd>{{ profile.joined_on|date:"d F Y" }}</dd>
+            </dl>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">My Event Registrations
+            <a href="{% url 'club:my_events' %}">View all</a></div>
+          <div class="panel-body" style="padding:0">
+            {% if registrations %}
+              <div class="table-scroll">
+                <table class="gov-table">
+                  <thead><tr><th>Event</th><th style="width:150px">Date</th><th style="width:120px">Status</th></tr></thead>
+                  <tbody>
+                    {% for registration in registrations %}
+                      <tr>
+                        <td><a href="{{ registration.event.get_absolute_url }}">{{ registration.event.title }}</a></td>
+                        <td>{{ registration.event.start|date:"d M Y" }}</td>
+                        <td>{% if registration.attended %}<span class="chip green">Attended</span>
+                            {% elif registration.event.is_upcoming %}<span class="chip">Confirmed</span>
+                            {% else %}<span class="chip maroon">Not marked</span>{% endif %}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="empty-state" style="border:0">
+                <span class="glyph" aria-hidden="true">🎟</span>
+                <p>You have not registered for any event yet.</p>
+                <a class="btn btn-ghost btn-sm" href="{% url 'club:events' %}">Find an event</a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">Certificates <a href="{% url 'club:my_certificates' %}">View all</a></div>
+          <ul class="panel-list">
+            {% for certificate in certificates %}
+              <li><a href="{% if certificate.file %}{{ certificate.file.url }}{% else %}{% url 'club:my_certificates' %}{% endif %}">
+                {{ certificate.title }}
+                <span class="meta">Issued {{ certificate.issued_on|date:"d M Y" }}
+                  {% if certificate.reference_no %}· {{ certificate.reference_no }}{% endif %}</span></a></li>
+            {% empty %}
+              <li><a href="{% url 'club:events' %}">No certificates issued yet — participate in a programme to earn one.</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <aside class="stack">
+        <div class="panel">
+          <div class="panel-head">Upcoming Events</div>
+          <ul class="panel-list">
+            {% for event in upcoming_events %}
+              <li><a href="{{ event.get_absolute_url }}">{{ event.title }}
+                <span class="meta">{{ event.start|date:"d M Y, g:i A" }}</span></a></li>
+            {% empty %}
+              <li><a href="{% url 'club:events' %}">No upcoming events.</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="panel">
+          <div class="panel-head">Announcements</div>
+          <ul class="panel-list">
+            {% for note in announcements %}
+              <li><a href="{{ note.target_url }}">{{ note.title }}
+                <span class="meta">{{ note.published_at|date:"d M Y" }}</span></a></li>
+            {% empty %}
+              <li><a href="{% url 'club:notifications' %}">No announcements.</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="panel">
+          <div class="panel-head">Documents</div>
+          <ul class="panel-list">
+            {% for resource in resources %}
+              <li><a href="{% url 'club:resource_download' resource.slug %}">⬇ {{ resource.title }}</a></li>
+            {% empty %}
+              <li><a href="{% url 'club:resources' %}">No documents published.</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% load club_extras %}{% with kind=field|widget_type %}
+<div class="field{% if field.errors %} has-error{% endif %}"{% if full %} style="grid-column:1/-1"{% endif %}>
+  {% if kind == 'checkboxinput' %}
+    <div class="check-inline">
+      <label for="{{ field.id_for_label }}">{{ field }} <span>{{ field.label }}{% if field.field.required %}<span class="req">*</span>{% endif %}</span></label>
+    </div>
+  {% else %}
+    <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="req" aria-hidden="true">*</span>{% endif %}</label>
+    {% if kind == 'checkboxselectmultiple' %}
+      <div class="checkbox-grid">{{ field }}</div>
+    {% else %}
+      {{ field }}
+    {% endif %}
+  {% endif %}
+  {% if field.help_text %}<span class="helptext">{{ field.help_text }}</span>{% endif %}
+  {% if field.errors %}<ul class="errorlist">{% for error in field.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+</div>
+{% endwith %}

@@ -1,0 +1,60 @@
+{% extends 'club/base.html' %}
+
+{% block content %}
+<div class="page-header">
+  <div class="wrap">
+    <h1>Create Portal Account</h1>
+    <p>A portal account lets you track your membership, register for events and download certificates.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="wrap layout-sidebar">
+    <div>
+      <fieldset class="gov-fieldset">
+        <legend>Account details</legend>
+        <form method="post" class="gov-form" data-validate novalidate>
+          {% csrf_token %}
+          {% if form.non_field_errors %}<div class="notice-strip error">{{ form.non_field_errors }}</div>{% endif %}
+          <div class="form-row">
+            {% include 'club/partials/field.html' with field=form.first_name %}
+            {% include 'club/partials/field.html' with field=form.last_name %}
+          </div>
+          <div class="form-row">
+            {% include 'club/partials/field.html' with field=form.username %}
+            {% include 'club/partials/field.html' with field=form.email %}
+          </div>
+          <div class="form-row">
+            {% include 'club/partials/field.html' with field=form.phone %}
+          </div>
+          <div class="form-row">
+            {% include 'club/partials/field.html' with field=form.password1 %}
+            {% include 'club/partials/field.html' with field=form.password2 %}
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Create account</button>
+            <a class="btn btn-ghost" href="{% url 'club:login' %}">I already have an account</a>
+          </div>
+        </form>
+      </fieldset>
+    </div>
+    <aside class="stack">
+      <div class="notice-strip">
+        Creating a portal account is not the same as applying for membership.
+        <a href="{% url 'club:membership' %}">Submit the membership form</a> to be enrolled.
+      </div>
+      <div class="panel">
+        <div class="panel-head">Password guidance</div>
+        <div class="panel-body" style="font-size:.86rem;color:var(--ink-soft)">
+          <ul style="margin:0;padding-left:1.1em">
+            <li>At least 8 characters.</li>
+            <li>Not entirely numeric.</li>
+            <li>Not similar to your name or e-mail.</li>
+            <li>Not a commonly used password.</li>
+          </ul>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends 'club/base.html' %}
+
+{% block content %}
+<section class="section">
+  <div class="wrap layout-sidebar">
+    <article>
+      {% if article.category %}<span class="chip solid">{{ article.category.name }}</span>{% endif %}
+      <h1 style="margin-top:12px">{{ article.title }}</h1>
+      <div class="card-meta" style="margin-bottom:18px">
+        <span>📅 {{ article.published_at|date:"l, d F Y" }}</span>
+        {% if article.author %}<span>✍ {{ article.author }}</span>{% endif %}
+        <span>🕘 {{ article.published_at|timesince }} ago</span>
+      </div>
+      <div style="border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--line);aspect-ratio:16/7">
+        {% include 'club/partials/thumb.html' with image=article.image label=article.title alt=article.title %}
+      </div>
+      {% if article.excerpt %}
+        <div class="notice-strip" style="margin:20px 0">{{ article.excerpt }}</div>
+      {% endif %}
+      <div style="margin-top:18px">{{ article.body|linebreaks }}</div>
+
+      <div class="card-foot" style="margin-top:26px">
+        <a class="btn btn-ghost btn-sm" href="{% url 'club:news' %}">← Back to all news</a>
+        <span style="font-size:.8rem;color:var(--ink-soft)">Published by {{ org.organization_name }}</span>
+      </div>
+
+      {% if related_articles %}
+        <div class="section-head" style="margin-top:38px"><h2 class="section-title">Related Articles</h2></div>
+        <div class="grid cols-3">
+          {% for article in related_articles %}{% include 'club/partials/news_card.html' %}{% endfor %}
+        </div>
+      {% endif %}
+    </article>
+
+    <aside class="stack">
+      <div class="panel">
+        <div class="panel-head">Latest Notices <a href="{% url 'club:notifications' %}">All</a></div>
+        <ul class="panel-list scroll-list">
+          {% for note in notifications_list %}
+            <li><a href="{{ note.target_url }}">{{ note.title }}
+              <span class="meta">{{ note.published_at|date:"d M Y" }}</span></a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-head">Explore</div>
+        <ul class="panel-list">
+          <li><a href="{% url 'club:events' %}">Upcoming events</a></li>
+          <li><a href="{% url 'club:gallery' %}">Photo gallery</a></li>
+          <li><a href="{% url 'club:resources' %}">Reports &amp; downloads</a></li>
+          <li><a href="{% url 'club:membership' %}">Become a member</a></li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

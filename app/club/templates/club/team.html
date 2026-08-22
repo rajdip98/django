@@ -1,0 +1,48 @@
+{% extends 'club/base.html' %}
+
+{% block content %}
+<div class="page-header">
+  <div class="wrap">
+    <h1>Our Team</h1>
+    <p>Office bearers, executive committee members, advisors, coordinators and volunteers.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="wrap">
+    {% for category, members in groups %}
+      <div class="section-head" style="margin-top:{% if forloop.first %}0{% else %}38px{% endif %}">
+        <h2 class="section-title">{% if category %}{{ category.name }}{% else %}Members{% endif %}</h2>
+      </div>
+      <div class="grid cols-4">
+        {% for member in members %}
+          <article class="card member-card" id="member-{{ member.slug }}">
+            <div class="card-body">
+              <div class="portrait">
+                {% include 'club/partials/thumb.html' with image=member.photo label=member.name alt=member.name %}
+              </div>
+              <h3 class="card-title" style="margin-bottom:2px">{{ member.name }}</h3>
+              <div class="position">{{ member.position }}</div>
+              {% if member.tenure %}<div style="font-size:.76rem;color:var(--ink-soft)">Term: {{ member.tenure }}</div>{% endif %}
+              {% if member.bio %}<p class="card-text">{{ member.bio|truncatewords:24 }}</p>{% endif %}
+              {% if member.email %}
+                <a href="mailto:{{ member.email }}" style="font-size:.8rem">{{ member.email }}</a>
+              {% endif %}
+              <div class="social-row">
+                {% for name, url, key in member.social_links %}
+                  {% if url %}<a href="{{ url }}" target="_blank" rel="noopener" title="{{ name }}">{{ name|slice:":2" }}</a>{% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% empty %}
+      <div class="empty-state">
+        <span class="glyph" aria-hidden="true">👥</span>
+        <p>Team details have not been published yet.</p>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

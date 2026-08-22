@@ -1,0 +1,18 @@
+{% load club_extras %}<article class="card">
+  <div class="card-media">
+    {% include 'club/partials/thumb.html' with image=article.image label=article.title alt=article.title %}
+    {% if article.category %}<span class="chip solid">{{ article.category.name }}</span>{% endif %}
+  </div>
+  <div class="card-body">
+    <div class="card-meta">
+      <span>📅 {{ article.published_at|date:"d M Y" }}</span>
+      {% if article.author %}<span>✍ {{ article.author }}</span>{% endif %}
+    </div>
+    <h3 class="card-title"><a href="{{ article.get_absolute_url }}">{{ article.title }}</a></h3>
+    <p class="card-text">{{ article.excerpt|default:article.body|truncatewords:22 }}</p>
+    <div class="card-foot">
+      {% if article.is_featured %}<span class="chip gold">Featured</span>{% else %}<span></span>{% endif %}
+      <a class="btn btn-sm btn-ghost" href="{{ article.get_absolute_url }}">Read more →</a>
+    </div>
+  </div>
+</article>

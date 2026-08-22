@@ -23,5 +23,6 @@ COPY . /code/
 # Collect static files
 RUN python manage.py collectstatic --noinput
 
-# Start server
-CMD python manage.py migrate && python manage.py createsuperauto && gunicorn defang_sample.wsgi:application --bind 0.0.0.0:8000
+# Start server. SQLite is reset on every deploy, so the demo content is seeded
+# on startup; drop `seed_demo` once the site holds real content in a durable database.
+CMD python manage.py migrate && python manage.py createsuperauto && python manage.py seed_demo && gunicorn defang_sample.wsgi:application --bind 0.0.0.0:8000

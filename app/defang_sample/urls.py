@@ -1,25 +1,20 @@
-"""
-URL configuration for defang_sample project.
+"""URL configuration for the project.
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+The club website is mounted at the site root; the original to-do sample is
+kept at /todos/ so the Defang template still works as documented.
 """
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, include
-from django.views.generic import RedirectView
+from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('todos/', include('example_app.urls', namespace='example_app')),
-    path('', RedirectView.as_view(url='/todos/')),
+    path('', include('club.urls', namespace='club')),
 ]
+
+# Uploaded media is served by Django in development; behind Gunicorn use the
+# platform's object storage or a front-end web server instead.
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

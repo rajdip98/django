@@ -1,0 +1,62 @@
+{% extends 'club/base.html' %}
+{% load club_extras %}
+
+{% block content %}
+<div class="page-header">
+  <div class="wrap">
+    <h1>Photo &amp; Video Gallery</h1>
+    <p>{{ photo_count }} photographs and {{ video_count }} videos from our programmes.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="wrap">
+    <div class="filterbar">
+      <form action="" method="get" role="search">
+        <label class="sr-only" for="gallery-search">Search the gallery</label>
+        <input class="gov-input" type="search" id="gallery-search" name="q" value="{{ query }}"
+               placeholder="Search photographs and videos">
+        {% if active_category %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
+        {% if media_type %}<input type="hidden" name="type" value="{{ media_type }}">{% endif %}
+        <button class="btn btn-primary" type="submit">Search</button>
+      </form>
+      <div class="pill-row">
+        <a class="pill {% if not media_type %}active{% endif %}" href="{% query_replace type='' %}">All media</a>
+        <a class="pill {% if media_type == 'photo' %}active{% endif %}" href="{% query_replace type='photo' %}">Photos</a>
+        <a class="pill {% if media_type == 'video' %}active{% endif %}" href="{% query_replace type='video' %}">Videos</a>
+      </div>
+      <div class="pill-row" style="margin-left:auto">
+        <a class="pill {% if not active_category %}active{% endif %}" href="{% query_replace category='' %}">All albums</a>
+        {% for category in categories %}
+          <a class="pill {% if active_category == category.slug %}active{% endif %}"
+             href="{% query_replace category=category.slug %}">{{ category.name }}</a>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% if items %}
+      <div class="gallery-grid">
+        {% for item in items %}
+          <button type="button" class="gallery-tile" data-lightbox
+                  data-full="{% if item.image %}{{ item.image.url }}{% endif %}"
+                  data-video="{{ item.video_url }}"
+                  data-caption="{{ item.title|escape }} — {{ item.taken_on|date:'d M Y' }}"
+                  data-initials="{{ item.title|initials }}"
+                  data-swatch="ph-{{ item.title|swatch }}">
+            {% include 'club/partials/thumb.html' with image=item.image label=item.title alt=item.title %}
+            {% if item.media_type == 'video' %}<span class="play" aria-hidden="true">▶</span>{% endif %}
+            <span class="overlay">{{ item.title }}</span>
+          </button>
+        {% endfor %}
+      </div>
+      {% include 'club/partials/pagination.html' with page_obj=items %}
+    {% else %}
+      <div class="empty-state">
+        <span class="glyph" aria-hidden="true">🖼</span>
+        <p>No media has been published in this album yet.</p>
+        <a class="btn btn-ghost btn-sm" href="{% url 'club:gallery' %}">Show all media</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

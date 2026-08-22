@@ -1,0 +1,84 @@
+{% extends 'club/base.html' %}
+{% load club_extras %}
+
+{% block content %}
+<div class="page-header">
+  <div class="wrap">
+    <h1>Resources &amp; Downloads</h1>
+    <p>Forms, reports, rules and regulations, brochures and event documents.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="wrap">
+    <div class="filterbar">
+      <form action="" method="get" role="search">
+        <label class="sr-only" for="resource-search">Search downloads</label>
+        <input class="gov-input" type="search" id="resource-search" name="q" value="{{ query }}"
+               placeholder="Search documents">
+        {% if active_category %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
+        <button class="btn btn-primary" type="submit">Search</button>
+      </form>
+      <div class="pill-row">
+        <a class="pill {% if not active_category %}active{% endif %}" href="{% query_replace category='' %}">All</a>
+        {% for category in categories %}
+          <a class="pill {% if active_category == category.slug %}active{% endif %}"
+             href="{% query_replace category=category.slug %}">{{ category.name }}</a>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% if resources %}
+      <div class="table-scroll">
+        <table class="gov-table">
+          <caption>Documents published by the organisation. Click download to obtain a copy.</caption>
+          <thead>
+            <tr>
+              <th style="width:60px">Sl.</th>
+              <th>Document</th>
+              <th style="width:150px">Category</th>
+              <th style="width:120px">Published</th>
+              <th style="width:120px">File</th>
+              <th style="width:200px">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for resource in resources %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                  <strong>{{ resource.title }}</strong>
+                  {% if resource.description %}<br><span style="font-size:.84rem;color:var(--ink-soft)">{{ resource.description }}</span>{% endif %}
+                </td>
+                <td>{{ resource.category.name|default:"General" }}</td>
+                <td>{{ resource.published_on|date:"d M Y" }}</td>
+                <td>{{ resource.file_label|default:"—" }}</td>
+                <td>
+                  {% if resource.download_url %}
+                    <a class="btn btn-sm btn-primary" href="{% url 'club:resource_download' resource.slug %}">⬇ Download</a>
+                    <a class="btn btn-sm btn-ghost" href="{{ resource.download_url }}" target="_blank" rel="noopener">View</a>
+                  {% else %}
+                    <span class="chip">Available at the office</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% include 'club/partials/pagination.html' with page_obj=resources %}
+    {% else %}
+      <div class="empty-state">
+        <span class="glyph" aria-hidden="true">📄</span>
+        <p>No documents match your search{% if query %} for “{{ query }}”{% endif %}.</p>
+        <a class="btn btn-ghost btn-sm" href="{% url 'club:resources' %}">Show all documents</a>
+      </div>
+    {% endif %}
+
+    <div class="notice-strip" style="margin-top:26px">
+      Documents are published in PDF format. If a file does not open, please write to
+      {% if org.email %}<a href="mailto:{{ org.email }}">{{ org.email }}</a>{% else %}the office{% endif %}.
+    </div>
+  </div>
+</section>
+{% endblock %}

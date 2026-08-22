@@ -1,0 +1,58 @@
+{% extends 'club/base.html' %}
+
+{% block content %}
+<section class="section">
+  <div class="wrap">
+    <nav class="dash-tabs" aria-label="Member portal" style="margin-top:0">
+      <a href="{% url 'club:dashboard' %}">Overview</a>
+      <a class="active" href="{% url 'club:profile' %}">Profile</a>
+      <a href="{% url 'club:my_events' %}">My Events</a>
+      <a href="{% url 'club:my_certificates' %}">Certificates</a>
+    </nav>
+
+    <div class="layout-sidebar">
+      <fieldset class="gov-fieldset">
+        <legend>My particulars</legend>
+        <form method="post" enctype="multipart/form-data" class="gov-form" data-validate novalidate>
+          {% csrf_token %}
+          <div class="form-row">
+            {% include 'club/partials/field.html' with field=form.first_name %}
+            {% include 'club/partials/field.html' with field=form.last_name %}
+          </div>
+          <div class="form-row">
+            {% include 'club/partials/field.html' with field=form.email %}
+            {% include 'club/partials/field.html' with field=form.phone %}
+          </div>
+          <div class="form-row">
+            {% include 'club/partials/field.html' with field=form.department %}
+            {% include 'club/partials/field.html' with field=form.date_of_birth %}
+          </div>
+          {% include 'club/partials/field.html' with field=form.address full=True %}
+          {% include 'club/partials/field.html' with field=form.photo full=True %}
+          {% include 'club/partials/field.html' with field=form.interests full=True %}
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Save changes</button>
+            <a class="btn btn-ghost" href="{% url 'club:dashboard' %}">Back to dashboard</a>
+          </div>
+        </form>
+      </fieldset>
+
+      <aside class="stack">
+        <div class="panel">
+          <div class="panel-head">Current Photograph</div>
+          <div class="panel-body" style="text-align:center">
+            <div class="portrait" style="width:130px;height:130px;border-radius:50%;overflow:hidden;margin:0 auto 12px;border:3px solid var(--gold)">
+              {% include 'club/partials/thumb.html' with image=profile.photo label=profile.display_name alt=profile.display_name %}
+            </div>
+            <strong>{{ profile.display_name }}</strong>
+            <div style="font-size:.82rem;color:var(--ink-soft)">{{ profile.membership_id }}</div>
+          </div>
+        </div>
+        <div class="notice-strip">
+          Changes to your name or date of birth may require verification at the office.
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+{% endblock %}

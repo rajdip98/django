@@ -1,0 +1,32 @@
+{% extends 'club/base.html' %}
+
+{% block content %}
+<section class="section">
+  <div class="wrap" style="max-width:760px">
+    <div class="panel">
+      <div class="panel-head">Acknowledgement</div>
+      <div class="panel-body" style="text-align:center;padding:34px 26px">
+        <div style="font-size:3rem;line-height:1" aria-hidden="true">✅</div>
+        <h1 style="margin-top:12px">Application received</h1>
+        <p style="color:var(--ink-soft)">Thank you for applying for membership of
+          {{ org.organization_name }}. Your application has been recorded and is now
+          pending verification by the office.</p>
+        {% if reference_no %}
+          <div class="notice-strip success" style="justify-content:center;margin:22px 0">
+            <span>Acknowledgement number: <strong>{{ reference_no }}</strong></span>
+          </div>
+        {% endif %}
+        <dl class="kv" style="text-align:left;max-width:460px;margin:0 auto 22px">
+          <dt>Current status</dt><dd>Pending review</dd>
+          <dt>Expected response</dt><dd>Within 7 working days</dd>
+          <dt>Enquiries</dt><dd>{{ org.phone }}{% if org.email %} · {{ org.email }}{% endif %}</dd>
+        </dl>
+        <div class="form-actions" style="justify-content:center">
+          <a class="btn btn-primary" href="{% url 'club:signup' %}">Create your portal account</a>
+          <a class="btn btn-ghost" href="{% url 'club:home' %}">Back to home</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
