@@ -86,10 +86,18 @@ export function HouseholdFormScreen(): JSX.Element {
   const photoInputRef = useRef<HTMLInputElement>(null);
   const saveTimer = useRef<number | undefined>(undefined);
   const dirtyRef = useRef(false);
+  // Mirrors `draft` so edits compose correctly without doing work inside a
+  // state updater — React may call an updater more than once, or discard the
+  // render entirely, so scheduling a save from in there is not safe.
+  const draftRef = useRef<Household | null>(draft);
 
   // Adopt the stored record once it appears (e.g. straight after creation).
   useEffect(() => {
-    if (!draft && stored) setDraft(deepClone(stored));
+    if (!draft && stored) {
+      const adopted = deepClone(stored);
+      draftRef.current = adopted;
+      setDraft(adopted);
+    }
   }, [draft, stored]);
 
   const persist = useCallback(
@@ -108,16 +116,16 @@ export function HouseholdFormScreen(): JSX.Element {
   /** Update the draft and schedule a debounced save. */
   const update = useCallback(
     (mutate: (current: Household) => Household) => {
-      setDraft((current) => {
-        if (!current) return current;
-        const next = mutate(current);
-        dirtyRef.current = true;
+      const current = draftRef.current;
+      if (!current) return;
 
-        if (saveTimer.current) window.clearTimeout(saveTimer.current);
-        saveTimer.current = window.setTimeout(() => void persist(next), 700);
+      const next = mutate(current);
+      draftRef.current = next;
+      dirtyRef.current = true;
+      setDraft(next);
 
-        return next;
-      });
+      if (saveTimer.current) window.clearTimeout(saveTimer.current);
+      saveTimer.current = window.setTimeout(() => void persist(next), 700);
     },
     [persist],
   );
@@ -130,10 +138,12 @@ export function HouseholdFormScreen(): JSX.Element {
     [],
   );
 
+  // Flush a pending save if the tab is hidden or closed mid-interview.
   useEffect(() => {
     const flush = () => {
-      if (!dirtyRef.current || !draft) return;
-      void persist(draft);
+      const pending = draftRef.current;
+      if (!dirtyRef.current || !pending) return;
+      void persist(pending);
     };
     window.addEventListener('pagehide', flush);
     window.addEventListener('visibilitychange', flush);
@@ -141,7 +151,7 @@ export function HouseholdFormScreen(): JSX.Element {
       window.removeEventListener('pagehide', flush);
       window.removeEventListener('visibilitychange', flush);
     };
-  }, [draft, persist]);
+  }, [persist]);
 
   const flags = useMemo(() => (draft ? validateHousehold(draft) : []), [draft]);
   const summary = useMemo(() => summariseFlags(flags), [flags]);
@@ -253,7 +263,9 @@ export function HouseholdFormScreen(): JSX.Element {
     try {
       if (saveTimer.current) window.clearTimeout(saveTimer.current);
       const saved = await submitHousehold(draft);
-      setDraft(deepClone(saved));
+      const fresh = deepClone(saved);
+      draftRef.current = fresh;
+      setDraft(fresh);
       dirtyRef.current = false;
       toast(t('form.submitSuccess'), 'success');
       navigate(isCitizen ? '/' : '/households');

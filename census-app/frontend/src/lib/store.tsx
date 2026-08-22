@@ -377,13 +377,35 @@ export function AppProvider({ children }: { children: ReactNode }): JSX.Element 
     [refreshPendingCount],
   );
 
-  const importHouseholds = useCallback(async (incoming: Household[]) => {
-    if (!incoming.length) return 0;
-    await db.saveHouseholds(incoming);
-    const rows = await db.listHouseholds();
-    if (mountedRef.current) setHouseholds(rows);
-    return incoming.length;
-  }, []);
+  const importHouseholds = useCallback(
+    async (incoming: Household[]) => {
+      if (!incoming.length) return 0;
+      await db.saveHouseholds(incoming);
+
+      // Restoring onto a replacement phone is the documented recovery path, so
+      // anything already submitted has to be queued — otherwise the work would
+      // sit on the new device looking complete and never reach the server.
+      const deviceOnly = session?.local ?? !backend;
+      if (!deviceOnly) {
+        const queueTime = nowIso();
+        for (const household of incoming) {
+          if (household.status === 'draft') continue;
+          await db.enqueueOutbox({
+            id: household.id,
+            householdId: household.id,
+            queuedAt: queueTime,
+            attempts: 0,
+          });
+        }
+        await refreshPendingCount();
+      }
+
+      const rows = await db.listHouseholds();
+      if (mountedRef.current) setHouseholds(rows);
+      return incoming.length;
+    },
+    [backend, refreshPendingCount, session],
+  );
 
   const clearLocalData = useCallback(async () => {
     await db.clearCollectedData(false);

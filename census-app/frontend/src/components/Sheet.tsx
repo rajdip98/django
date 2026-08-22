@@ -5,6 +5,11 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { CloseIcon } from './Icons';
 import { useT } from '../lib/store';
 
+/* Sheets can stack (a confirm dialog over the member editor). Without a stack,
+ * one Escape press closed every open sheet at once, because each listener sits
+ * on `document` and stopPropagation does not stop siblings. */
+const openSheets: symbol[] = [];
+
 export function Sheet({
   title,
   onClose,
@@ -23,8 +28,13 @@ export function Sheet({
   useEffect(() => {
     closeRef.current?.focus();
 
+    const id = Symbol('sheet');
+    openSheets.push(id);
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
+        // Only the sheet on top closes.
+        if (openSheets[openSheets.length - 1] !== id) return;
         event.stopPropagation();
         onClose();
         return;
@@ -55,7 +65,10 @@ export function Sheet({
 
     return () => {
       document.removeEventListener('keydown', onKeyDown, true);
-      document.body.style.overflow = previousOverflow;
+      const index = openSheets.indexOf(id);
+      if (index !== -1) openSheets.splice(index, 1);
+      // Restore scrolling only once the last sheet has closed.
+      if (openSheets.length === 0) document.body.style.overflow = previousOverflow;
     };
   }, [onClose]);
 

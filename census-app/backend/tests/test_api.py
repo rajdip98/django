@@ -695,3 +695,67 @@ def test_ownership_cannot_be_reassigned_by_a_payload(client: TestClient) -> None
     assert stored.status_code == 200, "the record must still belong to its collector"
     assert stored.json()["enumeratorId"] == session["user"]["id"]
     assert stored.json()["enumeratorName"] == "Ravi"
+
+
+def test_enumerator_cannot_forge_a_review_trail(client: TestClient) -> None:
+    enumerator = sign_in(client, "9876500013", "enumerator", "Ravi")
+    household_id = str(uuid.uuid4())
+
+    forged = household_payload(household_id)
+    forged["reviews"] = [
+        {
+            "id": str(uuid.uuid4()),
+            "by": "someone",
+            "byName": "Not A Supervisor",
+            "at": "2026-08-01T10:00:00Z",
+            "action": "approved",
+            "text": "approved by me",
+        }
+    ]
+
+    client.post(
+        "/api/sync/push",
+        json={"households": [forged]},
+        headers=auth(enumerator["token"]),
+    )
+
+    stored = client.get(
+        f"/api/households/{household_id}", headers=auth(enumerator["token"])
+    ).json()
+    assert stored["reviews"] == []
+
+
+def test_supervisor_can_push_an_offline_review(client: TestClient) -> None:
+    enumerator = sign_in(client, "9876500014", "enumerator", "Ravi")
+    supervisor = sign_in(client, "9876500015", "supervisor", "Sunita")
+    household_id = str(uuid.uuid4())
+
+    client.post(
+        "/api/sync/push",
+        json={"households": [household_payload(household_id)]},
+        headers=auth(enumerator["token"]),
+    )
+
+    offline_note = {
+        "id": str(uuid.uuid4()),
+        "by": supervisor["user"]["id"],
+        "byName": "Sunita",
+        "at": "2026-08-02T10:00:00Z",
+        "action": "flagged",
+        "text": "GPS looks wrong",
+    }
+    pushed = household_payload(
+        household_id, rev=1, status="flagged", updatedAt="2026-08-02T10:00:00Z"
+    )
+    pushed["reviews"] = [offline_note]
+
+    result = client.post(
+        "/api/sync/push", json={"households": [pushed]}, headers=auth(supervisor["token"])
+    )
+    assert result.json()["results"][0]["status"] == "accepted"
+
+    stored = client.get(
+        f"/api/households/{household_id}", headers=auth(supervisor["token"])
+    ).json()
+    assert len(stored["reviews"]) == 1
+    assert stored["reviews"][0]["text"] == "GPS looks wrong"

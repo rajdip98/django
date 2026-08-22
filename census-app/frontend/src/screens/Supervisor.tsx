@@ -45,11 +45,41 @@ export function SupervisorScreen(): JSX.Element {
 
   const ratio = sexRatio(analytics.genderCounts);
 
+  const finish = (action: ReviewNote['action']) => {
+    setReviewing(null);
+    toast(
+      t(
+        action === 'approved'
+          ? 'supervisor.approved'
+          : action === 'flagged'
+            ? 'supervisor.flaggedDone'
+            : 'supervisor.reopened',
+      ),
+      'success',
+    );
+  };
+
   const applyReview = async (
     household: Household,
     action: ReviewNote['action'],
     text: string,
   ) => {
+    // With a server reachable, the review is recorded there and the returned
+    // record is stored as-is. Writing a local note *as well* used to leave two
+    // identical entries in the trail once the queued push merged with the
+    // server's own note.
+    if (backend) {
+      try {
+        const saved = await api.reviewHousehold(household.id, action, text);
+        await saveHousehold({ ...saved, sync: 'synced' }, { queue: false });
+        finish(action);
+        return;
+      } catch (error) {
+        console.warn('census: review falling back to offline queue', error);
+      }
+    }
+
+    // Offline: record the decision locally and let sync carry it up.
     const note: ReviewNote = {
       id: uuid(),
       by: session?.user.id ?? 'local',
@@ -62,35 +92,11 @@ export function SupervisorScreen(): JSX.Element {
     const status =
       action === 'approved' ? 'approved' : action === 'flagged' ? 'flagged' : 'submitted';
 
-    const updated: Household = {
-      ...household,
-      status,
-      reviews: [...household.reviews, note],
-    };
-
-    // Save locally first so the decision survives a dropped connection, then
-    // tell the server (which records it in the audit log).
-    await saveHousehold(updated, { queue: true });
-
-    if (backend) {
-      try {
-        await api.reviewHousehold(household.id, action, text);
-      } catch (error) {
-        console.warn('census: review not yet sent to server', error);
-      }
-    }
-
-    setReviewing(null);
-    toast(
-      t(
-        action === 'approved'
-          ? 'supervisor.approved'
-          : action === 'flagged'
-            ? 'supervisor.flaggedDone'
-            : 'supervisor.reopened',
-      ),
-      'success',
+    await saveHousehold(
+      { ...household, status, reviews: [...household.reviews, note] },
+      { queue: true },
     );
+    finish(action);
   };
 
   const downloadReport = () => {

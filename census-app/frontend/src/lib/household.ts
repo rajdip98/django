@@ -105,7 +105,9 @@ export function shouldQueueForSync(
   options: { deviceOnly: boolean; explicit?: boolean },
 ): boolean {
   if (options.deviceOnly) return false;
-  if (options.explicit) return true;
+  // An explicit choice wins in both directions: `false` is how a caller stores
+  // a copy that came *from* the server without pushing it straight back.
+  if (options.explicit !== undefined) return options.explicit;
   return household.status !== 'draft';
 }
 

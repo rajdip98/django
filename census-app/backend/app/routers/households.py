@@ -204,6 +204,13 @@ async def sync_push(
             incoming["enumeratorId"] = principal.id
             incoming["enumeratorName"] = principal.name or incoming.get("enumeratorName", "")
 
+        # The review trail is created by the review endpoint. Only a supervisor
+        # can legitimately push one (an approval made while offline); anyone
+        # else's copy is replaced by the server's, so a forged or stale trail
+        # cannot be written back.
+        if not principal.is_supervisor:
+            incoming["reviews"] = existing.get("reviews", []) if existing else []
+
         if not incoming.get("createdAt"):
             incoming["createdAt"] = now_iso()
         if not incoming.get("updatedAt"):
