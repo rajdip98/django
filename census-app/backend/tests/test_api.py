@@ -829,3 +829,25 @@ def test_pull_page_keeps_identical_timestamps_together(client: TestClient, monke
     second = client.get(f"/api/sync/pull?since={first['serverTime']}", headers=headers).json()
     assert len(second["households"]) == 1
     assert second["hasMore"] is False
+
+
+def test_multi_worker_with_embedded_store_warns(tmp_path, monkeypatch, capsys) -> None:
+    """Two workers on one JSON file lose data silently — say so loudly."""
+    from app.store import FileStore, warn_if_multiprocess
+
+    store = FileStore(tmp_path / "census.json")
+
+    monkeypatch.setenv("WEB_CONCURRENCY", "4")
+    warn_if_multiprocess(store)
+    assert "WARNING" in capsys.readouterr().out
+
+    monkeypatch.setenv("WEB_CONCURRENCY", "1")
+    warn_if_multiprocess(store)
+    assert capsys.readouterr().out == ""
+
+    # Never warns when a real database is configured.
+    monkeypatch.setenv("WEB_CONCURRENCY", "8")
+    from app.store import MongoStore
+
+    warn_if_multiprocess(MongoStore("mongodb://example", "db"))
+    assert capsys.readouterr().out == ""

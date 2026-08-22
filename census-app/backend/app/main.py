@@ -19,7 +19,7 @@ from .config import APP_VERSION, Settings, get_settings
 from .deps import settings_dep
 from .models import HealthOut, now_iso
 from .routers import admin, ai_routes, auth, households
-from .store import build_store
+from .store import build_store, warn_if_multiprocess
 
 
 @asynccontextmanager
@@ -29,6 +29,8 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     await store.connect()
     app.state.store = store
     app.state.settings = settings
+
+    warn_if_multiprocess(store)
 
     print(
         f"census: API v{APP_VERSION} ready "

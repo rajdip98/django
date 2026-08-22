@@ -129,7 +129,7 @@ Deliberate choices worth knowing about:
 ## Tests
 
 ```bash
-cd backend && .venv/bin/python -m pytest tests -q      # 44 API tests
+cd backend && .venv/bin/python -m pytest tests -q      # 45 API tests
 cd frontend && npm test                                # 61 unit tests
 cd frontend && npm run build                           # typecheck + production build
 ```

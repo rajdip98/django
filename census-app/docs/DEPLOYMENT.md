@@ -54,6 +54,12 @@ ALLOW_SELF_REGISTRATION: "false"   # once your enumerators are registered
 To run without MongoDB, comment out the `mongo` service and `MONGODB_URI`. The
 embedded JSON store in the `census-data` volume takes over.
 
+> **The embedded store is single-process.** It holds state in memory and
+> rewrites one JSON file, so running `--workers 2` (or `WEB_CONCURRENCY=2`)
+> means two processes overwriting each other — silent data loss. Run a single
+> worker, or set `MONGODB_URI`. The server prints a warning at startup if it
+> detects a worker count above one.
+
 ---
 
 ## 3. VPS without Docker
@@ -143,7 +149,8 @@ ones that matter most:
 | --- | --- | --- |
 | `SECRET_KEY` | generated | Signs login tokens. Set it, or tokens reset on redeploy. |
 | `ADMIN_PASSWORD` | `rajdip100@` | **Change this.** Or set `ADMIN_PASSWORD_HASH` instead. |
-| `MONGODB_URI` | *(empty)* | Empty = embedded JSON store. |
+| `MONGODB_URI` | *(empty)* | Empty = embedded JSON store (single process only). |
+| `MAX_REQUEST_BYTES` | `33554432` | Largest accepted body; keep in step with your proxy. |
 | `ALLOW_SELF_REGISTRATION` | `true` | Set `false` after registering your team. |
 | `CORS_ORIGINS` | `*` | Set to your real origin in production. |
 | `TWILIO_*` | *(empty)* | Without these, OTPs are returned in the API response. |

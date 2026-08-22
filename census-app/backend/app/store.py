@@ -81,6 +81,11 @@ class FileStore:
     temporary file + ``os.replace`` so a crash mid-write cannot truncate the
     dataset. Fine up to the tens of thousands of households a single field
     office collects; beyond that, point MONGODB_URI at a real database.
+
+    **Single process only.** State lives in this process's memory and is
+    serialised with an asyncio lock, so two workers would each hold their own
+    copy and overwrite each other's file — silent data loss. Run one worker, or
+    set MONGODB_URI. `warn_if_multiprocess` below makes the mistake loud.
     """
 
     kind = "embedded"
@@ -311,6 +316,33 @@ class MongoStore:
 
     async def count(self, collection: str, where: dict[str, Any] | None = None) -> int:
         return int(await self._collection(collection).count_documents(where or {}))
+
+
+def warn_if_multiprocess(store: Store) -> None:
+    """Shout if the embedded store is used with more than one worker.
+
+    Uvicorn and Gunicorn advertise their worker count in the environment. Two
+    processes sharing one JSON file lose data quietly, which is the worst way to
+    lose census returns, so make the misconfiguration impossible to miss.
+    """
+    if getattr(store, "kind", "") != "embedded":
+        return
+
+    for variable in ("WEB_CONCURRENCY", "UVICORN_WORKERS", "GUNICORN_WORKERS"):
+        raw = os.environ.get(variable)
+        if not raw:
+            continue
+        try:
+            workers = int(raw)
+        except ValueError:
+            continue
+        if workers > 1:
+            print(
+                f"census: WARNING — {variable}={workers} with the embedded JSON store. "
+                "Each worker keeps its own copy and they will overwrite each other. "
+                "Run a single worker, or set MONGODB_URI."
+            )
+            return
 
 
 def build_store(mongodb_uri: str | None, mongodb_db: str, data_dir: Path) -> Store:
