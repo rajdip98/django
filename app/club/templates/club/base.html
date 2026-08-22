@@ -30,6 +30,7 @@
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
 
+{% if org.show_top_strip %}
 <div class="topbar">
   <div class="wrap">
     <div class="gov-authority">
@@ -51,6 +52,7 @@
     </div>
   </div>
 </div>
+{% endif %}
 
 <header class="masthead">
   <div class="wrap">
@@ -63,12 +65,14 @@
       {% if org.registration_line %}<p class="org-reg">{{ org.registration_line }}</p>{% endif %}
     </div>
     <div class="masthead-actions">
+      {% if org.show_header_search %}
       <form class="search-inline" action="{% url 'club:search' %}" method="get" role="search">
         <label class="sr-only" for="masthead-search">Search this website</label>
         <input class="gov-input" type="search" id="masthead-search" name="q"
                placeholder="Search events, news, people…" value="{{ query|default:'' }}">
         <button class="btn btn-primary btn-sm" type="submit">Search</button>
       </form>
+      {% endif %}
     </div>
   </div>
 </header>
@@ -137,7 +141,7 @@
   </div>
 </nav>
 
-{% if ticker_items %}
+{% if ticker_items and org.show_ticker %}
 <div class="ticker">
   <div class="wrap">
     <span class="ticker-label">What's New</span>
@@ -152,6 +156,21 @@
       </div>
     </div>
   </div>
+</div>
+{% endif %}
+
+{% if top_banners %}
+<div class="wrap" style="padding-top:16px">
+  {% for banner in top_banners %}
+    <a class="banner-strip" href="{{ banner.link_url|default:'#' }}">
+      {% if banner.image %}<img src="{{ banner.image.url }}" alt="{{ banner.title }}">{% endif %}
+      <span class="banner-text">
+        <strong>{{ banner.title }}</strong>
+        {% if banner.subtitle %}<span>{{ banner.subtitle }}</span>{% endif %}
+      </span>
+      {% if banner.link_url %}<span class="btn btn-sm btn-gold">{{ banner.link_text }}</span>{% endif %}
+    </a>
+  {% endfor %}
 </div>
 {% endif %}
 
@@ -231,6 +250,19 @@
           <li><a href="{% url 'club:terms' %}">Terms of Use</a></li>
         </ul>
       </div>
+      {% if footer_qr_codes %}
+      <div>
+        <h3>Scan &amp; connect</h3>
+        {% for code in footer_qr_codes %}
+          <figure class="footer-qr">
+            <img src="{{ code.display_url }}" alt="QR code — {{ code.label }}" loading="lazy">
+            <figcaption>{{ code.caption|default:code.label }}
+              {% if code.scans_hint %}<span>{{ code.scans_hint }}</span>{% endif %}
+            </figcaption>
+          </figure>
+        {% endfor %}
+      </div>
+      {% endif %}
       <div>
         <h3>Contact</h3>
         <div class="footer-contact">
@@ -244,7 +276,8 @@
   </div>
   <div class="footer-bottom">
     <div class="wrap">
-      <span>© {{ current_year }} {{ org.organization_name }}. All rights reserved.</span>
+      <span>© {{ current_year }} {{ org.organization_name }}. All rights reserved.
+        {% if org.footer_note %}<br>{{ org.footer_note }}{% endif %}</span>
       <span class="links">
         <a href="{% url 'club:privacy' %}">Privacy Policy</a>
         <a href="{% url 'club:terms' %}">Terms of Use</a>

@@ -29,6 +29,7 @@ urlpatterns = [
     path('resources/<slug:slug>/download/', views.resource_download, name='resource_download'),
 
     path('contact/', views.contact, name='contact'),
+    path('qr/<slug:slug>.svg', views.qr_svg, name='qr_svg'),
     path('search/', views.search, name='search'),
     path('notifications/', views.notifications, name='notifications'),
     path('privacy/', views.static_page, {'kind': 'privacy'}, name='privacy'),

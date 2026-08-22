@@ -1,6 +1,6 @@
 from django.utils import timezone
 
-from .models import Announcement, Category, SiteSettings
+from .models import Announcement, Banner, Category, QRCode, SiteSettings
 
 NAV_ITEMS = [
     ('Home', 'club:home', []),
@@ -30,6 +30,8 @@ def site(request):
         'notifications_list': announcements[:6],
         'notification_count': len([a for a in announcements if a.is_new]),
         'footer_categories': Category.objects.filter(section='resource')[:5],
+        'top_banners': Banner.live_for('sitewide_top'),
+        'footer_qr_codes': QRCode.live_for('footer'),
         'current_year': timezone.now().year,
         'last_updated': timezone.now(),
     }

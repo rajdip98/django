@@ -10,12 +10,12 @@ from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from club.models import (Achievement, Activity, Announcement, Article, Category,
-                         Certificate, CoreValue, Event, EventRegistration,
-                         GalleryItem, Interest, MemberProfile,
-                         MembershipApplication, MembershipBenefit, Milestone,
-                         Resource, SiteSettings, Statistic, TeamMember,
-                         Testimonial)
+from club.models import (Achievement, Activity, Announcement, Article, Banner,
+                         Category, Certificate, CoreValue, Event,
+                         EventRegistration, GalleryItem, Interest,
+                         MemberProfile, MembershipApplication,
+                         MembershipBenefit, Milestone, QRCode, Resource,
+                         SiteSettings, Statistic, TeamMember, Testimonial)
 
 ORG = 'Sunrise Youth Club & Cultural Association'
 
@@ -30,7 +30,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if options['reset']:
             for model in (EventRegistration, Event, Article, GalleryItem, TeamMember,
-                          Activity, Resource, Announcement, MembershipBenefit,
+                          Activity, Resource, Announcement, MembershipBenefit, Banner,
+                          QRCode,
                           MembershipApplication, Certificate, Testimonial, Statistic,
                           Milestone, Achievement, CoreValue, Interest, Category):
                 model.objects.all().delete()
@@ -49,9 +50,39 @@ class Command(BaseCommand):
         self.seed_membership()
         self.seed_announcements(events)
         self.seed_members(events)
+        self.seed_banners_and_qr()
         self.stdout.write(self.style.SUCCESS(
             'Demo content ready. Sign in at /login/ as member/member12345 or at '
             '/admin/ as admin/admin.'))
+
+    def seed_banners_and_qr(self):
+        banners = [
+            ('Membership enrolment for the new session is open', 'home_strip',
+             'Applications close at the end of the month. Apply online in five minutes.',
+             '/membership/', 'Apply now'),
+            ('Annual Report 2024–25 published', 'sitewide_top',
+             'The report and audited accounts are available for download.',
+             '/resources/', 'Download'),
+        ]
+        for order, (title, placement, subtitle, link, link_text) in enumerate(banners):
+            Banner.objects.get_or_create(
+                title=title,
+                defaults={'placement': placement, 'subtitle': subtitle, 'link_url': link,
+                          'link_text': link_text, 'order': order, 'is_active': True})
+
+        codes = [
+            ('Membership application', 'https://example.org/membership/', 'membership',
+             'Scan to open the application form', 'Point your phone camera at the code.'),
+            ('Website home page', 'https://example.org/', 'footer',
+             'Scan for our website', 'Share the club portal with a friend.'),
+            ('Office location & contact', 'https://example.org/contact/', 'contact',
+             'Scan for directions and contact details', 'Saves the office address to your phone.'),
+        ]
+        for order, (label, payload, placement, caption, hint) in enumerate(codes):
+            QRCode.objects.get_or_create(
+                label=label,
+                defaults={'payload': payload, 'placement': placement, 'caption': caption,
+                          'scans_hint': hint, 'order': order, 'is_active': True})
 
     # ------------------------------------------------------------------ site
     def seed_settings(self):

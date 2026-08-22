@@ -88,6 +88,20 @@
           <a class="btn btn-ghost btn-block" style="margin-top:8px" href="{% url 'club:signup' %}">Create a portal account</a>
         </div>
       </div>
+      {% if qr_codes %}
+      <div class="panel">
+        <div class="panel-head">Scan to apply on your phone</div>
+        <div class="panel-body">
+          {% for code in qr_codes %}
+            <div class="qr-block" style="margin-bottom:14px">
+              <div class="frame"><img src="{{ code.display_url }}" alt="QR code — {{ code.label }}" loading="lazy"></div>
+              <div class="label">{{ code.caption|default:code.label }}</div>
+              {% if code.scans_hint %}<div class="hint">{{ code.scans_hint }}</div>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
       <div class="notice-strip warn">
         Note the acknowledgement number shown after submission. It is required for any enquiry
         about your application.

@@ -1,22 +1,23 @@
 import calendar as pycalendar
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
+from io import BytesIO
 
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
 from .forms import (ContactForm, EventRegistrationForm, MembershipApplicationForm,
                     ProfileForm, SignUpForm)
-from .models import (Achievement, Activity, Announcement, Article, Category,
-                     CoreValue, Event, EventRegistration, GalleryItem,
-                     MemberProfile, MembershipBenefit, Milestone, Resource,
-                     SiteSettings, Statistic, TeamMember, Testimonial)
+from .models import (Achievement, Activity, Announcement, Article, Banner,
+                     Category, CoreValue, Event, EventRegistration, GalleryItem,
+                     MemberProfile, MembershipBenefit, Milestone, QRCode,
+                     Resource, SiteSettings, Statistic, TeamMember, Testimonial)
 
 
 def _paginate(request, queryset, per_page=9):
@@ -44,6 +45,9 @@ def home(request):
         'gallery_items': GalleryItem.objects.all()[:8],
         'testimonials': Testimonial.objects.all()[:6],
         'leaders': TeamMember.objects.select_related('category')[:4],
+        'home_banners': Banner.live_for('home_strip'),
+        'hero_banners': Banner.live_for('home_hero'),
+        'sidebar_qr_codes': QRCode.live_for('home_sidebar'),
         'page_title': 'Home',
         'meta_description': SiteSettings.load().introduction[:160],
     }
@@ -318,6 +322,7 @@ def membership(request):
     context = {
         'form': form,
         'benefits': MembershipBenefit.objects.all(),
+        'qr_codes': QRCode.live_for('membership'),
         'page_title': 'Membership',
         'breadcrumbs': _breadcrumbs(('Membership', None)),
         'meta_description': 'Membership benefits and the online application form.',
@@ -376,6 +381,7 @@ def contact(request):
         form = ContactForm()
     context = {
         'form': form,
+        'qr_codes': QRCode.live_for('contact'),
         'page_title': 'Contact Us',
         'breadcrumbs': _breadcrumbs(('Contact Us', None)),
     }
@@ -575,3 +581,37 @@ def my_certificates(request):
                                     ('Certificates', None)),
     }
     return render(request, 'club/my_certificates.html', context)
+
+
+def qr_svg(request, slug):
+    """Render a QR code as SVG, generated live from its stored payload.
+
+    Because the code is drawn on request, repointing it in the admin panel
+    changes every printed and published copy immediately.
+    """
+    code = get_object_or_404(QRCode, slug=slug, is_active=True)
+    if code.image:
+        return HttpResponseRedirect(code.image.url)
+
+    import qrcode
+    import qrcode.image.svg
+    from qrcode.constants import (ERROR_CORRECT_H, ERROR_CORRECT_L,
+                                  ERROR_CORRECT_M, ERROR_CORRECT_Q)
+
+    levels = {'L': ERROR_CORRECT_L, 'M': ERROR_CORRECT_M,
+              'Q': ERROR_CORRECT_Q, 'H': ERROR_CORRECT_H}
+    maker = qrcode.QRCode(
+        version=None,
+        error_correction=levels.get(code.error_correction, ERROR_CORRECT_M),
+        box_size=10, border=2,
+        image_factory=qrcode.image.svg.SvgPathImage)
+    maker.add_data(code.payload)
+    maker.make(fit=True)
+
+    buffer = BytesIO()
+    maker.make_image().save(buffer)
+    response = HttpResponse(buffer.getvalue(), content_type='image/svg+xml')
+    # Repointing the code bumps updated_at, so caches pick the change up.
+    response['ETag'] = f'"{code.pk}-{int(code.updated_at.timestamp())}"'
+    response['Cache-Control'] = 'public, max-age=300'
+    return response

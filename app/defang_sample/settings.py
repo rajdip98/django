@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'club',
+    'staff',
     'example_app',
 ]
 
@@ -121,6 +122,17 @@ TIME_ZONE = 'UTC'
 LOGIN_URL = 'club:login'
 LOGIN_REDIRECT_URL = 'club:dashboard'
 LOGOUT_REDIRECT_URL = 'club:home'
+
+# --- Administration panel -------------------------------------------------
+# Shared bootstrap password issued to every new Super Admin and Admin. The
+# account cannot do anything until it is changed at first sign-in. Override in
+# deployment: anyone who can read this repository can read the fallback.
+PANEL_DEFAULT_PASSWORD = os.environ.get('PANEL_DEFAULT_PASSWORD', 'rajdip10')
+
+# Secret an Admin may enter to borrow Super Admin access for 30 minutes. It is
+# hashed into the database on first run; rotate it from Panel → Security, and
+# override the fallback here for deployment.
+PANEL_ELEVATION_SECRET = os.environ.get('PANEL_ELEVATION_SECRET', 'rajdip2007')
 
 # Password reset e-mails are printed to the console unless SMTP is configured.
 EMAIL_BACKEND = os.environ.get(

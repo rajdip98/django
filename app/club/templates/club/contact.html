@@ -80,6 +80,20 @@
           </div>
         </div>
       </div>
+      {% if qr_codes %}
+      <div class="panel">
+        <div class="panel-head">Scan &amp; Save</div>
+        <div class="panel-body">
+          {% for code in qr_codes %}
+            <div class="qr-block" style="margin-bottom:14px">
+              <div class="frame"><img src="{{ code.display_url }}" alt="QR code — {{ code.label }}" loading="lazy"></div>
+              <div class="label">{{ code.caption|default:code.label }}</div>
+              {% if code.scans_hint %}<div class="hint">{{ code.scans_hint }}</div>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
       <div class="panel">
         <div class="panel-head">Common Enquiries</div>
         <ul class="panel-list">

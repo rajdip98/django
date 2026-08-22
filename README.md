@@ -37,6 +37,62 @@ breadcrumbs, notice-board panels, tabular listings and a four-column footer.
 | `/privacy/`, `/terms/` | Policy pages, edited from the admin |
 | `/admin/` | Content management for every model above |
 
+### Administration panel (`/panel/`)
+
+A staff panel with two roles, separate from the member portal and from Django's own
+console.
+
+| | Super Admin | Admin |
+| --- | :-: | :-: |
+| Website name, logo, header, footer | ✅ | ✅ |
+| Banners, files & downloads, QR codes | ✅ | ✅ |
+| Create and suspend administrators | ✅ | only while elevated |
+| Rotate the elevation secret | ✅ | only while elevated |
+| Read the audit log | ✅ | only while elevated |
+| Django console at `/admin/` | ✅ | ❌ |
+
+**First sign-in.** Every account — Super Admin and Admin alike — is created on a shared
+default password and can do nothing at all until it sets its own: each panel page
+redirects to the change-password form, and the form refuses to accept the default value
+back. A Super Admin can put a locked-out colleague back on the default with **Reset
+password**, which re-arms the same forced change.
+
+**Creating administrators.** A Super Admin can create any number of them, with no limit.
+New accounts default to the Admin role, get `is_staff = False` so the Django console
+stays out of reach, and appear in the panel with their password state visible.
+
+**Elevation.** An Admin who needs a Super Admin section enters the elevation secret and
+receives that access for 30 minutes, after which the window closes on its own. The secret
+is stored hashed — it cannot be read back from the database or from any page — five wrong
+attempts lock that account out of elevation for fifteen minutes, and every attempt,
+successful or not, lands in the audit log. A Super Admin can rotate the secret or switch
+elevation off entirely under **Security**.
+
+**Audit log.** Sign-ins, failed sign-ins, password changes and resets, account creation
+and suspension, every elevation attempt, secret rotations and all content changes are
+recorded with the account, timestamp, IP address and whether the actor was elevated.
+
+> **Change both shared secrets before this is public.** The fallbacks live in
+> `app/defang_sample/settings.py`, so anyone who can read this repository can read them.
+> Set `PANEL_DEFAULT_PASSWORD` and `PANEL_ELEVATION_SECRET` as environment variables in
+> deployment, and rotate the elevation secret from **Panel → Security**. A shared secret
+> also cannot prove *which* person used it beyond the account they signed in with, so
+> prefer granting the Super Admin role to people who genuinely need it and keep elevation
+> as an occasional fallback.
+
+Bootstrap the first Super Admin with `python manage.py bootstrap_panel` (it runs on
+container start too), then sign in at `/panel/login/` as `superadmin`.
+
+### QR codes
+
+QR codes are managed under **Panel → QR codes** and rendered as SVG on request from the
+target stored in the database, at a stable address (`/qr/<slug>.svg`). Changing the
+target therefore repoints every copy already printed, posted or published — the image
+itself never needs replacing. Each code carries a placement (footer, contact page, home
+sidebar, membership page, or unpublished), a caption, a scan hint, and an error-correction
+level; you can also upload a ready-made code, such as a payment QR, and it takes
+precedence over the generated one.
+
 ### Design and accessibility
 
 Light, dark and high-contrast themes, and three text sizes, are selected from the top
@@ -53,16 +109,19 @@ install still looks complete.
 cd app
 pip install -r requirements.txt
 DEBUG=True python manage.py migrate
-DEBUG=True python manage.py seed_demo      # realistic sample content
+DEBUG=True python manage.py seed_demo        # realistic sample content
+DEBUG=True python manage.py bootstrap_panel  # first Super Admin + elevation secret
 DEBUG=True python manage.py createsuperauto  # admin / admin
 DEBUG=True python manage.py runserver
 ```
 
-Then open http://localhost:8000/. Sign in to the member portal as `member` /
-`member12345`, and to the admin console at `/admin/` as `admin` / `admin`.
-`python manage.py seed_demo --reset` clears the club content and reloads it.
+Then open http://localhost:8000/. Sign in to the member portal at `/login/` as `member` /
+`member12345`, to the administration panel at `/panel/login/` as `superadmin` (it will
+demand a new password immediately), and to the Django console at `/admin/` as `admin` /
+`admin`. `python manage.py seed_demo --reset` clears the club content and reloads it.
 
-Run the tests with `DEBUG=True python manage.py test club`.
+Run the tests with `DEBUG=True python manage.py test` (45 tests across `club` and
+`staff`).
 
 ### Making it your own
 

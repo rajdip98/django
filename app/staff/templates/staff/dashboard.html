@@ -1,0 +1,73 @@
+{% extends 'staff/base.html' %}
+{% block heading %}Dashboard{% endblock %}
+{% block content %}
+<div class="tile-grid">
+  {% for label, value, url in stats %}
+    <a class="tile" href="{{ url }}" style="text-decoration:none">
+      <div class="n">{{ value }}</div>
+      <div class="l">{{ label }}</div>
+    </a>
+  {% endfor %}
+</div>
+
+<div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:18px;margin-top:20px"
+     class="dash-columns">
+  <div class="panel-card">
+    <header><h2>Manage website content</h2></header>
+    <div class="inner">
+      <div class="tile-grid">
+        <a class="btn btn-ghost" href="{% url 'staff:identity' %}">🏛 Name &amp; logo</a>
+        <a class="btn btn-ghost" href="{% url 'staff:header' %}">⬒ Header</a>
+        <a class="btn btn-ghost" href="{% url 'staff:footer' %}">⬓ Footer</a>
+        <a class="btn btn-ghost" href="{% url 'staff:banners' %}">🖼 Banners</a>
+        <a class="btn btn-ghost" href="{% url 'staff:files' %}">📄 Files</a>
+        <a class="btn btn-ghost" href="{% url 'staff:qr_codes' %}">▩ QR codes</a>
+      </div>
+      {% if not is_super and not elevated %}
+        <p style="font-size:.85rem;color:var(--ink-soft);margin:16px 0 0">
+          Administrator accounts, security settings and the audit log are Super Admin
+          sections. <a href="{% url 'staff:elevate' %}">Elevate with the secret</a> if you
+          need them.
+        </p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="panel-card">
+    <header>
+      <h2>Recent activity</h2>
+      {% if can_super %}<a href="{% url 'staff:audit_log' %}" style="font-size:.8rem">Full log</a>{% endif %}
+    </header>
+    <ul class="panel-list">
+      {% for entry in recent %}
+        <li style="padding:10px 16px;border-bottom:1px dashed var(--line)">
+          <strong style="font-size:.86rem">{{ entry.get_action_display }}</strong>
+          {% if entry.target %}<span style="font-size:.86rem"> — {{ entry.target }}</span>{% endif %}
+          <span class="meta" style="display:block;font-size:.74rem;color:var(--ink-soft)">
+            {{ entry.actor_label }} · {{ entry.created_at|date:"d M Y, H:i" }} UTC
+            {% if entry.was_elevated %}· elevated{% endif %}</span>
+        </li>
+      {% empty %}
+        <li style="padding:16px;font-size:.86rem;color:var(--ink-soft)">Nothing recorded yet.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+{% if can_super %}
+<div class="panel-card" style="margin-top:20px">
+  <header>
+    <h2>Administration</h2>
+    <a class="btn btn-sm btn-primary" href="{% url 'staff:administrator_create' %}">Create an administrator</a>
+  </header>
+  <div class="inner" style="font-size:.9rem;color:var(--ink-soft)">
+    {{ super_count }} Super Admin{{ super_count|pluralize }} and {{ admin_count }}
+    Admin{{ admin_count|pluralize }} currently hold accounts. Super Admins may create any
+    number of administrators; each new account starts on the shared default password and
+    must change it at first sign-in.
+  </div>
+</div>
+{% endif %}
+
+<style>@media (max-width: 1000px) { .dash-columns { grid-template-columns: minmax(0, 1fr) !important; } }</style>
+{% endblock %}

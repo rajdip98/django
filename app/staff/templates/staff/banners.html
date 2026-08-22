@@ -1,0 +1,52 @@
+{% extends 'staff/base.html' %}
+{% block heading %}Banners{% endblock %}
+{% block content %}
+<div class="panel-card">
+  <header>
+    <h2>{{ banners|length }} banner{{ banners|length|pluralize }}</h2>
+    <a class="btn btn-sm btn-primary" href="{% url 'staff:banner_create' %}">Add a banner</a>
+  </header>
+  <div class="table-scroll">
+    <table class="gov-table">
+      <thead>
+        <tr><th style="width:90px">Image</th><th>Title</th><th style="width:190px">Placement</th>
+            <th style="width:150px">Shown</th><th style="width:70px">Order</th>
+            <th style="width:170px">Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for banner in banners %}
+          <tr>
+            <td>
+              <div style="width:70px;height:44px;overflow:hidden;border-radius:4px">
+                {% include 'club/partials/thumb.html' with image=banner.image label=banner.title alt=banner.title %}
+              </div>
+            </td>
+            <td><strong>{{ banner.title }}</strong>
+              {% if banner.subtitle %}<br><span style="font-size:.82rem;color:var(--ink-soft)">{{ banner.subtitle }}</span>{% endif %}
+              {% if banner.link_url %}<br><span style="font-size:.78rem;color:var(--ink-soft)">→ {{ banner.link_url }}</span>{% endif %}
+            </td>
+            <td>{{ banner.get_placement_display }}</td>
+            <td>
+              {% if banner.is_live %}<span class="chip green">Live</span>
+              {% elif not banner.is_active %}<span class="chip">Switched off</span>
+              {% else %}<span class="chip gold">Out of date range</span>{% endif %}
+              {% if banner.starts_on or banner.ends_on %}
+                <br><span style="font-size:.75rem;color:var(--ink-soft)">
+                  {{ banner.starts_on|default:"—" }} → {{ banner.ends_on|default:"—" }}</span>
+              {% endif %}
+            </td>
+            <td>{{ banner.order }}</td>
+            <td class="table-actions">
+              <a class="btn btn-sm btn-ghost" href="{% url 'staff:banner_edit' banner.pk %}">Edit</a>
+              <a class="btn btn-sm btn-ghost" href="{% url 'staff:banner_delete' banner.pk %}">Delete</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" style="text-align:center;padding:26px;color:var(--ink-soft)">
+            No banners yet. <a href="{% url 'staff:banner_create' %}">Add the first one.</a></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

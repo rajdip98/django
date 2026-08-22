@@ -31,6 +31,25 @@
   </div>
 </section>
 
+{% if hero_banners %}
+<section class="section" style="padding-bottom:0">
+  <div class="wrap stack">
+    {% for banner in hero_banners %}
+      <a class="banner-card" href="{{ banner.link_url|default:'#' }}">
+        {% if banner.image %}<img src="{{ banner.image.url }}" alt="{{ banner.title }}">{% endif %}
+        <span class="body">
+          <span>
+            <strong style="display:block;font-family:var(--serif);font-size:1.15rem">{{ banner.title }}</strong>
+            {% if banner.subtitle %}<span style="color:var(--ink-soft);font-size:.9rem">{{ banner.subtitle }}</span>{% endif %}
+          </span>
+          {% if banner.link_url %}<span class="btn btn-sm btn-primary">{{ banner.link_text }}</span>{% endif %}
+        </span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
 {% if statistics %}
 <section class="section">
   <div class="wrap">
@@ -82,6 +101,20 @@
           {% endfor %}
         </ul>
       </div>
+      {% if sidebar_qr_codes %}
+      <div class="panel">
+        <div class="panel-head">Scan to connect</div>
+        <div class="panel-body">
+          {% for code in sidebar_qr_codes %}
+            <div class="qr-block" style="margin-bottom:14px">
+              <div class="frame"><img src="{{ code.display_url }}" alt="QR code — {{ code.label }}" loading="lazy"></div>
+              <div class="label">{{ code.caption|default:code.label }}</div>
+              {% if code.scans_hint %}<div class="hint">{{ code.scans_hint }}</div>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
       <div class="panel">
         <div class="panel-head">Quick Services</div>
         <ul class="panel-list">
@@ -117,6 +150,23 @@
     {% endif %}
   </div>
 </section>
+
+{% if home_banners %}
+<section class="section">
+  <div class="wrap">
+    {% for banner in home_banners %}
+      <a class="banner-strip" href="{{ banner.link_url|default:'#' }}">
+        {% if banner.image %}<img src="{{ banner.image.url }}" alt="{{ banner.title }}">{% endif %}
+        <span class="banner-text">
+          <strong>{{ banner.title }}</strong>
+          {% if banner.subtitle %}<span>{{ banner.subtitle }}</span>{% endif %}
+        </span>
+        {% if banner.link_url %}<span class="btn btn-sm btn-gold">{{ banner.link_text }}</span>{% endif %}
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 
 {% if activities %}
 <section class="section tinted">

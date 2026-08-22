@@ -1,0 +1,47 @@
+{% extends 'staff/base.html' %}
+{% block heading %}Super Admin access{% endblock %}
+{% block content %}
+<div style="max-width:640px">
+  {% if locked %}
+    <div class="danger-banner" style="margin-bottom:18px">
+      <strong>Elevation locked.</strong> Too many incorrect attempts were made from this
+      account. Try again later, or ask a Super Admin to act for you.
+    </div>
+  {% elif not secret_enabled %}
+    <div class="danger-banner" style="margin-bottom:18px">
+      <strong>Elevation is switched off.</strong> A Super Admin has disabled secret-based
+      elevation. Only accounts holding the Super Admin role can reach those sections.
+    </div>
+  {% else %}
+    <div class="warn-banner" style="margin-bottom:18px">
+      You are signed in as an <strong>Admin</strong>. Administrators, security settings and
+      the audit log are Super Admin sections. Entering the elevation secret grants that
+      access for <strong>30 minutes</strong>; the window then closes by itself.
+      Every attempt — successful or not — is written to the audit log with your username.
+    </div>
+  {% endif %}
+
+  <div class="panel-card">
+    <header><h2>Enter the elevation secret</h2></header>
+    <div class="inner">
+      <form method="post" class="gov-form" data-validate novalidate>
+        {% csrf_token %}
+        {% include 'club/partials/field.html' with field=form.secret full=True %}
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit" {% if locked or not secret_enabled %}disabled{% endif %}>
+            Grant Super Admin access</button>
+          <a class="btn btn-ghost" href="{% url 'staff:dashboard' %}">Back to dashboard</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="panel-card" style="margin-top:18px">
+    <header><h2>What you can already do</h2></header>
+    <div class="inner" style="font-size:.88rem;color:var(--ink-soft)">
+      Without elevating, your account manages all website content: the site name and logo,
+      the header and footer, banners, files and downloads, and QR codes.
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -57,6 +57,15 @@ class SiteSettings(models.Model):
     terms_of_use = models.TextField(blank=True)
     visitor_count = models.PositiveIntegerField(default=0)
     content_managed_by = models.CharField(max_length=200, blank=True)
+    # Header / footer switches, driven from the admin panel.
+    show_top_strip = models.BooleanField(
+        default=True, verbose_name='Show the authority strip above the masthead')
+    show_ticker = models.BooleanField(
+        default=True, verbose_name='Show the scrolling "what\'s new" ticker')
+    show_header_search = models.BooleanField(
+        default=True, verbose_name='Show the search box in the masthead')
+    footer_note = models.TextField(
+        blank=True, help_text='Extra line shown in the footer, above the copyright.')
 
     class Meta:
         verbose_name = 'Site settings'
@@ -544,3 +553,116 @@ class ContactMessage(TimeStamped):
 
     def __str__(self):
         return f'{self.subject} — {self.name}'
+
+
+class Banner(models.Model):
+    """Promotional banners placed by the admin panel."""
+
+    PLACEMENT_CHOICES = [
+        ('home_hero', 'Home page — below the hero'),
+        ('home_strip', 'Home page — full-width strip'),
+        ('sitewide_top', 'Site-wide — under the navigation'),
+        ('inner_page', 'Inner pages — sidebar'),
+    ]
+    title = models.CharField(max_length=200)
+    subtitle = models.CharField(max_length=300, blank=True)
+    image = models.ImageField(upload_to='banners/', blank=True)
+    link_url = models.CharField(max_length=300, blank=True)
+    link_text = models.CharField(max_length=60, blank=True, default='Read more')
+    placement = models.CharField(max_length=20, choices=PLACEMENT_CHOICES,
+                                 default='home_strip')
+    order = models.PositiveSmallIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    starts_on = models.DateField(null=True, blank=True)
+    ends_on = models.DateField(null=True, blank=True)
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,
+                                   related_name='banners_updated')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['placement', 'order', '-id']
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def is_live(self):
+        today = date.today()
+        if not self.is_active:
+            return False
+        if self.starts_on and self.starts_on > today:
+            return False
+        if self.ends_on and self.ends_on < today:
+            return False
+        return True
+
+    @classmethod
+    def live_for(cls, placement):
+        return [b for b in cls.objects.filter(placement=placement, is_active=True) if b.is_live]
+
+
+class QRCode(models.Model):
+    """A QR code rendered on the site.
+
+    The payload is encoded on the fly as an SVG, so the code can be repointed
+    from the admin panel without re-uploading anything. An uploaded image (a
+    bank or UPI code, say) takes precedence when present.
+    """
+
+    PLACEMENT_CHOICES = [
+        ('footer', 'Footer'),
+        ('contact', 'Contact page'),
+        ('home_sidebar', 'Home page — sidebar'),
+        ('membership', 'Membership page'),
+        ('none', 'Not displayed (link only)'),
+    ]
+    ERROR_CORRECTION_CHOICES = [
+        ('L', 'L — recovers 7%'),
+        ('M', 'M — recovers 15%'),
+        ('Q', 'Q — recovers 25%'),
+        ('H', 'H — recovers 30% (best for printed codes)'),
+    ]
+    label = models.CharField(max_length=120)
+    slug = models.SlugField(max_length=140, unique=True)
+    payload = models.TextField(
+        help_text='The URL or text the code points to, e.g. https://example.org/membership/')
+    caption = models.CharField(max_length=200, blank=True)
+    placement = models.CharField(max_length=20, choices=PLACEMENT_CHOICES, default='footer')
+    error_correction = models.CharField(max_length=1, choices=ERROR_CORRECTION_CHOICES,
+                                        default='M')
+    image = models.ImageField(
+        upload_to='qr/', blank=True,
+        help_text='Optional: upload a ready-made code to use instead of the generated one.')
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveSmallIntegerField(default=0)
+    scans_hint = models.CharField(max_length=120, blank=True,
+                                  help_text='Short instruction shown under the code.')
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True,
+                                   related_name='qr_codes_updated')
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', 'label']
+        verbose_name = 'QR code'
+
+    def __str__(self):
+        return self.label
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.label)[:140]
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse('club:qr_svg', args=[self.slug])
+
+    @property
+    def display_url(self):
+        """Where the <img> tag should point: the upload, or the live renderer."""
+        if self.image:
+            return self.image.url
+        return self.get_absolute_url()
+
+    @classmethod
+    def live_for(cls, placement):
+        return cls.objects.filter(placement=placement, is_active=True)

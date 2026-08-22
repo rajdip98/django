@@ -1,0 +1,18 @@
+{% extends 'staff/base.html' %}
+{% block heading %}Delete {{ kind }}{% endblock %}
+{% block content %}
+<div class="panel-card" style="max-width:560px">
+  <header><h2>Confirm deletion</h2></header>
+  <div class="inner">
+    <div class="danger-banner">
+      This will permanently delete the {{ kind }} <strong>{{ object }}</strong>.
+      The action is recorded in the audit log and cannot be undone.
+    </div>
+    <form method="post" style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+      {% csrf_token %}
+      <button class="btn btn-primary" type="submit" style="background:var(--maroon)">Delete permanently</button>
+      <a class="btn btn-ghost" href="{{ back_url }}">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}
