@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db import IntegrityError
 from django.db.models import Count, Q
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
@@ -152,22 +153,27 @@ def event_register(request, slug):
             'phone': getattr(getattr(request.user, 'member_profile', None), 'phone', ''),
         }
     if request.method == 'POST':
-        form = EventRegistrationForm(request.POST)
+        form = EventRegistrationForm(request.POST, event=event)
         if form.is_valid():
             registration = form.save(commit=False)
             registration.event = event
             if request.user.is_authenticated:
                 registration.user = request.user
-            registration.save()
-            messages.success(
-                request,
-                f'Registration confirmed for “{event.title}”. A confirmation has been '
-                f'recorded against {registration.email}.')
-            return redirect(event.get_absolute_url())
-        if 'email' in form.errors or '__all__' in form.errors:
-            messages.error(request, 'This e-mail is already registered for the event.')
+            try:
+                registration.save()
+            except IntegrityError:
+                # Two submissions racing each other past the form's own check.
+                form.add_error('email', 'This e-mail address is already registered '
+                                        'for this event.')
+            else:
+                messages.success(
+                    request,
+                    f'Registration confirmed for “{event.title}”. A confirmation has been '
+                    f'recorded against {registration.email}.')
+                return redirect(event.get_absolute_url())
+        messages.error(request, 'Please correct the highlighted fields and submit again.')
     else:
-        form = EventRegistrationForm(initial=initial)
+        form = EventRegistrationForm(initial=initial, event=event)
 
     context = {
         'event': event,

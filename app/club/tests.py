@@ -139,3 +139,29 @@ class MemberPortalTests(TestCase):
         self.user.refresh_from_db()
         self.assertEqual(self.profile.phone, '+91 98300 12345')
         self.assertEqual(self.user.email, 'new@example.com')
+
+
+class DuplicateRegistrationTests(TestCase):
+    """A repeat registration must be refused politely, not crash the page."""
+
+    @classmethod
+    def setUpTestData(cls):
+        SiteSettings.load()
+        cls.event = Event.objects.create(
+            title='Yoga Camp', description='Morning session.',
+            start=timezone.now() + timedelta(days=4), venue='Terrace')
+
+    def test_second_registration_with_the_same_email_is_rejected(self):
+        url = reverse('club:event_register', args=[self.event.slug])
+        payload = {'full_name': 'Ananya Sengupta', 'email': 'ananya@example.com', 'phone': '1'}
+        self.client.post(url, payload)
+        response = self.client.post(url, payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'already registered')
+        self.assertEqual(self.event.registrations.count(), 1)
+
+    def test_the_check_ignores_case(self):
+        url = reverse('club:event_register', args=[self.event.slug])
+        self.client.post(url, {'full_name': 'A', 'email': 'person@example.com', 'phone': ''})
+        self.client.post(url, {'full_name': 'A', 'email': 'PERSON@example.com', 'phone': ''})
+        self.assertEqual(self.event.registrations.count(), 1)

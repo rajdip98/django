@@ -72,6 +72,25 @@ class EventRegistrationForm(StyledFormMixin, forms.ModelForm):
         widgets = {'remarks': forms.Textarea(attrs={'class': 'gov-input', 'rows': 3})}
         labels = {'remarks': 'Remarks (optional)'}
 
+    def __init__(self, *args, event=None, **kwargs):
+        # The event is not a form field, so ModelForm cannot check the
+        # (event, email) uniqueness on its own — it is checked here instead.
+        self.event = event
+        super().__init__(*args, **kwargs)
+
+    def clean_email(self):
+        email = self.cleaned_data['email'].lower()
+        if self.event is None:
+            return email
+        clashes = self.event.registrations.filter(email__iexact=email)
+        if self.instance.pk:
+            clashes = clashes.exclude(pk=self.instance.pk)
+        if clashes.exists():
+            raise forms.ValidationError(
+                'This e-mail address is already registered for this event. '
+                'Contact the office if you need to change the registration.')
+        return email
+
 
 class ContactForm(StyledFormMixin, forms.ModelForm):
     class Meta:

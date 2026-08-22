@@ -127,17 +127,37 @@
     var src = tile.dataset.full || '';
     var caption = tile.dataset.caption || '';
     var video = tile.dataset.video || '';
-    var inner = '';
-    if (video) {
-      inner = '<p style="text-align:center"><a class="btn btn-gold" href="' + video +
-        '" target="_blank" rel="noopener">▶ Open video in a new tab</a></p>';
+
+    // Titles and captions are entered by staff, so every value below is treated
+    // as text and set through DOM properties — never parsed as markup.
+    while (figure.firstChild) figure.removeChild(figure.firstChild);
+
+    if (video && /^https?:\/\//i.test(video)) {
+      var wrapper = document.createElement('p');
+      wrapper.style.textAlign = 'center';
+      var link = document.createElement('a');
+      link.className = 'btn btn-gold';
+      link.href = video;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.textContent = '▶ Open video in a new tab';
+      wrapper.appendChild(link);
+      figure.appendChild(wrapper);
     } else if (src) {
-      inner = '<img src="' + src + '" alt="' + caption.replace(/"/g, '&quot;') + '">';
+      var image = document.createElement('img');
+      image.src = src;
+      image.alt = caption;
+      figure.appendChild(image);
     } else {
-      inner = '<div class="placeholder-art ph-frame ' + (tile.dataset.swatch || 'ph-0') + '">' +
-        (tile.dataset.initials || '') + '</div>';
+      var placeholder = document.createElement('div');
+      placeholder.className = 'placeholder-art ph-frame ' + (tile.dataset.swatch || 'ph-0');
+      placeholder.textContent = tile.dataset.initials || '';
+      figure.appendChild(placeholder);
     }
-    figure.innerHTML = inner + '<figcaption>' + caption + '</figcaption>';
+
+    var figcaption = document.createElement('figcaption');
+    figcaption.textContent = caption;
+    figure.appendChild(figcaption);
     lightbox.classList.add('is-open');
     document.body.style.overflow = 'hidden';
     var close = lightbox.querySelector('.close');
