@@ -123,7 +123,14 @@
           <div class="panel-head">Documents</div>
           <ul class="panel-list">
             {% for resource in resources %}
-              <li><a href="{% url 'club:resource_download' resource.slug %}">⬇ {{ resource.title }}</a></li>
+              <li>
+                {% if resource.download_url %}
+                  <a href="{% url 'club:resource_download' resource.slug %}">⬇ {{ resource.title }}</a>
+                {% else %}
+                  <a href="{% url 'club:resources' %}">{{ resource.title }}
+                    <span class="meta">Available at the office</span></a>
+                {% endif %}
+              </li>
             {% empty %}
               <li><a href="{% url 'club:resources' %}">No documents published.</a></li>
             {% endfor %}

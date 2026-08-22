@@ -6,15 +6,14 @@ from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from club.models import (Article, Banner, ContactMessage, Event,
                          MembershipApplication, QRCode, Resource, SiteSettings)
 
-from .access import (ELEVATION_SESSION_KEY, elevation_expires_at, get_profile,
-                     grant_elevation, has_super_powers, is_elevated,
-                     panel_required, record, revoke_elevation,
-                     super_admin_required)
+from .access import (elevation_expires_at, get_profile, grant_elevation,
+                     has_super_powers, is_elevated, panel_required, record,
+                     revoke_elevation, super_admin_required)
 from .forms import (AdminAccountForm, BannerForm, ElevationForm, FileForm,
                     FooterForm, ForcedPasswordChangeForm, HeaderForm,
                     IdentityForm, PanelLoginForm, QRCodeForm, RotateSecretForm)
@@ -68,6 +67,7 @@ def panel_login(request):
     return render(request, 'staff/login.html', {'form': form, 'org': SiteSettings.load()})
 
 
+@require_POST
 def panel_logout(request):
     if request.user.is_authenticated:
         record(request, AuditLog.LOGOUT, target=request.user.get_username())
@@ -142,7 +142,6 @@ def end_elevation(request):
 
 @panel_required
 def dashboard(request):
-    profile = request.staff_profile
     stats = [
         ('Events', Event.objects.count(), reverse('club:events')),
         ('News articles', Article.objects.count(), reverse('club:news')),

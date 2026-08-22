@@ -27,6 +27,13 @@
 .panel-nav a:hover { background: rgba(255, 255, 255, .08); color: #fff; text-decoration: none; }
 .panel-nav a.active { background: var(--navy-600); color: #fff; font-weight: 600; }
 .panel-nav a .glyph { width: 20px; text-align: center; opacity: .9; }
+.panel-nav form { margin: 0; }
+.panel-nav .panel-signout {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 12px;
+  border: 0; border-radius: var(--radius); background: transparent; color: #cfdcf0;
+  font: inherit; font-size: .87rem; cursor: pointer; text-align: left;
+}
+.panel-nav .panel-signout:hover { background: rgba(255, 255, 255, .08); color: #fff; }
 .panel-nav .locked { opacity: .55; }
 .panel-nav .locked::after { content: "🔒"; margin-left: auto; font-size: .7rem; }
 

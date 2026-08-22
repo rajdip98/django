@@ -369,7 +369,11 @@ def resource_download(request, slug):
     resource = get_object_or_404(Resource, slug=slug, is_published=True)
     target = resource.download_url
     if not target:
-        raise Http404('No file is attached to this resource.')
+        # The record is published but carries no file yet — send the visitor back
+        # to the list rather than showing them a bare 404.
+        messages.info(request, f'“{resource.title}” is not available for download. '
+                               f'Please collect a copy from the office.')
+        return redirect('club:resources')
     Resource.objects.filter(pk=resource.pk).update(downloads=resource.downloads + 1)
     return HttpResponseRedirect(target)
 

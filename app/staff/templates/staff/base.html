@@ -68,7 +68,11 @@
       <a href="{% url 'staff:change_password' %}" class="{% if section == 'Password' %}active{% endif %}">
         <span class="glyph" aria-hidden="true">🔑</span> Change password</a>
       <a href="{% url 'club:home' %}"><span class="glyph" aria-hidden="true">↗</span> View website</a>
-      <a href="{% url 'staff:logout' %}"><span class="glyph" aria-hidden="true">⎋</span> Sign out</a>
+      <form method="post" action="{% url 'staff:logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="panel-signout">
+          <span class="glyph" aria-hidden="true">⎋</span> Sign out</button>
+      </form>
     </nav>
   </aside>
 
