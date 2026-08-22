@@ -6,6 +6,7 @@ __pycache__/
 
 # Build output
 frontend/dist/
+frontend/*.tsbuildinfo
 backend/static/
 release/
 
