@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Study centre">
+  <defs><linearGradient id="g5" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#7a5c12"/><stop offset="1" stop-color="#a07a1c"/>
+  </linearGradient></defs>
+  <rect width="800" height="600" fill="url(#g5)"/>
+  <circle cx="640" cy="120" r="150" fill="#ffffff" opacity=".07"/>
+  <circle cx="130" cy="500" r="190" fill="#ffffff" opacity=".05"/>
+  <text x="400" y="290" font-size="130" text-anchor="middle" dominant-baseline="middle">📚</text>
+  <text x="400" y="392" font-family="Georgia, serif" font-size="34" fill="#ffffff"
+        text-anchor="middle" opacity=".95">Study centre</text>
+  <text x="400" y="432" font-family="Segoe UI, sans-serif" font-size="18" fill="#ffffff"
+        text-anchor="middle" opacity=".65">Replace with a photograph</text>
+</svg>
