@@ -49,6 +49,8 @@
           <td id="r-img" class="wait">checking…</td><td class="fix" id="n-img"></td></tr>
       <tr><td>Home page <code>index.html</code></td>
           <td id="r-home" class="wait">checking…</td><td class="fix" id="n-home"></td></tr>
+      <tr><td>Bare domain opens the home page</td>
+          <td id="r-root" class="wait">checking…</td><td class="fix" id="n-root"></td></tr>
       <tr><td>Backend (admin panels)</td>
           <td id="r-api" class="wait">checking…</td><td class="fix" id="n-api"></td></tr>
     </tbody>
@@ -77,7 +79,7 @@
   }
 
   function verdict() {
-    var keys = ['css', 'js', 'img', 'home'];
+    var keys = ['css', 'js', 'img', 'home', 'root'];
     var done = keys.every(function (k) { return k in results; });
     if (!done) return;
     var failed = keys.filter(function (k) { return !results[k]; });
@@ -88,9 +90,18 @@
         + 'Open the home page — it will display properly.';
     } else {
       box.className = 'verdict bad';
-      box.innerHTML = '<strong>Some files are missing.</strong> The most likely cause is that '
-        + 'the <code>assets</code> folder was not uploaded, or was uploaded into the wrong '
-        + 'place. Re-upload it so that <code>assets</code> sits beside <code>index.html</code>.';
+      var advice = [];
+      if (!results.home || !results.root) {
+        advice.push('<code>index.html</code> is missing from this folder — that is why the '
+          + 'bare address shows "Page not found". Upload it into the same folder as this page.');
+      }
+      if (!results.css || !results.js || !results.img) {
+        advice.push('The <code>assets</code> folder is missing. The pages will still display '
+          + 'correctly because the design is built into each one, but upload it so the '
+          + 'photographs appear.');
+      }
+      box.innerHTML = '<strong>The upload is incomplete.</strong><ul><li>'
+        + advice.join('</li><li>') + '</li></ul>';
     }
   }
 
@@ -107,7 +118,23 @@
   check('img', 'assets/img/emblem.svg', 'Found. Images will display.',
         'Not found. Upload the assets folder.');
   check('home', 'index.html', 'Found.',
-        'Not found — make sure index.html is beside this file.');
+        'Not found — this is why the bare domain shows "Page not found". Upload index.html.');
+
+  // Ask for the folder itself, the way a visitor typing the bare domain does.
+  var folderPath = window.location.pathname.replace(/[^\/]*$/, '');
+  fetch(folderPath, { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.text() : Promise.reject(new Error(r.status)); })
+    .then(function (body) {
+      var isHome = body.indexOf('Serving the ward') !== -1 || body.indexOf('slider') !== -1;
+      set('root', isHome,
+          isHome ? 'Typing your domain alone opens the home page.'
+                 : 'The address resolves, but not to the home page. Check that index.html '
+                   + 'is present and is not named index.html.txt or Index.html.');
+    })
+    .catch(function (e) {
+      set('root', false, 'The bare address returns an error (' + e.message + '). '
+        + 'index.html is missing from this folder.');
+    });
 
   // The panels are served by the backend; on a plain host there is none.
   fetch('/api/health', { cache: 'no-store' })

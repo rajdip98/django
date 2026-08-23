@@ -25,6 +25,11 @@ You need nothing installed. No Node.js, no command line.
    ✅ `public_html/index.html`
    ❌ `public_html/website/index.html` ← one level too deep
 
+   Check that **`index.html` itself arrived** — it is the home page, and without
+   it the bare domain shows "Page not found". Each page carries its own design,
+   so if the upload is awkward, get the `.html` files up first: they work on
+   their own, and `assets/` only adds the photographs.
+
 4. Visit your domain.
 
 **Then open `yourdomain.com/check.html`.** It tests your own installation and
@@ -34,9 +39,11 @@ tells you in plain words whether anything is missing.
 
 | What you see | Cause | Fix |
 |---|---|---|
+| **"Page not found" on the bare domain** | `index.html` did not upload | Upload `index.html` into `public_html`. It is the home page — nothing else can stand in for it |
 | Blank white page | The React version was uploaded | Upload `frontend/website/` instead — React must be compiled first, and web hosts cannot do that |
 | Blank page or "500" on **every** page | `.htaccess` | **Delete `.htaccess`.** The site works without it |
-| Page loads but has no colours | `assets` folder missing | Re-upload `assets` so it sits beside `index.html` |
+| Giant logo, plain links, no colours | Old version, before the design was built into each page | Use this build — every page now carries its own styling |
+| Photographs missing | `assets` folder missing | Upload `assets`. The pages still look correct without it |
 | Site is at `yourdomain.com/website/` | Uploaded one folder too deep | Move the files up into `public_html` |
 | Old page still showing | Browser cache | Hard refresh: Ctrl+F5, or open in a private window |
 

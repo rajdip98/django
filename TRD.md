@@ -59,6 +59,18 @@ markup, so it is readable before any CSS or JavaScript loads, and remains
 readable if either fails. This is a hard requirement (PRD R1, R2), not a
 preference.
 
+**Each page is also self-contained.** The stylesheet and the script are embedded
+in every `.html` file, so a page keeps its full design and behaviour even when
+the `assets/` folder never arrives — the usual result of a partial upload
+through a file manager. The external `assets/css/site.css` is still linked
+*after* the inline copy and holds identical rules, so editing that one file
+restyles the whole site when it is present. The script is inlined only, with no
+external copy, because loading it twice would bind every event listener twice.
+
+Inline SVG carries explicit `width` and `height` attributes. Sized by CSS alone,
+an emblem renders at viewport scale on a page whose stylesheet failed — which is
+precisely how a partial upload presents to a visitor.
+
 ## 3. Data model
 
 Nineteen content types, all owned by a tenant except where noted.
@@ -160,7 +172,13 @@ replaced before the system holds real data.
 ### 6.1 Website only — shared hosting
 
 Copy the contents of `frontend/website/` into `public_html`. Nothing else. No
-runtime, no database. `check.html` reports whether the upload succeeded.
+runtime, no database. `check.html` reports whether the upload succeeded — it
+tests the stylesheet, script, images, `index.html`, the bare domain, and the
+presence of a backend, and names whatever is missing.
+
+`index.html` is the only file that cannot be substituted: without it the bare
+domain has nothing to resolve to and the server answers 404. `index.htm` ships
+as a duplicate for hosts whose `DirectoryIndex` prefers that extension.
 
 `.htaccess` is optional and every directive in it is wrapped in `<IfModule>`.
 This matters: an unguarded directive that the server does not recognise makes
@@ -215,11 +233,14 @@ site uploaded one level too deep (`check.html` reports it), backend absent
 
 | | Measured |
 |---|---|
-| Home page HTML | 21 KB |
-| Stylesheet | 15 KB (4 KB compressed) |
-| JavaScript | 8 KB |
-| Total first view | under 60 KB with placeholder images |
-| Requests for a first view | 4 |
+| Home page HTML | 50 KB raw, 13 KB gzipped (stylesheet and script embedded) |
+| Inner pages | 40–42 KB raw, 11–12 KB gzipped |
+| External requests, assets present | 8 (photographs and the favicon) |
+| External requests, assets absent | 0 — the page is complete on its own |
+
+Embedding the design costs about 9 KB gzipped per page and removes the entire
+class of failure where a page arrives without its stylesheet. For a site of a
+dozen pages on shared hosting that is the right trade.
 
 Images below the fold use `loading="lazy"`. Pages are cacheable; HTML always
 revalidates so an edit by the office is seen immediately.

@@ -2,11 +2,26 @@
   HOW TO PUT THIS WEBSITE ONLINE
 ================================================================
 
+THE ONE FILE YOU MUST NOT MISS:  index.html
+-------------------------------------------
+If your domain shows "Page not found", it means index.html is not in the
+folder. That single file is the home page. Everything else can be missing and
+the site still works — but without index.html the bare address has nothing to
+open.
+
+
 FIRST: OPEN  yourdomain.com/check.html
 --------------------------------------
-After uploading, open that address. It tests your own installation and tells
-you in plain words whether anything is missing or in the wrong place. Use it
-before anything else on this page.
+After uploading, open that address. It tests your own installation and names
+exactly what is missing. Use it before anything else on this page.
+
+
+GOOD NEWS: THE PAGES CARRY THEIR OWN DESIGN
+-------------------------------------------
+Each .html file now has the styling built into it. If the "assets" folder
+fails to upload, the pages STILL look correct — you only lose the photographs.
+So if you are struggling with the upload, get the .html files up first; they
+are complete on their own.
 
 
 IF EVERY PAGE IS BLANK OR SHOWS "500"
@@ -42,12 +57,17 @@ HOW TO UPLOAD (cPanel / Hostinger / GoDaddy / any normal host)
 4. Upload EVERYTHING INSIDE this "website" folder — not the folder itself.
    When you are done, public_html should directly contain:
 
-        index.html
+        index.html        <- the home page. Check this one arrived.
+        index.htm         <- a spare copy, for hosts that look for .htm
         about.html
         committee.html
         ... (the other pages)
+        check.html        <- open this to test the upload
         .htaccess
-        assets/
+        assets/           <- photographs (optional; pages work without it)
+
+   TIP: if your File Manager struggles with the folder, upload the .html files
+   first. They are self-contained and the site will already work.
 
    If you see  public_html/website/index.html  you have gone one level too
    deep. Move the files up one level.
@@ -62,8 +82,11 @@ COMMON MISTAKES
 * Uploading the "website" folder itself     -> your site would be at
                                                yourdomain.com/website/ instead
                                                of yourdomain.com/
-* Missing the "assets" folder               -> the page loads but has no
-                                               colours or layout. Re-upload it.
+* Missing the "assets" folder               -> pages still look correct (the
+                                               design is inside each file); only
+                                               the photographs are missing.
+* Missing index.html                        -> the bare domain shows
+                                               "Page not found". Upload it.
 * .htaccess not uploaded                    -> the site still works; you just
                                                lose the custom 404 page.
   (.htaccess starts with a dot, so turn on "show hidden files" in File Manager.)
