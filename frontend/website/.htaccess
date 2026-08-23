@@ -1,20 +1,32 @@
-# Apache configuration for shared hosting (cPanel, Hostinger, GoDaddy and the like).
-# Upload this file together with the pages. If your host runs nginx instead, it is
-# ignored harmlessly — ask your host to set a 404 page and compression there.
+# ---------------------------------------------------------------------------
+# Apache settings for shared hosting (cPanel, Hostinger, GoDaddy, LiteSpeed).
+#
+# Everything here is optional. Every directive is wrapped in <IfModule>, so a
+# server missing any of these modules simply ignores that block instead of
+# failing. An unguarded directive that a server does not recognise makes Apache
+# answer HTTP 500 for EVERY page, which looks exactly like a blank website —
+# that is why the guards matter.
+#
+# If anything still goes wrong: DELETE THIS FILE. The website works completely
+# without it. You only lose the custom 404 page and some caching.
+# ---------------------------------------------------------------------------
 
 # Serve index.html for the bare domain.
-DirectoryIndex index.html
-
-# Show our own page instead of the host's default 404.
-ErrorDocument 404 /404.html
-
-<IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/html text/css application/javascript image/svg+xml
+<IfModule mod_dir.c>
+  DirectoryIndex index.html index.htm
 </IfModule>
 
+# Show our own page instead of the host's default "Not Found".
+ErrorDocument 404 /404.html
+
+# Compress text so pages load faster on a slow connection.
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript image/svg+xml
+</IfModule>
+
+# Let browsers keep the design files, but always re-check the pages themselves.
 <IfModule mod_expires.c>
   ExpiresActive On
-  # Pages change when the office edits them, so keep those fresh.
   ExpiresByType text/html "access plus 0 seconds"
   ExpiresByType text/css "access plus 7 days"
   ExpiresByType application/javascript "access plus 7 days"
@@ -29,7 +41,7 @@ ErrorDocument 404 /404.html
   Header set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
 
-# Never serve the working files if they are uploaded by accident.
-<FilesMatch "\.(md|py|json|lock|yml|yaml)$">
-  Require all denied
-</FilesMatch>
+# Make sure SVG images are served with the right type on older servers.
+<IfModule mod_mime.c>
+  AddType image/svg+xml .svg
+</IfModule>

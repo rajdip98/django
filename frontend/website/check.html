@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Installation check</title>
+<meta name="robots" content="noindex">
+<style>
+  /* Deliberately written inline. If the stylesheet is missing or the server is
+     misconfigured, this page must still be readable — that is its whole job. */
+  body { font-family: system-ui, "Segoe UI", Arial, sans-serif; background: #f2f5f9;
+         color: #16202b; margin: 0; padding: 26px 18px; line-height: 1.6; }
+  .box { max-width: 780px; margin: 0 auto; background: #fff; border: 1px solid #d3dbe5;
+         border-radius: 8px; padding: 24px 26px; }
+  h1 { font-family: Georgia, serif; margin: 0 0 4px; font-size: 1.5rem; }
+  .sub { color: #56626f; margin: 0 0 22px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #e6ebf2; font-size: .94rem; }
+  th { font-size: .74rem; text-transform: uppercase; letter-spacing: .07em; color: #56626f; }
+  .ok { color: #16704a; font-weight: 700; }
+  .bad { color: #8c2f39; font-weight: 700; }
+  .wait { color: #56626f; }
+  .verdict { padding: 14px 17px; border-radius: 6px; border-left: 5px solid #56626f;
+             background: #eef2f7; margin-bottom: 20px; }
+  .verdict.good { border-left-color: #16704a; background: #e2f2ea; }
+  .verdict.bad { border-left-color: #8c2f39; background: #fae9e9; }
+  code { background: #eef2f7; padding: 1px 5px; border-radius: 3px; font-size: .9em; }
+  .fix { font-size: .88rem; color: #56626f; }
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>Installation check</h1>
+  <p class="sub">If you can read this page, your web host is working and serving files
+     correctly. The tests below check that the rest of the website arrived with it.</p>
+
+  <div class="verdict" id="verdict">Running the checks…</div>
+
+  <table>
+    <thead><tr><th style="width:34%">What is being checked</th><th style="width:15%">Result</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Page served by the host</td><td class="ok">PASS</td>
+          <td class="fix">You are reading this, so HTML files are being served.</td></tr>
+      <tr><td>Stylesheet <code>assets/css/site.css</code></td>
+          <td id="r-css" class="wait">checking…</td><td class="fix" id="n-css"></td></tr>
+      <tr><td>Script <code>assets/js/site.js</code></td>
+          <td id="r-js" class="wait">checking…</td><td class="fix" id="n-js"></td></tr>
+      <tr><td>Image <code>assets/img/emblem.svg</code></td>
+          <td id="r-img" class="wait">checking…</td><td class="fix" id="n-img"></td></tr>
+      <tr><td>Home page <code>index.html</code></td>
+          <td id="r-home" class="wait">checking…</td><td class="fix" id="n-home"></td></tr>
+      <tr><td>Backend (admin panels)</td>
+          <td id="r-api" class="wait">checking…</td><td class="fix" id="n-api"></td></tr>
+    </tbody>
+  </table>
+
+  <h2 style="font-family:Georgia,serif;font-size:1.1rem">Where these files are</h2>
+  <table>
+    <tr><td style="width:34%">This page's address</td><td id="url"></td></tr>
+    <tr><td>Folder the site is in</td><td id="folder"></td></tr>
+  </table>
+
+  <p><a href="index.html">→ Go to the home page</a></p>
+</div>
+
+<script>
+(function () {
+  var results = {};
+
+  function set(key, pass, note) {
+    var cell = document.getElementById('r-' + key);
+    cell.textContent = pass ? 'PASS' : 'FAIL';
+    cell.className = pass ? 'ok' : 'bad';
+    document.getElementById('n-' + key).textContent = note;
+    results[key] = pass;
+    verdict();
+  }
+
+  function verdict() {
+    var keys = ['css', 'js', 'img', 'home'];
+    var done = keys.every(function (k) { return k in results; });
+    if (!done) return;
+    var failed = keys.filter(function (k) { return !results[k]; });
+    var box = document.getElementById('verdict');
+    if (!failed.length) {
+      box.className = 'verdict good';
+      box.innerHTML = '<strong>Everything is installed correctly.</strong> '
+        + 'Open the home page — it will display properly.';
+    } else {
+      box.className = 'verdict bad';
+      box.innerHTML = '<strong>Some files are missing.</strong> The most likely cause is that '
+        + 'the <code>assets</code> folder was not uploaded, or was uploaded into the wrong '
+        + 'place. Re-upload it so that <code>assets</code> sits beside <code>index.html</code>.';
+    }
+  }
+
+  function check(key, path, okNote, badNote) {
+    fetch(path, { cache: 'no-store' })
+      .then(function (r) { set(key, r.ok, r.ok ? okNote : 'HTTP ' + r.status + ' — ' + badNote); })
+      .catch(function () { set(key, false, badNote); });
+  }
+
+  check('css', 'assets/css/site.css', 'Found. The design will load.',
+        'Not found. Upload the assets folder.');
+  check('js', 'assets/js/site.js', 'Found. Menus and the gallery will work.',
+        'Not found. Upload the assets folder.');
+  check('img', 'assets/img/emblem.svg', 'Found. Images will display.',
+        'Not found. Upload the assets folder.');
+  check('home', 'index.html', 'Found.',
+        'Not found — make sure index.html is beside this file.');
+
+  // The panels are served by the backend; on a plain host there is none.
+  fetch('/api/health', { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+    .then(function () {
+      var cell = document.getElementById('r-api');
+      cell.textContent = 'PASS'; cell.className = 'ok';
+      document.getElementById('n-api').textContent =
+        'The backend is running, so the Admin and Super Admin panels will open.';
+    })
+    .catch(function () {
+      var cell = document.getElementById('r-api');
+      cell.textContent = 'ABSENT'; cell.className = 'wait';
+      document.getElementById('n-api').textContent =
+        'No backend on this domain. Expected on plain hosting — the website itself is '
+        + 'unaffected, but the two admin panel links will show a 404.';
+    });
+
+  document.getElementById('url').textContent = window.location.href;
+  var folder = window.location.pathname.replace(/check\.html$/, '');
+  document.getElementById('folder').textContent =
+    folder === '/' ? '/ (correct — the site is at the top level)'
+                   : folder + '  ← the site is in a sub-folder; move the files up into public_html';
+})();
+</script>
+</body>
+</html>

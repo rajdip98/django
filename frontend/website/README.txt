@@ -2,6 +2,23 @@
   HOW TO PUT THIS WEBSITE ONLINE
 ================================================================
 
+FIRST: OPEN  yourdomain.com/check.html
+--------------------------------------
+After uploading, open that address. It tests your own installation and tells
+you in plain words whether anything is missing or in the wrong place. Use it
+before anything else on this page.
+
+
+IF EVERY PAGE IS BLANK OR SHOWS "500"
+-------------------------------------
+DELETE THE FILE NAMED  .htaccess
+
+The website works perfectly without it; you only lose the custom 404 page.
+(A single line in that file which your server does not understand makes Apache
+refuse EVERY page with error 500, and a 500 with no message looks exactly like
+a blank white website.)
+
+
 WHAT WENT WRONG BEFORE
 ----------------------
 The blank white page you saw was the React version of the site. React has to
@@ -50,6 +67,10 @@ COMMON MISTAKES
 * .htaccess not uploaded                    -> the site still works; you just
                                                lose the custom 404 page.
   (.htaccess starts with a dot, so turn on "show hidden files" in File Manager.)
+* Old page still appearing                  -> your browser cached it.
+                                               Press Ctrl+F5, or open the site
+                                               in a private/incognito window.
+* Everything is 500 / blank                 -> delete .htaccess (see above).
 
 
 CHANGING THE CONTENT
