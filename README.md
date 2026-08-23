@@ -1,194 +1,65 @@
-# Django
+# Government / Political Club Website
 
-[![1-click-deploy](https://raw.githubusercontent.com/DefangLabs/defang-assets/main/Logos/Buttons/SVG/deploy-with-defang.svg)](https://portal.defang.dev/redirect?url=https%3A%2F%2Fgithub.com%2Fnew%3Ftemplate_name%3Dsample-django-template%26template_owner%3DDefangSamples)
+A complete club website with two staff panels, in two folders:
 
-This repository contains a **club / organisation website** built with Django, in a
-government-portal visual style, on top of the Defang Django sample. See
-[Club website](#club-website) below for what it contains and how to run it.
-
-The original sample is a simple Django to-do app that uses SQLite as the database, which will be reset every time you deploy. **It is not production-ready**. For production use cases, you should check out the Django + Postgres sample. The to-do sample now lives at `/todos/`; the club website is served at the site root.
-
-## Club website
-
-A database-driven website for a club, society or community organisation, styled after
-a government portal: an authority strip with accessibility controls, an emblem
-masthead, a sticky navigation bar with drop-downs, a scrolling "what's new" ticker,
-breadcrumbs, notice-board panels, tabular listings and a four-column footer.
-
-### Pages
-
-| Route | What it does |
-| --- | --- |
-| `/` | Hero, statistics counters, about preview, upcoming events, activities, news, gallery, office bearers, testimonials |
-| `/about/` | History, mission, vision, objectives, core values, timeline, achievements, message from the president |
-| `/events/`, `/events/<slug>/`, `/events/<slug>/register/` | Listing with search, category filters and upcoming/past tabs; detail page; registration form with capacity and deadline checks |
-| `/calendar/` | Month-by-month event calendar |
-| `/activities/` | Activities grouped by category |
-| `/gallery/` | Photo and video grid with album filters and a keyboard-navigable lightbox |
-| `/team/` | Office bearers, executive committee, advisors, coordinators and volunteers |
-| `/news/`, `/news/<slug>/` | Article listing with search and categories, featured article, detail page with related articles |
-| `/membership/` | Benefits and the online application form; acknowledgement page issues a reference number |
-| `/resources/` | Downloadable forms, reports, rules and brochures, with a download counter |
-| `/contact/` | Enquiry form, office address and map |
-| `/search/` | Site-wide search across events, news, team, gallery, resources, activities and pages |
-| `/notifications/` | All active notices |
-| `/register/`, `/login/`, `/password-reset/` | Portal account creation, sign-in and password reset |
-| `/dashboard/`, `/profile/`, `/dashboard/events/`, `/dashboard/certificates/` | Member portal: membership card, registrations, certificates, documents, announcements |
-| `/privacy/`, `/terms/` | Policy pages, edited from the admin |
-| `/admin/` | Content management for every model above |
-
-### Administration panel (`/panel/`)
-
-A staff panel with two roles, separate from the member portal and from Django's own
-console.
-
-| | Super Admin | Admin |
-| --- | :-: | :-: |
-| Website name, logo, header, footer | ✅ | ✅ |
-| Banners, files & downloads, QR codes | ✅ | ✅ |
-| Create and suspend administrators | ✅ | only while elevated |
-| Rotate the elevation secret | ✅ | only while elevated |
-| Read the audit log | ✅ | only while elevated |
-| Django console at `/admin/` | ✅ | ❌ |
-
-**First sign-in.** Every account — Super Admin and Admin alike — is created on a shared
-default password and can do nothing at all until it sets its own: each panel page
-redirects to the change-password form, and the form refuses to accept the default value
-back. A Super Admin can put a locked-out colleague back on the default with **Reset
-password**, which re-arms the same forced change.
-
-**Creating administrators.** A Super Admin can create any number of them, with no limit.
-New accounts default to the Admin role, get `is_staff = False` so the Django console
-stays out of reach, and appear in the panel with their password state visible.
-
-**Elevation.** An Admin who needs a Super Admin section enters the elevation secret and
-receives that access for 30 minutes, after which the window closes on its own. The secret
-is stored hashed — it cannot be read back from the database or from any page — five wrong
-attempts lock that account out of elevation for fifteen minutes, and every attempt,
-successful or not, lands in the audit log. A Super Admin can rotate the secret or switch
-elevation off entirely under **Security**.
-
-**Audit log.** Sign-ins, failed sign-ins, password changes and resets, account creation
-and suspension, every elevation attempt, secret rotations and all content changes are
-recorded with the account, timestamp, IP address and whether the actor was elevated.
-
-> **Change both shared secrets before this is public.** The fallbacks live in
-> `app/defang_sample/settings.py`, so anyone who can read this repository can read them.
-> Set `PANEL_DEFAULT_PASSWORD` and `PANEL_ELEVATION_SECRET` as environment variables in
-> deployment, and rotate the elevation secret from **Panel → Security**. A shared secret
-> also cannot prove *which* person used it beyond the account they signed in with, so
-> prefer granting the Super Admin role to people who genuinely need it and keep elevation
-> as an occasional fallback.
-
-Bootstrap the first Super Admin with `python manage.py bootstrap_panel` (it runs on
-container start too), then sign in at `/panel/login/` as `superadmin`.
-
-### QR codes
-
-QR codes are managed under **Panel → QR codes** and rendered as SVG on request from the
-target stored in the database, at a stable address (`/qr/<slug>.svg`). Changing the
-target therefore repoints every copy already printed, posted or published — the image
-itself never needs replacing. Each code carries a placement (footer, contact page, home
-sidebar, membership page, or unpublished), a caption, a scan hint, and an error-correction
-level; you can also upload a ready-made code, such as a payment QR, and it takes
-precedence over the generated one.
-
-### Design and accessibility
-
-Light, dark and high-contrast themes, and three text sizes, are selected from the top
-strip and remembered per browser. There is a skip link, visible focus outlines, ARIA
-labelling on the interactive controls, and `prefers-reduced-motion` support. The layout
-is mobile-first and never scrolls horizontally. All CSS and JavaScript is hand-written
-and self-contained — no CDNs, fonts or other external requests. Items without an
-uploaded image fall back to a coloured placeholder derived from the title, so a fresh
-install still looks complete.
-
-### Running it locally
-
-```bash
-cd app
-pip install -r requirements.txt
-DEBUG=True python manage.py migrate
-DEBUG=True python manage.py seed_demo        # realistic sample content
-DEBUG=True python manage.py bootstrap_panel  # first Super Admin + elevation secret
-DEBUG=True python manage.py createsuperauto  # admin / admin
-DEBUG=True python manage.py runserver
+```
+frontend/    React + HTML + CSS — the public website
+backend/     Python, Java, C#, Dash and C++ — the services behind it
 ```
 
-Then open http://localhost:8000/. Sign in to the member portal at `/login/` as `member` /
-`member12345`, to the administration panel at `/panel/login/` as `superadmin` (it will
-demand a new password immediately), and to the Django console at `/admin/` as `admin` /
-`admin`. `python manage.py seed_demo --reset` clears the club content and reloads it.
+- **`frontend/README.md`** — the website, its pages and how to build it.
+- **`backend/README.md`** — what each service does, how they fit together, and
+  what to change before putting it on a server.
 
-Run the tests with `DEBUG=True python manage.py test` (45 tests across `club` and
-`staff`).
-
-### Making it your own
-
-All content is editable in the admin console — there is nothing to edit in the
-templates. Start with **Site settings** (organisation name, emblem, contact details,
-mission, privacy policy), then add categories, events, news, team members, gallery
-items and resources. Uploaded files are written to `app/media/`, which Django serves
-only when `DEBUG=True`; put them behind a web server or object storage for a real
-deployment, and move off SQLite before going live.
-
-The app includes a management command which is run on startup to create a superuser with the username `admin` and password `admin`. This means you can login to the admin interface at `/admin/` and see the Django admin interface without any additional steps. The `example_app` is already registered and the `Todo` model is already set up to be managed in the admin interface.
-
-The Dockerfile and compose files are already set up for you and are ready to be deployed. Serving is done using [Gunicorn](https://gunicorn.org/) and uses [WhiteNoise](https://whitenoise.readthedocs.io/en/latest/) for static files. The `CSRF_TRUSTED_ORIGINS` setting is configured to allow the app to run on a `defang.dev` subdomain.
-
-## Prerequisites
-
-1. Download [Defang CLI](https://github.com/DefangLabs/defang)
-2. (Optional) If you are using [Defang BYOC](https://docs.defang.io/docs/concepts/defang-byoc) authenticate with your cloud provider account
-3. (Optional for local development) [Docker CLI](https://docs.docker.com/engine/install/)
-
-## Development
-
-To run the application locally, you can use the following command:
+## Quick start
 
 ```bash
-docker compose up --build
+# 1. Backend (needs MySQL, Java 21, .NET 8, Python 3.11)
+export DATABASE_URL="mysql://clubapp:password@127.0.0.1:3306/club"
+export REPORTS_DATABASE_URL="mysql://clubreports:password@127.0.0.1:3306/club"
+cd backend && ./start-all.sh
+
+# 2. Frontend
+cd ../frontend && npm install && npm run dev
 ```
 
-## Configuration
+| | Address |
+|---|---|
+| Website | `/` |
+| Admin panel | `/adminpanel/login/` |
+| Super Admin panel | `/superadminpanel/login/` |
+| Analytics dashboard | `/analytics/` (staff sign-in required) |
 
-For this sample, you will not need to provide [configuration](https://docs.defang.io/docs/concepts/configuration). 
+## What is here
 
-If you wish to provide configuration, see below for an example of setting a configuration for a value named `API_KEY`.
+| Folder | Language | Responsible for |
+|---|---|---|
+| `frontend/` | React 19 + Vite | The public website: twelve pages, three appearance modes, no dead links. |
+| `backend/python-api/` | Python (Django 5) | The schema, both panels, every account, sessions, uploads, QR codes. |
+| `backend/java-gateway/` | Java 21 (Spring Boot) | The only process open to the internet: filters, rate-limits and routes every request. |
+| `backend/csharp-api/` | C# (.NET 8) | The read-only public API the website reads from. |
+| `backend/dash-analytics/` | Python (Plotly Dash) | Administrators' charts, on a read-only database account. |
+| `backend/cpp-secretvault/` | C++17 + OpenSSL | An encrypted store for keys and passwords. |
+
+Every service except the gateway binds to `127.0.0.1`. That is what makes the
+gateway's checks worth anything — expose Django or the C# API directly and you
+have taken the front door off.
+
+## Before you put this on a server
+
+The three default passwords are visible in this repository, so treat them as
+public. The panels force each administrator to replace theirs at first sign-in,
+but set your own defaults first — `backend/README.md` lists the variables.
+
+## Tests
 
 ```bash
-defang config set API_KEY
+cd backend && ./run-tests.sh
 ```
 
-## Deployment
-
-> [!NOTE]
-> Download [Defang CLI](https://github.com/DefangLabs/defang)
-
-### Defang Playground
-
-Deploy your application to the Defang Playground by opening up your terminal and typing:
-```bash
-defang compose up
-```
-
-### BYOC (AWS)
-
-If you want to deploy to your own cloud account, you can use Defang BYOC:
-
-1. [Authenticate your AWS account](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html), and check that you have properly set your environment variables like `AWS_PROFILE`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY`.
-2. Make sure to update the `CSRF_TRUSTED_ORIGINS` setting in the `settings.py` file to include an appropriate domain.
-3. Run in a terminal that has access to your AWS environment variables:
-    ```bash
-    defang --provider=aws compose up
-    ```
+100 Django tests, 24 Java gateway tests, 22 C# API tests, 13 C++ vault tests.
 
 ---
 
-Title: Django
-
-Short Description: A simple Django app that uses SQLite as the database.
-
-Tags: Django, SQLite, Python
-
-Languages: python
+This repository began as the Defang Django sample; `compose.yaml` still builds
+the Django service for that deployment path.

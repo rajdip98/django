@@ -1,0 +1,29 @@
+{% extends 'club/base.html' %}
+{% block title %}Page not found — {{ org.organization_name }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="wrap" style="max-width:720px;text-align:center">
+    <div style="font-size:3.4rem;line-height:1" aria-hidden="true">🔍</div>
+    <h1>We could not find that page</h1>
+    <p style="color:var(--ink-soft)">The address may have changed, or the page may have
+      been removed. The sections below cover everything on this website.</p>
+    <div class="pill-row" style="justify-content:center;margin:22px 0">
+      <a class="pill" href="{% url 'club:home' %}">Home</a>
+      <a class="pill" href="{% url 'club:about' %}">About Us</a>
+      <a class="pill" href="{% url 'club:events' %}">Events</a>
+      <a class="pill" href="{% url 'club:gallery' %}">Gallery</a>
+      <a class="pill" href="{% url 'club:news' %}">News</a>
+      <a class="pill" href="{% url 'club:membership' %}">Membership</a>
+      <a class="pill" href="{% url 'club:resources' %}">Downloads</a>
+      <a class="pill" href="{% url 'club:contact' %}">Contact</a>
+    </div>
+    <form action="{% url 'club:search' %}" method="get" class="search-inline"
+          style="justify-content:center">
+      <label class="sr-only" for="notfound-search">Search this website</label>
+      <input class="gov-input" type="search" id="notfound-search" name="q"
+             placeholder="Search the website" style="max-width:320px">
+      <button class="btn btn-primary" type="submit">Search</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

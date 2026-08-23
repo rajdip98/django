@@ -1,0 +1,96 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en" data-theme="light" data-font="md" data-contrast="normal">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ section|default:"Dashboard" }} — Platform{% endblock %}</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="{% static 'club/css/gov.css' %}">
+<link rel="stylesheet" href="{% static 'staff/css/panel.css' %}">
+<style>
+  /* The platform panel is deliberately a different colour from a website's own
+     panel, so it is never mistaken for one. */
+  .panel-side { background: #2a1a3d; }
+  .panel-nav a.active { background: #5b3a86; }
+  .platform-badge { background: #7a4fb5; color: #fff; }
+  .platform-strip { background: #2a1a3d; color: #e2d6f2; font-size: .78rem; padding: 7px 0; }
+  .platform-strip .wrap { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+</style>
+<script>
+  (function () {
+    try {
+      var d = document.documentElement;
+      d.setAttribute('data-theme', localStorage.getItem('club-theme') || 'light');
+      d.setAttribute('data-font', localStorage.getItem('club-font') || 'md');
+    } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+<a class="skip-link" href="#panel-content">Skip to content</a>
+<div class="platform-strip">
+  <div class="wrap">
+    <span aria-hidden="true">⬢</span>
+    <span><strong>Platform panel.</strong> This controls every website on this
+      installation. A website's own admin panel is at <code>/adminpanel/</code>.</span>
+  </div>
+</div>
+<div class="panel-shell">
+  <aside class="panel-side">
+    <div class="panel-brand">
+      <span style="font-size:1.6rem" aria-hidden="true">⬢</span>
+      <span><strong>Platform</strong><span>{{ tenant_count }} website{{ tenant_count|pluralize }}</span></span>
+    </div>
+    <nav class="panel-nav" aria-label="Platform sections">
+      <a href="{% url 'saas:dashboard' %}" class="{% if section == 'Dashboard' %}active{% endif %}">
+        <span class="glyph" aria-hidden="true">▦</span> Dashboard</a>
+      <span class="group-label">Manage</span>
+      <a href="{% url 'saas:tenants' %}" class="{% if section == 'Websites' or section == 'Website' %}active{% endif %}">
+        <span class="glyph" aria-hidden="true">🌐</span> Websites</a>
+      <a href="{% url 'saas:administrators' %}" class="{% if section == 'Administrators' or section == 'Administrator' %}active{% endif %}">
+        <span class="glyph" aria-hidden="true">👥</span> Administrators</a>
+      <a href="{% url 'saas:security' %}" class="{% if section == 'Security' %}active{% endif %}">
+        <span class="glyph" aria-hidden="true">🔐</span> Security</a>
+      <a href="{% url 'saas:audit_log' %}" class="{% if section == 'Audit log' %}active{% endif %}">
+        <span class="glyph" aria-hidden="true">🧾</span> Audit log</a>
+      <span class="group-label">Account</span>
+      {% if is_owner %}
+        <a href="{% url 'saas:change_password' %}" class="{% if section == 'Password' %}active{% endif %}">
+          <span class="glyph" aria-hidden="true">🔑</span> Change password</a>
+      {% endif %}
+      <a href="/admin/"><span class="glyph" aria-hidden="true">⚙</span> Django console</a>
+      <form method="post" action="{% url 'saas:logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="panel-signout">
+          <span class="glyph" aria-hidden="true">⎋</span> Sign out</button>
+      </form>
+    </nav>
+  </aside>
+
+  <div class="panel-main">
+    <header class="panel-topbar">
+      <h1>{% block heading %}{{ section|default:"Dashboard" }}{% endblock %}</h1>
+      <span class="spacer"></span>
+      {% if is_owner %}
+        <span class="role-badge platform-badge">Platform Owner</span>
+      {% elif unlocked %}
+        <span class="role-badge elevated">Unlocked until {{ unlock_expires|date:"H:i" }} UTC</span>
+        <a class="btn btn-sm btn-ghost" href="{% url 'saas:end_unlock' %}">End now</a>
+      {% endif %}
+      <span style="font-size:.85rem;color:var(--ink-soft)">{{ user.get_username }}</span>
+      <button type="button" class="btn btn-sm btn-ghost" data-toggle-theme aria-pressed="false">☾ Dark</button>
+    </header>
+    <main class="panel-body" id="panel-content" tabindex="-1">
+      {% if messages %}
+        <ul class="messages" style="padding-top:0;margin-bottom:18px">
+          {% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+<script src="{% static 'club/js/site.js' %}"></script>
+</body>
+</html>

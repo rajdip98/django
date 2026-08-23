@@ -1,0 +1,61 @@
+{% extends 'saas/base.html' %}
+{% block content %}
+<div class="tile-grid">
+  <div class="tile"><div class="n">{{ rows|length }}</div><div class="l">Websites</div></div>
+  <div class="tile"><div class="n">{{ total_admins }}</div><div class="l">Administrators</div></div>
+</div>
+
+<div class="panel-card" style="margin-top:20px">
+  <header>
+    <h2>Websites on this installation</h2>
+    <a class="btn btn-sm btn-primary" href="{% url 'saas:tenant_create' %}">Add a website</a>
+  </header>
+  <div class="table-scroll">
+    <table class="gov-table">
+      <thead><tr><th>Website</th><th style="width:170px">Domain</th><th style="width:90px">Admins</th>
+        <th style="width:90px">Events</th><th style="width:90px">Notices</th>
+        <th style="width:110px">Pending</th><th style="width:100px">Status</th>
+        <th style="width:150px">Actions</th></tr></thead>
+      <tbody>
+        {% for row in rows %}
+          <tr>
+            <td><strong>{{ row.tenant.name }}</strong>
+              {% if row.tenant.is_default %}<span class="chip gold">Default</span>{% endif %}
+              <br><span style="font-size:.8rem;color:var(--ink-soft)">
+                {{ row.settings.organization_name|default:"— no settings yet —" }}</span></td>
+            <td>{{ row.tenant.domain|default:"(any host)" }}</td>
+            <td>{{ row.admins }}</td><td>{{ row.events }}</td><td>{{ row.articles }}</td>
+            <td>{{ row.applications }} application{{ row.applications|pluralize }}<br>
+              <span style="font-size:.78rem;color:var(--ink-soft)">{{ row.enquiries }} enquiries</span></td>
+            <td>{% if row.tenant.is_active %}<span class="chip green">Online</span>
+                {% else %}<span class="chip maroon">Offline</span>{% endif %}</td>
+            <td class="table-actions">
+              <a class="btn btn-sm btn-ghost" href="{% url 'saas:tenant_edit' row.tenant.pk %}">Edit</a>
+              <a class="btn btn-sm btn-ghost"
+                 href="{% url 'saas:administrators' %}?tenant={{ row.tenant.slug }}">Admins</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="8" style="text-align:center;padding:26px;color:var(--ink-soft)">
+            No websites yet. <a href="{% url 'saas:tenant_create' %}">Add the first one.</a></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="panel-card" style="margin-top:20px">
+  <header><h2>Recent activity across all websites</h2>
+    <a href="{% url 'saas:audit_log' %}" style="font-size:.8rem">Full log</a></header>
+  <ul class="panel-list">
+    {% for entry in recent %}
+      <li style="padding:10px 16px;border-bottom:1px dashed var(--line)">
+        <strong style="font-size:.86rem">{{ entry.get_action_display }}</strong>
+        {% if entry.target %}<span style="font-size:.86rem"> — {{ entry.target }}</span>{% endif %}
+        <span style="display:block;font-size:.74rem;color:var(--ink-soft)">
+          {{ entry.actor_label }} · {{ entry.created_at|date:"d M Y, H:i" }} UTC</span>
+      </li>
+    {% empty %}<li style="padding:16px;font-size:.86rem;color:var(--ink-soft)">Nothing recorded yet.</li>{% endfor %}
+  </ul>
+</div>
+{% endblock %}

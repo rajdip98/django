@@ -1,0 +1,342 @@
+{% load static club_extras %}<!DOCTYPE html>
+<html lang="en" data-theme="light" data-font="md" data-contrast="normal">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{{ page_title|default:"Home" }} — {{ org.organization_name }}{% endblock %}</title>
+<meta name="description" content="{% block meta_description %}{{ meta_description|default:org.slogan }}{% endblock %}">
+<meta property="og:site_name" content="{{ org.organization_name }}">
+<meta property="og:title" content="{{ page_title|default:org.organization_name }}">
+<meta property="og:description" content="{{ meta_description|default:org.slogan }}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+<meta name="theme-color" content="{{ org.primary_color }}">
+<link rel="canonical" href="{{ request.build_absolute_uri }}">
+<link rel="stylesheet" href="{% static 'club/css/gov.css' %}">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23123a6d'/><text x='16' y='22' font-size='16' font-family='Georgia' fill='%23c8901d' text-anchor='middle'>{{ org.short_name|first }}</text></svg>">
+<script>
+  // Applied before first paint so the chosen theme never flashes.
+  (function () {
+    try {
+      var d = document.documentElement;
+      d.setAttribute('data-theme', localStorage.getItem('club-theme') || 'light');
+      d.setAttribute('data-font', localStorage.getItem('club-font') || 'md');
+      d.setAttribute('data-contrast', localStorage.getItem('club-contrast') || 'normal');
+    } catch (e) {}
+  })();
+</script>
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+{% if org.show_top_strip %}
+<div class="topbar">
+  <div class="wrap">
+    <div class="gov-authority">
+      <span class="dot" aria-hidden="true"></span>
+      <span>{{ org.parent_authority|default:"An initiative of the citizens of the ward" }}</span>
+    </div>
+    <div class="a11y-tools" role="group" aria-label="Accessibility tools">
+      <a href="#main-content">Skip to content</a>
+      <span class="sep" aria-hidden="true">|</span>
+      <span class="sr-only">Text size</span>
+      <button type="button" class="tool" data-font-set="sm" aria-label="Decrease text size">A-</button>
+      <button type="button" class="tool" data-font-set="md" aria-label="Normal text size">A</button>
+      <button type="button" class="tool" data-font-set="lg" aria-label="Increase text size">A+</button>
+      <span class="sep" aria-hidden="true">|</span>
+      <button type="button" class="tool" data-toggle-contrast aria-pressed="false">◐ High contrast</button>
+      <button type="button" class="tool" data-toggle-theme aria-pressed="false">☾ Dark</button>
+      <span class="sep" aria-hidden="true">|</span>
+      <a href="{% url 'staff:login' %}" class="staff-link">🔑 Admin Panel</a>
+      <a href="{% url 'saas:login' %}" class="staff-link">⬢ Super Admin</a>
+      <span class="sep" aria-hidden="true">|</span>
+      <a href="{% url 'club:contact' %}">Help</a>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<header class="masthead">
+  <div class="wrap">
+    {% include 'club/partials/emblem.html' %}
+    <div class="masthead-titles">
+      <a href="{% url 'club:home' %}" style="text-decoration:none">
+        <p class="org-name">{{ org.organization_name }}</p>
+      </a>
+      {% if org.slogan %}<p class="org-sub">{{ org.slogan }}</p>{% endif %}
+      {% if org.registration_line %}<p class="org-reg">{{ org.registration_line }}</p>{% endif %}
+    </div>
+    <div class="masthead-actions">
+      {% if org.show_header_search %}
+      <form class="search-inline" action="{% url 'club:search' %}" method="get" role="search">
+        <label class="sr-only" for="masthead-search">Search this website</label>
+        <input class="gov-input" type="search" id="masthead-search" name="q"
+               placeholder="Search events, news, people…" value="{{ query|default:'' }}">
+        <button class="btn btn-primary btn-sm" type="submit">Search</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</header>
+<div class="tri-rule" aria-hidden="true"></div>
+
+<nav class="mainnav" aria-label="Primary">
+  <div class="wrap">
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
+      ☰ Menu
+    </button>
+    <ul class="nav-list" id="primary-navigation">
+      {% for label, url_name, children in nav_items %}
+        {% url url_name as item_url %}
+        <li class="{% if children %}has-children{% endif %} {% if request.path|is_active_path:item_url %}active{% endif %}">
+          <a href="{{ item_url }}">{{ label }}{% if children %}<span class="caret" aria-hidden="true">▾</span>{% endif %}</a>
+          {% if children %}
+            <ul class="dropdown">
+              {% for child_label, child_url in children %}
+                <li><a href="{% url child_url %}">{{ child_label }}</a></li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    <div class="nav-utility">
+      <button class="nav-icon-btn" type="button" data-open-search aria-label="Open search (press /)">
+        🔍<span class="sr-only">Search</span>
+      </button>
+      <div style="position:relative">
+        <button class="nav-icon-btn" type="button" data-toggle-notifications
+                aria-expanded="false" aria-controls="notification-panel" aria-label="Notifications">
+          🔔
+          {% if notification_count %}<span class="badge-count">{{ notification_count }}</span>{% endif %}
+        </button>
+        <div class="panel" id="notification-panel" hidden
+             style="position:absolute;right:0;top:calc(100% + 8px);width:320px;z-index:90;box-shadow:var(--shadow-lg)">
+          <div class="panel-head">Notifications
+            <a href="{% url 'club:notifications' %}">View all</a>
+          </div>
+          <ul class="panel-list scroll-list">
+            {% for note in notifications_list %}
+              <li>
+                <a href="{{ note.target_url }}">
+                  {{ note.title }}
+                  <span class="meta">{{ note.get_kind_display }} · {{ note.published_at|date:"d M Y" }}</span>
+                </a>
+              </li>
+            {% empty %}
+              <li><a href="{% url 'club:notifications' %}">No notifications at present.</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      {% if user.is_authenticated %}
+        <a class="nav-icon-btn" href="{% url 'club:dashboard' %}">👤 Dashboard</a>
+        <form action="{% url 'club:logout' %}" method="post" style="display:inline">
+          {% csrf_token %}
+          <button class="nav-icon-btn" type="submit">Logout</button>
+        </form>
+      {% else %}
+        <a class="nav-icon-btn" href="{% url 'club:login' %}">Login</a>
+        <a class="btn btn-gold btn-sm" href="{% url 'club:membership' %}">Join Us</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+{% if ticker_items and org.show_ticker %}
+<div class="ticker">
+  <div class="wrap">
+    <span class="ticker-label">What's New</span>
+    <div class="ticker-viewport">
+      <div class="ticker-track">
+        {% for item in ticker_items %}
+          <a href="{{ item.target_url }}">{{ item.title }}{% if item.is_new %}<span class="tag-new">NEW</span>{% endif %}</a>
+        {% endfor %}
+        {% for item in ticker_items %}
+          <a href="{{ item.target_url }}" aria-hidden="true" tabindex="-1">{{ item.title }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if top_banners %}
+<div class="wrap" style="padding-top:16px">
+  {% for banner in top_banners %}
+    <a class="banner-strip" href="{{ banner.link_url|default:'#' }}">
+      {% if banner.image %}<img src="{{ banner.image.url }}" alt="{{ banner.title }}">{% endif %}
+      <span class="banner-text">
+        <strong>{{ banner.title }}</strong>
+        {% if banner.subtitle %}<span>{{ banner.subtitle }}</span>{% endif %}
+      </span>
+      {% if banner.link_url %}<span class="btn btn-sm btn-gold">{{ banner.link_text }}</span>{% endif %}
+    </a>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% block breadcrumbs %}
+  {% if breadcrumbs %}
+  <div class="breadcrumbs">
+    <div class="wrap">
+      <ol>
+        {% for label, url in breadcrumbs %}
+          <li>{% if url %}<a href="{{ url }}">{{ label }}</a>{% else %}<span aria-current="page">{{ label }}</span>{% endif %}</li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  {% endif %}
+{% endblock %}
+
+<main id="main-content" tabindex="-1">
+  {% if messages %}
+    <div class="wrap">
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          {% include 'club/partials/emblem.html' %}
+          <span>
+            <strong>{{ org.organization_name }}</strong>
+            <span style="font-size:.78rem">Established {{ org.established }}</span>
+          </span>
+        </div>
+        <p class="footer-about">{{ org.introduction|truncatewords:34 }}</p>
+        <div class="footer-social">
+          {% for name, url, key in org.social_links %}
+            {% if url %}<a href="{{ url }}" title="{{ name }}" target="_blank" rel="noopener">{{ name|slice:":2" }}</a>{% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      <div>
+        <h3>Quick Links</h3>
+        <ul>
+          <li><a href="{% url 'club:home' %}">Home</a></li>
+          <li><a href="{% url 'club:about' %}">About Us</a></li>
+          <li><a href="{% url 'club:events' %}">Events</a></li>
+          <li><a href="{% url 'club:gallery' %}">Gallery</a></li>
+          <li><a href="{% url 'club:team' %}">Our Team</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Organisation</h3>
+        <ul>
+          <li><a href="{% url 'club:activities' %}">Activities</a></li>
+          <li><a href="{% url 'club:membership' %}">Membership</a></li>
+          <li><a href="{% url 'club:news' %}">News &amp; Notices</a></li>
+          <li><a href="{% url 'club:about' %}#achievements">Achievements</a></li>
+          <li><a href="{% url 'club:calendar' %}">Event Calendar</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Resources</h3>
+        <ul>
+          <li><a href="{% url 'club:resources' %}">Downloads</a></li>
+          {% for category in footer_categories %}
+            <li><a href="{% url 'club:resources' %}?category={{ category.slug }}">{{ category.name }}</a></li>
+          {% endfor %}
+          <li><a href="{% url 'club:privacy' %}">Privacy Policy</a></li>
+          <li><a href="{% url 'club:terms' %}">Terms of Use</a></li>
+        </ul>
+      </div>
+      {% if footer_qr_codes %}
+      <div>
+        <h3>Scan &amp; connect</h3>
+        {% for code in footer_qr_codes %}
+          <figure class="footer-qr">
+            <img src="{{ code.display_url }}" alt="QR code — {{ code.label }}" loading="lazy">
+            <figcaption>{{ code.caption|default:code.label }}
+              {% if code.scans_hint %}<span>{{ code.scans_hint }}</span>{% endif %}
+            </figcaption>
+          </figure>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <div>
+        <h3>Staff</h3>
+        <ul>
+          <li><a href="{% url 'staff:login' %}">🔑 Admin Panel</a></li>
+          <li><a href="{% url 'saas:login' %}">⬢ Super Admin Panel</a></li>
+        </ul>
+        <p class="footer-about" style="margin-top:8px">
+          Website administrators sign in at <code>/adminpanel/login</code>.
+          The platform owner signs in at <code>/superadminpanel/login</code>.
+        </p>
+      </div>
+      <div>
+        <h3>Contact</h3>
+        <div class="footer-contact">
+          <div><span aria-hidden="true">📍</span><span>{{ org.address|linebreaksbr }}</span></div>
+          {% if org.phone %}<div><span aria-hidden="true">☎</span><a href="tel:{{ org.phone }}">{{ org.phone }}</a></div>{% endif %}
+          {% if org.email %}<div><span aria-hidden="true">✉</span><a href="mailto:{{ org.email }}">{{ org.email }}</a></div>{% endif %}
+          {% if org.office_hours %}<div><span aria-hidden="true">🕘</span><span>{{ org.office_hours }}</span></div>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="wrap">
+      <span>© {{ current_year }} {{ org.organization_name }}. All rights reserved.
+        {% if org.footer_note %}<br>{{ org.footer_note }}{% endif %}</span>
+      <span class="links">
+        <a href="{% url 'club:privacy' %}">Privacy Policy</a>
+        <a href="{% url 'club:terms' %}">Terms of Use</a>
+        <a href="{% url 'club:contact' %}">Contact</a>
+        <a href="{% url 'staff:login' %}">Admin Panel</a>
+        <a href="{% url 'saas:login' %}">Super Admin Panel</a>
+      </span>
+      <span>
+        {% if org.content_managed_by %}Content managed by {{ org.content_managed_by }} · {% endif %}
+        Last updated {{ last_updated|date:"d M Y" }}
+      </span>
+    </div>
+  </div>
+</footer>
+
+<div class="search-overlay" id="search-overlay" role="dialog" aria-modal="true" aria-label="Site search">
+  <button class="close" type="button" data-close-search aria-label="Close search">×</button>
+  <div class="panel-inner">
+    <h2>Search {{ org.organization_name }}</h2>
+    <form action="{% url 'club:search' %}" method="get" role="search">
+      <label class="sr-only" for="overlay-search">Search terms</label>
+      <input type="search" id="overlay-search" name="q" placeholder="Events, news, team members, downloads…"
+             value="{{ query|default:'' }}">
+      <button class="btn btn-gold" type="submit">Search</button>
+    </form>
+    <p class="hint">Press <kbd>/</kbd> anywhere to open this box, <kbd>Esc</kbd> to close.</p>
+    <div class="quick-links">
+      <a href="{% url 'club:events' %}">Upcoming events</a>
+      <a href="{% url 'club:news' %}">Latest news</a>
+      <a href="{% url 'club:resources' %}">Downloads</a>
+      <a href="{% url 'club:team' %}">Our team</a>
+      <a href="{% url 'club:membership' %}">Become a member</a>
+    </div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Media viewer">
+  <button class="close" type="button" aria-label="Close">×</button>
+  <button class="nav-arrow prev" type="button" aria-label="Previous">‹</button>
+  <button class="nav-arrow next" type="button" aria-label="Next">›</button>
+  <figure></figure>
+</div>
+
+<button class="to-top" type="button" aria-label="Back to top">↑</button>
+<script src="{% static 'club/js/site.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

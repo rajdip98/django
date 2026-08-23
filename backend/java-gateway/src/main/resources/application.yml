@@ -1,0 +1,51 @@
+server:
+  port: ${GATEWAY_PORT:8080}
+  # Never advertise the server product, and cap what a request may send.
+  server-header:
+  tomcat:
+    max-http-form-post-size: 10MB
+    max-swallow-size: 10MB
+  error:
+    include-message: never
+    include-stacktrace: never
+    whitelabel:
+      enabled: false
+
+spring:
+  application:
+    name: club-gateway
+  # The gateway serves no files of its own; every path belongs to an upstream.
+  web:
+    resources:
+      add-mappings: false
+  mvc:
+    throw-exception-if-no-handler-found: true
+  servlet:
+    multipart:
+      # The gateway forwards bodies byte for byte; it never reads the fields.
+      # Leaving this on would let Spring consume a multipart body first, and the
+      # upload would reach Django empty — which shows up as a CSRF failure on
+      # every form that carries a file. The proxy enforces its own size cap.
+      enabled: false
+
+gateway:
+  # Where each service listens. They should bind to localhost only, so the
+  # gateway is the one way in from outside.
+  python-api: ${PYTHON_API:http://127.0.0.1:8000}
+  csharp-api: ${CSHARP_API:http://127.0.0.1:5081}
+  dash-analytics: ${DASH_ANALYTICS:http://127.0.0.1:8050}
+  # Origins allowed to call the API from a browser. The default covers the Vite
+  # dev server under both names a developer might open it by. In production set
+  # this to your own domain, or leave it empty when the site and the gateway
+  # share an origin and no cross-origin call is needed at all.
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+  # Requests per minute, per client address. The website is a single-page app
+  # that makes several API calls per view, so ordinary browsing needs headroom.
+  rate-limit-per-minute: ${RATE_LIMIT:300}
+  # A tighter limit for the paths people attack.
+  auth-rate-limit-per-minute: ${AUTH_RATE_LIMIT:10}
+
+logging:
+  level:
+    root: INFO
+    org.club.gateway: INFO

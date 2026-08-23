@@ -1,0 +1,19 @@
+{% extends 'saas/base.html' %}
+{% block heading %}Delete {{ kind }}{% endblock %}
+{% block content %}
+<div class="panel-card" style="max-width:560px">
+  <header><h2>Confirm deletion</h2></header>
+  <div class="inner">
+    <div class="danger-banner">
+      This permanently deletes the {{ kind }} <strong>{{ object }}</strong>.
+      The action is recorded in the audit log and cannot be undone.
+    </div>
+    {% if extra %}<p style="margin-top:14px;font-size:.9rem;color:var(--ink-soft)">{{ extra }}</p>{% endif %}
+    <form method="post" style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+      {% csrf_token %}
+      <button class="btn btn-primary" type="submit" style="background:var(--maroon)">Delete permanently</button>
+      <a class="btn btn-ghost" href="{{ back_url }}">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

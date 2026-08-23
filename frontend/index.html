@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" data-theme="light" data-contrast="normal">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b2545" />
+    <title>Krishnanagar Youth &amp; Cultural Club — Official Website</title>
+    <meta name="description"
+      content="Official website of the Krishnanagar Youth & Cultural Club: events, activities,
+               membership, notices, office bearers and public documents." />
+    <link rel="icon" type="image/svg+xml" href="/emblem.svg" />
+    <link rel="canonical" href="https://example.org/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Krishnanagar Youth & Cultural Club" />
+    <meta property="og:title" content="Krishnanagar Youth & Cultural Club" />
+    <meta property="og:description"
+      content="Events, activities, membership and public notices from the club office." />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script>
+      // Apply the saved appearance before first paint so the page never flashes.
+      (function () {
+        try {
+          var d = document.documentElement;
+          d.setAttribute('data-theme', localStorage.getItem('club-theme') || 'light');
+          d.setAttribute('data-contrast', localStorage.getItem('club-contrast') || 'normal');
+          d.setAttribute('data-font', localStorage.getItem('club-font') || 'md');
+        } catch (e) { /* private browsing — the defaults in the markup stand */ }
+      })();
+    </script>
+  </head>
+  <body>
+    <noscript>
+      <div style="padding:16px;background:#fdf3d7;border-bottom:3px solid #b8860b">
+        This website needs JavaScript. The office also publishes every notice on the
+        physical board at the club premises.
+      </div>
+    </noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
