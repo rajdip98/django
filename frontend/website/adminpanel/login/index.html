@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Panel — Club Website</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+  :root { --navy:#0b2545; --navy2:#123a63; --gold:#c8961e; --line:#d3dbe5;
+          --ink:#16202b; --soft:#56626f; --page:#f2f5f9; --green:#16704a; --maroon:#8c2f39; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--page); color:var(--ink); line-height:1.6;
+         font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif; }
+  header { background:var(--navy); color:#fff; padding:16px 22px; display:flex;
+           align-items:center; gap:14px; flex-wrap:wrap; }
+  header h1 { font-family:Georgia,serif; font-size:1.25rem; margin:0; color:#fff; }
+  header .sp { flex:1; }
+  header a { color:#e8c565; font-size:.88rem; text-decoration:none; }
+  .wrap { max-width:1080px; margin:0 auto; padding:22px 18px 60px; }
+  .note { border:1px solid var(--line); border-left:5px solid var(--gold); background:#fbf0d5;
+          color:#4a3608; padding:14px 17px; border-radius:6px; margin-bottom:22px; }
+  .note.blue { border-left-color:var(--navy2); background:#e8eef6; color:#16202b; }
+  .note.ok { border-left-color:var(--green); background:#e2f2ea; color:#0d4b32; }
+  .note strong { display:block; margin-bottom:3px; }
+  .grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(280px,340px); gap:22px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  .card > h2 { background:var(--navy2); color:#fff; margin:0; padding:11px 17px;
+               font-family:Georgia,serif; font-size:1rem; }
+  .card .body { padding:17px; }
+  label { display:block; font-weight:600; font-size:.87rem; margin:0 0 4px; }
+  input, textarea { width:100%; padding:9px 11px; border:1px solid var(--line);
+                    border-radius:5px; font:inherit; background:#fff; color:var(--ink); }
+  .field { margin-bottom:14px; }
+  .hint { color:var(--soft); font-size:.8rem; margin-top:3px; }
+  .btn { display:inline-flex; align-items:center; gap:7px; padding:10px 17px; border-radius:5px;
+         border:1px solid transparent; font:inherit; font-weight:600; cursor:pointer;
+         background:var(--navy2); color:#fff; text-decoration:none; }
+  .btn:hover { background:var(--navy); }
+  .btn-gold { background:var(--gold); color:#241a04; }
+  .btn-ghost { background:#fff; border-color:var(--line); color:var(--ink); }
+  .row { display:flex; gap:9px; flex-wrap:wrap; }
+  .notice-row { display:flex; gap:8px; margin-bottom:8px; }
+  .notice-row input { flex:1; }
+  .notice-row button { border:1px solid var(--line); background:#fff; border-radius:5px;
+                       cursor:pointer; padding:0 11px; color:var(--maroon); font-weight:700; }
+  pre { background:#0d1420; color:#d7e3f2; padding:14px; border-radius:6px; overflow:auto;
+        font-size:.8rem; max-height:250px; }
+  ol { padding-left:20px; } ol li { margin-bottom:7px; }
+  code { background:#e8eef6; padding:1px 5px; border-radius:3px; font-size:.9em; }
+  @media (max-width:820px) { .grid { grid-template-columns:minmax(0,1fr); } }
+</style>
+</head>
+<body>
+<header>
+  <strong style="font-size:1.5rem">🔑</strong>
+  <h1>Admin Panel</h1>
+  <span class="sp"></span>
+  <a href="/index.html">← Back to the website</a>
+</header>
+
+<div class="wrap">
+  <div id="backend-note" class="note blue" hidden>
+    <strong>The full admin system is running on this domain.</strong>
+    <a href="/adminpanel/" id="backend-link">Open the full Admin Panel →</a>
+    — it has accounts, permissions, file uploads and an audit log.
+  </div>
+
+  <div class="note">
+    <strong>This is the offline editor.</strong>
+    Your website is on ordinary hosting, which cannot run the full admin system — that needs a
+    server with Python. This page still lets you change everything in the header and footer of
+    every page: edit below, download one small file, and upload it to your host.
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="card" style="margin-bottom:20px">
+        <h2>Club details</h2>
+        <div class="body">
+          <div class="field">
+            <label for="orgName">Club name</label>
+            <input id="orgName" data-key="orgName">
+            <div class="hint">Appears in the header, the footer and the copyright line.</div>
+          </div>
+          <div class="field">
+            <label for="shortName">Short name / initials</label>
+            <input id="shortName" data-key="shortName">
+          </div>
+          <div class="field">
+            <label for="tagline">Tagline under the name</label>
+            <input id="tagline" data-key="tagline">
+          </div>
+          <div class="field">
+            <label for="established">Established (year)</label>
+            <input id="established" data-key="established">
+          </div>
+          <div class="field">
+            <label for="registration">Registration details</label>
+            <input id="registration" data-key="registration">
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px">
+        <h2>Office contact</h2>
+        <div class="body">
+          <div class="field">
+            <label for="address">Address</label>
+            <textarea id="address" data-key="address" rows="3"></textarea>
+            <div class="hint">Press Enter for a new line — the footer keeps the line breaks.</div>
+          </div>
+          <div class="field">
+            <label for="phone">Telephone</label>
+            <input id="phone" data-key="phone">
+          </div>
+          <div class="field">
+            <label for="email">E-mail</label>
+            <input id="email" data-key="email">
+          </div>
+          <div class="field">
+            <label for="hours">Office hours (footer)</label>
+            <input id="hours" data-key="hours">
+          </div>
+          <div class="field">
+            <label for="hoursShort">Office hours (header, shorter)</label>
+            <input id="hoursShort" data-key="hoursShort">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Scrolling notices</h2>
+        <div class="body">
+          <div id="notices"></div>
+          <button class="btn btn-ghost" type="button" id="add-notice">+ Add a notice</button>
+        </div>
+      </div>
+    </div>
+
+    <aside>
+      <div class="card" style="margin-bottom:20px">
+        <h2>Publish your changes</h2>
+        <div class="body">
+          <p style="font-size:.9rem;margin-top:0">Download the file, then upload it to your host,
+            replacing the old one.</p>
+          <div class="row">
+            <button class="btn btn-gold" type="button" id="download">⬇ Download content.js</button>
+            <button class="btn btn-ghost" type="button" id="reset">Reset</button>
+          </div>
+          <p class="hint" style="margin-top:11px">Upload it to:<br>
+            <code>public_html/assets/js/content.js</code></p>
+          <div id="saved" class="note ok" style="margin:14px 0 0;display:none">
+            Downloaded. Now upload it to <code>assets/js/</code> on your host.
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:20px">
+        <h2>What will be written</h2>
+        <div class="body" style="padding:12px">
+          <pre id="preview">{}</pre>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Is this secure?</h2>
+        <div class="body" style="font-size:.88rem">
+          <p><strong>This page has no password, and could not usefully have one.</strong>
+            Anyone can read the source of a page on a static website, so a password typed here
+            would be visible to them.</p>
+          <p>That is safe, because this editor cannot change your website. It only prepares a
+            file. Publishing it means uploading to your host — and that needs your hosting
+            login, which nobody else has.</p>
+          <p style="margin-bottom:0">For real accounts, permissions and an audit log, run the
+            backend — see the panel on the left.</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="card" style="margin-top:24px">
+    <h2>Want the full admin system, with logins?</h2>
+    <div class="body">
+      <p>The complete panel — multiple administrators, roles, file uploads, event and member
+        management, and an audit log — is in the <code>backend</code> folder of your project. It
+        needs a host that can run Python.</p>
+      <ol>
+        <li>In cPanel, look for <strong>Setup Python App</strong>. If it is there, your host can
+          run it.</li>
+        <li>Create an application, Python 3.11, and upload <code>backend/python-api</code>.</li>
+        <li>Create a MySQL database in cPanel and set <code>DATABASE_URL</code> in the
+          application's environment variables.</li>
+        <li>Run <code>python manage.py migrate</code> and
+          <code>python manage.py bootstrap_panel</code> from the panel's terminal.</li>
+        <li>Point the application at <code>/adminpanel</code>. This page then steps aside and
+          the real one opens.</li>
+      </ol>
+      <p style="margin-bottom:0">Full instructions are in <code>backend/README.md</code>. If your
+        host has no Python option, the offline editor above covers the header and footer, and the
+        page text can be edited directly in the <code>.html</code> files.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var KEYS = ['orgName', 'shortName', 'tagline', 'established', 'registration',
+              'address', 'phone', 'email', 'hours', 'hoursShort'];
+  var STORE = 'club-admin-draft';
+  var noticeList = document.getElementById('notices');
+
+  // Defaults, so the fields are never empty on a first visit.
+  var DEFAULTS = {
+    orgName: 'Krishnanagar Youth & Cultural Club',
+    shortName: 'KYCC',
+    tagline: 'Service · Culture · Community · Established 1978',
+    established: '1978',
+    registration: 'Registered under the West Bengal Societies Registration Act — Reg. No. S/1L/12345 of 1978-79',
+    address: 'Community Hall, 14 Rabindra Sarani\nWard No. 12, Krishnanagar\nNadia, West Bengal — 741101',
+    phone: '+91 33 2555 0100',
+    email: 'office@example.org',
+    hours: 'Monday to Saturday, 10:00 AM – 5:00 PM (closed on public holidays)',
+    hoursShort: 'Monday to Saturday, 10:00 AM – 5:00 PM',
+    notices: [
+      { text: 'Annual General Meeting — 12 September 2026, 11:00 AM at the club hall', href: 'notices.html' },
+      { text: 'Membership renewal for 2026-27 is open until 30 September', href: 'membership.html' },
+      { text: 'Blood donation camp: registrations close on 5 September', href: 'events.html' }
+    ]
+  };
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORE);
+      if (raw) return JSON.parse(raw);
+    } catch (e) { /* private browsing — start from the defaults */ }
+    return JSON.parse(JSON.stringify(DEFAULTS));
+  }
+
+  var draft = load();
+
+  function noticeRow(notice) {
+    var row = document.createElement('div');
+    row.className = 'notice-row';
+
+    var text = document.createElement('input');
+    text.value = notice.text || '';
+    text.placeholder = 'Notice text';
+    text.addEventListener('input', collect);
+
+    var href = document.createElement('input');
+    href.value = notice.href || 'notices.html';
+    href.placeholder = 'Page to open';
+    href.style.maxWidth = '150px';
+    href.addEventListener('input', collect);
+
+    var remove = document.createElement('button');
+    remove.type = 'button';
+    remove.textContent = '×';
+    remove.title = 'Remove this notice';
+    remove.addEventListener('click', function () { row.remove(); collect(); });
+
+    row.appendChild(text);
+    row.appendChild(href);
+    row.appendChild(remove);
+    return row;
+  }
+
+  function render() {
+    KEYS.forEach(function (key) {
+      var field = document.getElementById(key);
+      if (field) field.value = draft[key] || '';
+    });
+    noticeList.textContent = '';
+    (draft.notices || []).forEach(function (n) { noticeList.appendChild(noticeRow(n)); });
+    preview();
+  }
+
+  function collect() {
+    KEYS.forEach(function (key) {
+      var field = document.getElementById(key);
+      if (field) draft[key] = field.value;
+    });
+    draft.notices = Array.prototype.map.call(
+      noticeList.querySelectorAll('.notice-row'),
+      function (row) {
+        var inputs = row.querySelectorAll('input');
+        return { text: inputs[0].value, href: inputs[1].value || 'notices.html' };
+      }
+    ).filter(function (n) { return n.text.trim() !== ''; });
+
+    try { localStorage.setItem(STORE, JSON.stringify(draft)); } catch (e) { /* ignore */ }
+    preview();
+  }
+
+  function fileContents() {
+    return '/* Written by the Admin Panel on ' + new Date().toLocaleString() + '.\n'
+         + '   Upload this file to assets/js/content.js on your web host. */\n\n'
+         + 'window.CLUB_CONTENT = ' + JSON.stringify(draft, null, 2) + ';\n';
+  }
+
+  function preview() {
+    document.getElementById('preview').textContent = JSON.stringify(draft, null, 2);
+  }
+
+  KEYS.forEach(function (key) {
+    var field = document.getElementById(key);
+    if (field) field.addEventListener('input', collect);
+  });
+
+  document.getElementById('add-notice').addEventListener('click', function () {
+    noticeList.appendChild(noticeRow({ text: '', href: 'notices.html' }));
+    collect();
+  });
+
+  document.getElementById('download').addEventListener('click', function () {
+    collect();
+    var blob = new Blob([fileContents()], { type: 'application/javascript' });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = 'content.js';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    document.getElementById('saved').style.display = 'block';
+  });
+
+  document.getElementById('reset').addEventListener('click', function () {
+    if (!window.confirm('Discard your changes and go back to the published values?')) return;
+    draft = JSON.parse(JSON.stringify(DEFAULTS));
+    try { localStorage.removeItem(STORE); } catch (e) { /* ignore */ }
+    render();
+  });
+
+  // If the backend is running on this domain, say so and offer the real panel.
+  fetch('/api/health', { cache: 'no-store' })
+    .then(function (r) { if (r.ok) document.getElementById('backend-note').hidden = false; })
+    .catch(function () { /* no backend — the offline editor is the right tool */ });
+
+  render();
+})();
+</script>
+</body>
+</html>

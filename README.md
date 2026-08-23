@@ -46,6 +46,8 @@ tells you in plain words whether anything is missing.
 | Photographs missing | `assets` folder missing | Upload `assets`. The pages still look correct without it |
 | Site is at `yourdomain.com/website/` | Uploaded one folder too deep | Move the files up into `public_html` |
 | Old page still showing | Browser cache | Hard refresh: Ctrl+F5, or open in a private window |
+| Admin Panel link shows "Page not found" | Old build, before the panel pages existed | Use this build — `/adminpanel/login/` is a real page now |
+| Edited details not appearing | `content.js` not uploaded, or uploaded to the wrong folder | It belongs at `assets/js/content.js` |
 
 `check.html` diagnoses all of these for you.
 
@@ -92,8 +94,21 @@ yourdomain.com/adminpanel/login/          website content
 yourdomain.com/superadminpanel/login/     administers websites and administrators
 ```
 
-These are served by the **backend**, not by the website. On plain hosting with
-no backend those two links show a 404 — expected, not a fault.
+**Both addresses now work on plain hosting.** What you get depends on whether
+the backend is running:
+
+| | Without a backend | With the backend |
+|---|---|---|
+| `/adminpanel/login/` | **Offline editor** — change the club name, tagline, address, telephone, e-mail, office hours and the scrolling notices. Download one small `content.js` and upload it to `assets/js/`, and every page updates at once. | The full Django panel: accounts, roles, uploads, events, members, audit log |
+| `/superadminpanel/login/` | Explains what needs a server, with step-by-step instructions for switching the backend on through cPanel | The platform panel |
+
+Both pages check for a backend on the domain and step aside automatically when
+one is there.
+
+The offline editor has no password, and could not usefully have one — anyone can
+read the source of a page on a static site. That is safe: the editor cannot
+change your website, it only prepares a file. Publishing means uploading to your
+host, which needs your hosting login.
 
 | | Admin | Super Admin |
 |---|---|---|

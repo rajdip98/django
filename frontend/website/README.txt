@@ -127,18 +127,44 @@ the office" text to a link:
 
 THE ADMIN PANELS
 ----------------
-The "Admin Panel" and "Super Admin" links in the header and footer point to:
+      yourdomain.com/adminpanel/login/
+      yourdomain.com/superadminpanel/login/
 
-      /adminpanel/login/
-      /superadminpanel/login/
+BOTH OF THESE NOW WORK on ordinary hosting — they are real pages in this
+folder. Make sure the "adminpanel" and "superadminpanel" folders upload along
+with everything else.
 
-Those pages are served by the BACKEND (the Django application in the backend
-folder). They only work if you are running that backend on the same domain.
+WHAT THE ADMIN PANEL DOES
+-------------------------
+It lets you change, on every page at once:
 
-On a plain web host with no backend, those two links will show your host's
-404 page — that is expected, not a fault in this website. See backend/README.md
-for how to run them, and frontend/README.md if the backend lives on a
-different domain.
+      the club name              the address
+      the short name/initials    the telephone number
+      the tagline                the e-mail address
+      the year established       the office hours
+      the registration details   the scrolling notices
+
+How to use it:
+
+  1. Open  yourdomain.com/adminpanel/login/
+  2. Edit the boxes.
+  3. Press "Download content.js".
+  4. Upload that file to     public_html/assets/js/content.js
+     (replacing the one already there)
+  5. Reload your website — every page shows the new details.
+
+IS IT SAFE WITHOUT A PASSWORD?
+------------------------------
+Yes. The page cannot change your website; it only prepares a file. To publish
+anything you must upload that file to your host, and that needs your hosting
+login, which nobody else has. A password typed into a page on a static website
+would be visible to anyone who views the page source, so it would protect
+nothing.
+
+For real administrator accounts, roles, file uploads, event and member
+management, and an audit log, you need the backend running. Open
+  yourdomain.com/superadminpanel/login/
+for step-by-step instructions, or read backend/README.md.
 
 
 THE CONTACT FORM

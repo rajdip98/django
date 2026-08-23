@@ -35,6 +35,17 @@ ErrorDocument 404 /404.html
   ExpiresByType image/png "access plus 30 days"
 </IfModule>
 
+# The Admin Panel publishes content.js. Caching it for a week would mean an
+# edit did not show up for a week, so this one file always revalidates.
+<Files "content.js">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "no-cache, must-revalidate"
+  </IfModule>
+  <IfModule mod_expires.c>
+    ExpiresDefault "access plus 0 seconds"
+  </IfModule>
+</Files>
+
 <IfModule mod_headers.c>
   Header set X-Content-Type-Options "nosniff"
   Header set X-Frame-Options "SAMEORIGIN"

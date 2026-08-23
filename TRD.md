@@ -180,6 +180,28 @@ presence of a backend, and names whatever is missing.
 domain has nothing to resolve to and the server answers 404. `index.htm` ships
 as a duplicate for hosts whose `DirectoryIndex` prefers that extension.
 
+### 6.1.1 Administration without a backend
+
+`/adminpanel/login/` and `/superadminpanel/login/` are real pages in the static
+build, so those addresses resolve on any host. Each queries `/api/health` on
+load and, when a backend answers, offers the Django panel instead of itself.
+
+Without a backend, the admin page is a content editor. Header and footer text is
+marked in the templates with `data-content` attributes; `assets/js/content.js`
+optionally defines `window.CLUB_CONTENT`, and the page script substitutes those
+values at load. The editor composes that file and hands it to the administrator
+as a download, so one uploaded file restyles the text of every page. Values are
+written with `textContent`, never as markup, and `tel:` links have whitespace
+stripped. Notices are rebuilt as elements rather than an HTML string.
+
+`content.js` is excluded from the asset cache policy — a seven-day cache on it
+would mean an edit did not appear for a week.
+
+This editor is not an authorisation boundary and does not pretend to be one. A
+static page cannot verify a credential; the real control is that publishing
+requires write access to the host. Accounts, roles and the audit log exist only
+in the Django panel.
+
 `.htaccess` is optional and every directive in it is wrapped in `<IfModule>`.
 This matters: an unguarded directive that the server does not recognise makes
 Apache return HTTP 500 for every request, which presents as a blank site. The

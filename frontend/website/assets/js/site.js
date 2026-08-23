@@ -4,6 +4,45 @@
 (function () {
   'use strict';
 
+  // ---- Content overrides --------------------------------------------------
+  // assets/js/content.js is optional. When an administrator has published one,
+  // its values replace the text that is written into the pages.
+  var content = (typeof window.CLUB_CONTENT === 'object' && window.CLUB_CONTENT) || {};
+
+  Object.keys(content).forEach(function (key) {
+    var value = content[key];
+    if (key === 'notices' || value === undefined || value === null || value === '') return;
+
+    Array.prototype.forEach.call(
+      document.querySelectorAll('[data-content="' + key + '"]'),
+      function (node) {
+        node.textContent = value;
+        var prefix = node.getAttribute('data-content-href');
+        if (prefix) {
+          // tel: links must not carry spaces.
+          node.setAttribute('href', prefix + (prefix === 'tel:' ? String(value).replace(/\s/g, '') : value));
+        }
+      }
+    );
+  });
+
+  if (Array.isArray(content.notices) && content.notices.length) {
+    var track = document.querySelector('[data-content-notices]');
+    if (track) {
+      track.textContent = '';
+      // Printed twice so the strip scrolls without a visible gap.
+      for (var pass = 0; pass < 2; pass++) {
+        content.notices.forEach(function (notice) {
+          var link = document.createElement('a');
+          link.href = notice.href || 'notices.html';
+          // Administrator text is inserted as text, never as markup.
+          link.textContent = '\u25B8 ' + (notice.text || '');
+          track.appendChild(link);
+        });
+      }
+    }
+  }
+
   // ---- Appearance ---------------------------------------------------------
   var root = document.documentElement;
 

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Super Admin Panel — Club Website</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+  :root { --navy:#071a33; --navy2:#123a63; --gold:#c8961e; --line:#d3dbe5;
+          --ink:#16202b; --soft:#56626f; --page:#f2f5f9; --maroon:#8c2f39; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--page); color:var(--ink); line-height:1.6;
+         font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif; }
+  header { background:var(--navy); color:#fff; padding:16px 22px; display:flex;
+           align-items:center; gap:14px; flex-wrap:wrap;
+           border-bottom:3px solid var(--gold); }
+  header h1 { font-family:Georgia,serif; font-size:1.25rem; margin:0; color:#fff; }
+  header .sp { flex:1; }
+  header a { color:#e8c565; font-size:.88rem; text-decoration:none; }
+  .wrap { max-width:920px; margin:0 auto; padding:22px 18px 60px; }
+  .note { border:1px solid var(--line); border-left:5px solid var(--gold); background:#fbf0d5;
+          color:#4a3608; padding:14px 17px; border-radius:6px; margin-bottom:22px; }
+  .note.blue { border-left-color:var(--navy2); background:#e8eef6; color:var(--ink); }
+  .note strong { display:block; margin-bottom:3px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:8px;
+          overflow:hidden; margin-bottom:20px; }
+  .card > h2 { background:var(--navy2); color:#fff; margin:0; padding:11px 17px;
+               font-family:Georgia,serif; font-size:1rem; }
+  .card .body { padding:17px; }
+  table { width:100%; border-collapse:collapse; font-size:.9rem; }
+  th, td { text-align:left; padding:9px 8px; border-bottom:1px solid #e6ebf2; }
+  th { font-size:.74rem; text-transform:uppercase; letter-spacing:.06em; color:var(--soft); }
+  .yes { color:#16704a; font-weight:700; } .no { color:var(--maroon); font-weight:700; }
+  code { background:#e8eef6; padding:1px 5px; border-radius:3px; font-size:.9em; }
+  ol { padding-left:20px; } ol li { margin-bottom:7px; }
+  .btn { display:inline-flex; gap:7px; padding:10px 17px; border-radius:5px; border:1px solid transparent;
+         font:inherit; font-weight:600; text-decoration:none; background:var(--navy2); color:#fff; }
+  .btn-ghost { background:#fff; border-color:var(--line); color:var(--ink); }
+</style>
+</head>
+<body>
+<header>
+  <strong style="font-size:1.5rem">⬢</strong>
+  <h1>Super Admin Panel</h1>
+  <span class="sp"></span>
+  <a href="/index.html">← Back to the website</a>
+</header>
+
+<div class="wrap">
+  <div id="backend-note" class="note blue" hidden>
+    <strong>The platform is running on this domain.</strong>
+    <a href="/superadminpanel/">Open the real Super Admin Panel →</a>
+  </div>
+
+  <div class="note">
+    <strong>Super Admin needs the backend running.</strong>
+    Unlike the header and footer, the things this panel controls — administrator accounts,
+    passwords, permissions and the audit log — cannot be done by a file on a static host.
+    They need a server that can check who is signing in.
+  </div>
+
+  <div class="card">
+    <h2>What each panel can do, and where</h2>
+    <div class="body">
+      <table>
+        <thead><tr><th>Task</th><th style="width:150px">Offline editor</th><th style="width:150px">With the backend</th></tr></thead>
+        <tbody>
+          <tr><td>Club name, logo text, tagline</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+          <tr><td>Header and footer details</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+          <tr><td>Address, telephone, e-mail, hours</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+          <tr><td>Scrolling notices</td><td class="yes">Yes</td><td class="yes">Yes</td></tr>
+          <tr><td>Page text and photographs</td><td>Edit the files</td><td class="yes">Yes</td></tr>
+          <tr><td>Upload banners and documents</td><td class="no">No</td><td class="yes">Yes</td></tr>
+          <tr><td>Events, members, registrations</td><td class="no">No</td><td class="yes">Yes</td></tr>
+          <tr><td>Create and remove administrators</td><td class="no">No</td><td class="yes">Yes</td></tr>
+          <tr><td>Passwords, roles, audit log</td><td class="no">No</td><td class="yes">Yes</td></tr>
+          <tr><td>Manage several club websites</td><td class="no">No</td><td class="yes">Yes</td></tr>
+        </tbody>
+      </table>
+      <p style="margin:16px 0 0">
+        <a class="btn" href="/adminpanel/login/">Open the offline editor →</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Turning the backend on</h2>
+    <div class="body">
+      <p>Your project already contains it, in the <code>backend</code> folder. It needs hosting
+        that can run Python — many shared hosts can, through cPanel.</p>
+      <ol>
+        <li>In cPanel, look for <strong>Setup Python App</strong>. If it is not there, ask your
+          host whether Python applications are available on your plan.</li>
+        <li>Create an application on Python 3.11 and upload <code>backend/python-api</code> into it.</li>
+        <li>Create a MySQL database and user in cPanel, then set the application's
+          <code>DATABASE_URL</code> environment variable to
+          <code>mysql://user:password@localhost:3306/dbname</code>.</li>
+        <li>Set your own passwords in the environment before the first sign-in:
+          <code>PANEL_DEFAULT_PASSWORD</code>, <code>PANEL_ELEVATION_SECRET</code>,
+          <code>PLATFORM_DEFAULT_PASSWORD</code>, and a fresh <code>DJANGO_SECRET_KEY</code>.</li>
+        <li>From the application's terminal, run <code>python manage.py migrate</code>, then
+          <code>python manage.py bootstrap_panel</code> and
+          <code>python manage.py bootstrap_platform</code>.</li>
+        <li>Set the application URL to <code>/adminpanel</code>. These two pages then step aside
+          and the real panels open in their place.</li>
+      </ol>
+      <p style="margin-bottom:0"><code>backend/README.md</code> has the complete instructions,
+        and <code>TRD.md</code> describes what each service does.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>A word about passwords</h2>
+    <div class="body">
+      <p>The three default passwords shipped with the project are written in files that anyone
+        with the download can read. Treat them as public. Set your own through the environment
+        variables listed above <em>before</em> the first sign-in.</p>
+      <p style="margin-bottom:0">Each administrator is then forced to replace their own password
+        the first time they sign in, and reaching Super Admin functions needs a separate
+        passphrase that expires after thirty minutes.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  fetch('/api/health', { cache: 'no-store' })
+    .then(function (r) { if (r.ok) document.getElementById('backend-note').hidden = false; })
+    .catch(function () { /* no backend, which is what this page is here to explain */ });
+</script>
+</body>
+</html>

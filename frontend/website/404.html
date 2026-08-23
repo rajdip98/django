@@ -433,13 +433,13 @@ form.gov { display: grid; gap: 15px; }
         <path d="M20 45c4 4 8 6 12 6s8-2 12-6" fill="none" stroke="#f0cf7d" stroke-width="2" stroke-linecap="round"/>
       </svg>
     <div class="titles">
-      <h1>Krishnanagar Youth &amp; Cultural Club</h1>
-      <p>Service · Culture · Community · Established 1978</p>
+      <h1 data-content="orgName">Krishnanagar Youth &amp; Cultural Club</h1>
+      <p data-content="tagline">Service · Culture · Community · Established 1978</p>
     </div>
     <div class="contact-block">
-      <strong>+91 33 2555 0100</strong>
-      <a href="mailto:office@example.org">office@example.org</a><br>
-      Monday to Saturday, 10:00 AM – 5:00 PM
+      <strong data-content="phone">+91 33 2555 0100</strong>
+      <a href="mailto:office@example.org" data-content="email" data-content-href="mailto:">office@example.org</a><br>
+      <span data-content="hoursShort">Monday to Saturday, 10:00 AM – 5:00 PM</span>
     </div>
   </div>
 </header>
@@ -465,7 +465,7 @@ form.gov { display: grid; gap: 15px; }
   <div class="wrap">
     <span class="label">Notices</span>
     <div class="ticker-track">
-      <div class="ticker-move"><a href="notices.html">▸ Annual General Meeting — 12 September 2026, 11:00 AM at the club hall</a><a href="membership.html">▸ Membership renewal for 2026-27 is open until 30 September</a><a href="events.html">▸ Blood donation camp: registrations close on 5 September</a><a href="downloads.html">▸ Audited accounts for 2024-25 are now available to download</a><a href="news.html">▸ Club receives the district award for social service</a><a href="notices.html">▸ Annual General Meeting — 12 September 2026, 11:00 AM at the club hall</a><a href="membership.html">▸ Membership renewal for 2026-27 is open until 30 September</a><a href="events.html">▸ Blood donation camp: registrations close on 5 September</a><a href="downloads.html">▸ Audited accounts for 2024-25 are now available to download</a><a href="news.html">▸ Club receives the district award for social service</a></div>
+      <div class="ticker-move" data-content-notices><a href="notices.html">▸ Annual General Meeting — 12 September 2026, 11:00 AM at the club hall</a><a href="membership.html">▸ Membership renewal for 2026-27 is open until 30 September</a><a href="events.html">▸ Blood donation camp: registrations close on 5 September</a><a href="downloads.html">▸ Audited accounts for 2024-25 are now available to download</a><a href="news.html">▸ Club receives the district award for social service</a><a href="notices.html">▸ Annual General Meeting — 12 September 2026, 11:00 AM at the club hall</a><a href="membership.html">▸ Membership renewal for 2026-27 is open until 30 September</a><a href="events.html">▸ Blood donation camp: registrations close on 5 September</a><a href="downloads.html">▸ Audited accounts for 2024-25 are now available to download</a><a href="news.html">▸ Club receives the district award for social service</a></div>
     </div>
   </div>
 </div>
@@ -499,9 +499,10 @@ form.gov { display: grid; gap: 15px; }
   <div class="wrap">
     <div class="footer-grid">
       <div>
-        <h3>KYCC</h3>
-        <p style="font-size:.89rem">Krishnanagar Youth &amp; Cultural Club</p>
-        <p style="font-size:.83rem">Registered under the West Bengal Societies Registration Act — Reg. No. S/1L/12345 of 1978-79<br>Established 1978</p>
+        <h3 data-content="shortName">KYCC</h3>
+        <p style="font-size:.89rem" data-content="orgName">Krishnanagar Youth &amp; Cultural Club</p>
+        <p style="font-size:.83rem"><span data-content="registration">Registered under the West Bengal Societies Registration Act — Reg. No. S/1L/12345 of 1978-79</span><br>
+          Established <span data-content="established">1978</span></p>
       </div>
       <div>
         <h3>Quick links</h3>
@@ -510,12 +511,12 @@ form.gov { display: grid; gap: 15px; }
       <div>
         <h3>Office</h3>
         <ul>
-          <li class="footer-address">Community Hall, 14 Rabindra Sarani
+          <li class="footer-address" data-content="address">Community Hall, 14 Rabindra Sarani
 Ward No. 12, Krishnanagar
 Nadia, West Bengal — 741101</li>
-          <li><a href="tel:+913325550100">+91 33 2555 0100</a></li>
-          <li><a href="mailto:office@example.org">office@example.org</a></li>
-          <li style="font-size:.83rem">Monday to Saturday, 10:00 AM – 5:00 PM (closed on public holidays)</li>
+          <li><a href="tel:+913325550100" data-content="phone" data-content-href="tel:">+91 33 2555 0100</a></li>
+          <li><a href="mailto:office@example.org" data-content="email" data-content-href="mailto:">office@example.org</a></li>
+          <li style="font-size:.83rem" data-content="hours">Monday to Saturday, 10:00 AM – 5:00 PM (closed on public holidays)</li>
         </ul>
       </div>
       <div>
@@ -530,7 +531,8 @@ Nadia, West Bengal — 741101</li>
       </div>
     </div>
     <div class="footer-bar">
-      <span>© <span data-year>2026</span> Krishnanagar Youth &amp; Cultural Club. All rights reserved.</span>
+      <span>© <span data-year>2026</span> <span data-content="orgName">Krishnanagar Youth &amp; Cultural Club</span>.
+        All rights reserved.</span>
       <span class="spacer"></span>
       <a href="contact.html">Contact</a>
       <a href="downloads.html">Downloads</a>
@@ -540,12 +542,52 @@ Nadia, West Bengal — 741101</li>
   </div>
 </footer>
 
+<script src="assets/js/content.js"></script>
 <script>
 /* Everything the pages need, in one small file. No libraries, no build step.
    If a browser blocks scripts entirely, every page still reads correctly —
    nothing here is required to see the content. */
 (function () {
   'use strict';
+
+  // ---- Content overrides --------------------------------------------------
+  // assets/js/content.js is optional. When an administrator has published one,
+  // its values replace the text that is written into the pages.
+  var content = (typeof window.CLUB_CONTENT === 'object' && window.CLUB_CONTENT) || {};
+
+  Object.keys(content).forEach(function (key) {
+    var value = content[key];
+    if (key === 'notices' || value === undefined || value === null || value === '') return;
+
+    Array.prototype.forEach.call(
+      document.querySelectorAll('[data-content="' + key + '"]'),
+      function (node) {
+        node.textContent = value;
+        var prefix = node.getAttribute('data-content-href');
+        if (prefix) {
+          // tel: links must not carry spaces.
+          node.setAttribute('href', prefix + (prefix === 'tel:' ? String(value).replace(/\s/g, '') : value));
+        }
+      }
+    );
+  });
+
+  if (Array.isArray(content.notices) && content.notices.length) {
+    var track = document.querySelector('[data-content-notices]');
+    if (track) {
+      track.textContent = '';
+      // Printed twice so the strip scrolls without a visible gap.
+      for (var pass = 0; pass < 2; pass++) {
+        content.notices.forEach(function (notice) {
+          var link = document.createElement('a');
+          link.href = notice.href || 'notices.html';
+          // Administrator text is inserted as text, never as markup.
+          link.textContent = '\u25B8 ' + (notice.text || '');
+          track.appendChild(link);
+        });
+      }
+    }
+  }
 
   // ---- Appearance ---------------------------------------------------------
   var root = document.documentElement;
