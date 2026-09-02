@@ -1,0 +1,94 @@
+{% extends 'club/base.html' %}
+{% load club_extras %}
+
+{% block content %}
+<div class="page-header">
+  <div class="wrap">
+    <h1>News, Notices &amp; Announcements</h1>
+    <p>Official communications, achievements and press notes from the organisation.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="wrap layout-sidebar">
+    <div>
+      <div class="filterbar">
+        <form action="" method="get" role="search">
+          <label class="sr-only" for="news-search">Search news</label>
+          <input class="gov-input" type="search" id="news-search" name="q" value="{{ query }}"
+                 placeholder="Search articles and notices">
+          {% if active_category %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
+          <button class="btn btn-primary" type="submit">Search</button>
+        </form>
+      </div>
+
+      {% if categories %}
+      <div class="pill-row" style="margin-bottom:22px">
+        <a class="pill {% if not active_category %}active{% endif %}" href="{% query_replace category='' %}">All</a>
+        {% for category in categories %}
+          <a class="pill {% if active_category == category.slug %}active{% endif %}"
+             href="{% query_replace category=category.slug %}">{{ category.name }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if featured and not query and not active_category %}
+        <article class="card" style="margin-bottom:24px">
+          <div class="card-media" style="aspect-ratio:16/6">
+            {% include 'club/partials/thumb.html' with image=featured.image label=featured.title alt=featured.title %}
+            <span class="chip gold">Featured</span>
+          </div>
+          <div class="card-body">
+            <div class="card-meta">
+              <span>📅 {{ featured.published_at|date:"d M Y" }}</span>
+              {% if featured.author %}<span>✍ {{ featured.author }}</span>{% endif %}
+            </div>
+            <h2 class="card-title" style="font-size:1.35rem">
+              <a href="{{ featured.get_absolute_url }}">{{ featured.title }}</a></h2>
+            <p class="card-text">{{ featured.excerpt|default:featured.body|truncatewords:44 }}</p>
+            <div class="card-foot">
+              <span class="chip">{{ featured.category.name|default:"Notice" }}</span>
+              <a class="btn btn-sm btn-primary" href="{{ featured.get_absolute_url }}">Read the full article →</a>
+            </div>
+          </div>
+        </article>
+      {% endif %}
+
+      {% if articles %}
+        <div class="grid cols-2">
+          {% for article in articles %}{% include 'club/partials/news_card.html' %}{% endfor %}
+        </div>
+        {% include 'club/partials/pagination.html' with page_obj=articles %}
+      {% else %}
+        <div class="empty-state">
+          <span class="glyph" aria-hidden="true">📰</span>
+          <p>No articles found{% if query %} for “{{ query }}”{% endif %}.</p>
+          <a class="btn btn-ghost btn-sm" href="{% url 'club:news' %}">Clear filters</a>
+        </div>
+      {% endif %}
+    </div>
+
+    <aside class="stack">
+      <div class="panel">
+        <div class="panel-head">Notice Board <a href="{% url 'club:notifications' %}">All</a></div>
+        <ul class="panel-list scroll-list">
+          {% for note in notifications_list %}
+            <li><a href="{{ note.target_url }}">{{ note.title }}
+              <span class="meta">{{ note.get_kind_display }} · {{ note.published_at|date:"d M Y" }}</span></a></li>
+          {% empty %}
+            <li><a href="{% url 'club:notifications' %}">No notices at present.</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-head">Categories</div>
+        <ul class="panel-list">
+          {% for category in categories %}
+            <li><a href="{% query_replace category=category.slug %}">{{ category.name }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

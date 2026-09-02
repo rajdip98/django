@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" data-contrast="normal" data-font="md">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Events — Krishnanagar Youth &amp; Cultural Club</title>
+<meta name="description" content="Calendar of club programmes, camps and tournaments.">
+<meta name="author" content="Krishnanagar Youth &amp; Cultural Club">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Krishnanagar Youth &amp; Cultural Club">
+<meta property="og:title" content="Events — Krishnanagar Youth &amp; Cultural Club">
+<meta property="og:description" content="Calendar of club programmes, camps and tournaments.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="assets/img/emblem.svg">
+<!-- The design is embedded in this page so it cannot go missing. The external
+     stylesheet that follows holds exactly the same rules: edit that file to
+     restyle the whole site, and it will override what is inlined here. -->
+<style>
+/* ---------------------------------------------------------------------------
+   Krishnanagar Youth & Cultural Club — public website.
+
+   Plain CSS, no framework and no build step. Everything here works from a file
+   uploaded straight to a web host.
+   --------------------------------------------------------------------------- */
+
+:root {
+  --navy-900: #071a33;
+  --navy-800: #0b2545;
+  --navy-700: #123a63;
+  --navy-600: #1a5089;
+  --gold: #c8961e;
+  --gold-soft: #f0cf7d;
+  --maroon: #8c2f39;
+  --green: #16704a;
+
+  --page: #f2f5f9;
+  --surface: #ffffff;
+  --surface-alt: #e9eef5;
+  --ink: #16202b;
+  --ink-soft: #56626f;
+  --line: #d3dbe5;
+
+  --serif: Georgia, "Noto Serif", "Times New Roman", serif;
+  --sans: "Segoe UI", system-ui, -apple-system, "Noto Sans", Arial, sans-serif;
+  --wrap: 1200px;
+  --radius: 6px;
+  --shadow: 0 1px 3px rgba(7, 26, 51, .10), 0 10px 28px rgba(7, 26, 51, .07);
+}
+
+html[data-theme="dark"] {
+  --page: #0c141f;
+  --surface: #141e2c;
+  --surface-alt: #1b2739;
+  --ink: #e7edf5;
+  --ink-soft: #9fb0c4;
+  --line: #27364a;
+}
+html[data-contrast="high"] {
+  --page: #fff; --surface: #fff; --surface-alt: #fff;
+  --ink: #000; --ink-soft: #000; --line: #000;
+  --navy-800: #000; --navy-700: #000; --navy-600: #000; --gold: #6d5200;
+}
+html[data-contrast="high"] a { text-decoration: underline; }
+html[data-font="lg"] { font-size: 108%; }
+html[data-font="xl"] { font-size: 118%; }
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0; background: var(--page); color: var(--ink);
+  font-family: var(--sans); line-height: 1.65; -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 { font-family: var(--serif); line-height: 1.25; margin: 0 0 .5em; }
+h1 { font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.3rem); }
+h2 { font-size: clamp(1.3rem, 1.1rem + .9vw, 1.75rem); }
+h3 { font-size: 1.1rem; }
+p { margin: 0 0 1em; }
+img { max-width: 100%; display: block; }
+
+a { color: var(--navy-600); text-underline-offset: 2px; }
+html[data-theme="dark"] a { color: #8ab6e8; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+.wrap { width: min(var(--wrap), 100% - 30px); margin-inline: auto; }
+.skip-link { position: absolute; left: -9999px; top: 0; z-index: 200;
+  background: var(--gold); color: #21160a; padding: 10px 16px; font-weight: 700; }
+.skip-link:focus { left: 8px; top: 8px; }
+
+/* ---- Top strip ---------------------------------------------------------- */
+.topbar { background: var(--navy-900); color: #cbd9ec; font-size: .78rem; }
+.topbar .wrap { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-height: 36px; }
+.topbar a, .topbar button {
+  color: #cbd9ec; background: none; border: 0; font: inherit; cursor: pointer;
+  padding: 4px 7px; border-radius: 4px; text-decoration: none;
+}
+.topbar a:hover, .topbar button:hover { background: rgba(255, 255, 255, .13); color: #fff; }
+.topbar .spacer { flex: 1; }
+.topbar .staff { border: 1px solid rgba(255, 255, 255, .3); font-weight: 600; }
+.topbar .staff.gold { border-color: var(--gold-soft); color: var(--gold-soft); }
+
+/* ---- Masthead ----------------------------------------------------------- */
+.masthead { background: var(--navy-800); color: #fff; padding: 16px 0; }
+.masthead .wrap { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.masthead .emblem { width: 68px; height: 68px; flex: none; }
+.masthead .titles { flex: 1; min-width: 210px; }
+.masthead .titles h1 { margin: 0; font-size: clamp(1.05rem, .9rem + .95vw, 1.65rem); color: #fff; }
+.masthead .titles p { margin: 3px 0 0; color: #b3c6de; font-size: .84rem; }
+.masthead .contact-block { font-size: .8rem; color: #b3c6de; text-align: right; }
+.masthead .contact-block strong { color: #fff; display: block; font-size: .95rem; }
+.masthead .contact-block a { color: var(--gold-soft); text-decoration: none; }
+
+/* ---- Navigation --------------------------------------------------------- */
+.nav-toggle {
+  display: none; width: 100%; background: var(--navy-700); color: #fff; border: 0;
+  padding: 12px 16px; font: inherit; font-weight: 600; cursor: pointer; text-align: left;
+}
+.mainnav { background: var(--navy-700); position: sticky; top: 0; z-index: 60; }
+.mainnav .wrap { display: flex; flex-wrap: wrap; align-items: stretch; }
+.mainnav a {
+  color: #e6eefa; text-decoration: none; padding: 12px 15px; font-size: .9rem;
+  border-bottom: 3px solid transparent; display: flex; align-items: center;
+}
+.mainnav a:hover { background: var(--navy-600); }
+.mainnav a.active { background: var(--navy-600); border-bottom-color: var(--gold); font-weight: 600; }
+
+/* ---- Notice ticker ------------------------------------------------------ */
+.ticker { background: var(--surface); border-bottom: 1px solid var(--line); overflow: hidden; }
+.ticker .wrap { display: flex; align-items: center; gap: 14px; }
+.ticker .label {
+  background: var(--maroon); color: #fff; font-size: .7rem; font-weight: 700;
+  letter-spacing: .09em; text-transform: uppercase; padding: 5px 11px; flex: none;
+  margin: 8px 0; border-radius: 3px;
+}
+.ticker-track { overflow: hidden; flex: 1; }
+.ticker-move { display: flex; gap: 44px; white-space: nowrap; animation: ticker 34s linear infinite; }
+.ticker-move a { color: var(--ink); text-decoration: none; font-size: .88rem; padding: 9px 0; }
+.ticker-move a:hover { color: var(--navy-600); text-decoration: underline; }
+.ticker:hover .ticker-move { animation-play-state: paused; }
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) {
+  .ticker-move { animation: none; flex-wrap: wrap; white-space: normal; }
+}
+
+/* ---- Slider ------------------------------------------------------------- */
+.slider { position: relative; background: var(--navy-900); overflow: hidden; }
+.slide {
+  display: none; min-height: 360px; padding: 56px 0;
+  background-size: cover; background-position: center; position: relative;
+}
+.slide.on { display: block; animation: fade .6s ease; }
+@keyframes fade { from { opacity: .3; } to { opacity: 1; } }
+.slide::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(7, 26, 51, .93) 0%, rgba(7, 26, 51, .70) 60%, rgba(7, 26, 51, .45) 100%);
+}
+.slide .wrap { position: relative; z-index: 2; }
+.slide .eyebrow {
+  display: inline-block; background: rgba(255, 255, 255, .13); border: 1px solid rgba(255, 255, 255, .28);
+  color: #f0f5fc; padding: 4px 12px; border-radius: 999px; font-size: .74rem;
+  letter-spacing: .09em; text-transform: uppercase; margin-bottom: 14px;
+}
+.slide h2 { color: #fff; font-size: clamp(1.6rem, 1.2rem + 2vw, 2.7rem); max-width: 20ch; }
+.slide p { color: #cddcee; max-width: 56ch; font-size: 1.02rem; }
+.slide-actions { display: flex; gap: 11px; flex-wrap: wrap; margin-top: 20px; }
+.slider-dots { position: absolute; bottom: 16px; left: 0; right: 0; z-index: 3;
+  display: flex; gap: 8px; justify-content: center; }
+.slider-dots button {
+  width: 11px; height: 11px; border-radius: 50%; border: 2px solid #fff;
+  background: transparent; cursor: pointer; padding: 0;
+}
+.slider-dots button[aria-current="true"] { background: var(--gold); border-color: var(--gold); }
+.slider-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 3;
+  background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .3);
+  color: #fff; width: 42px; height: 42px; border-radius: 50%; cursor: pointer; font-size: 1.2rem;
+}
+.slider-arrow:hover { background: rgba(255, 255, 255, .28); }
+.slider-arrow.prev { left: 14px; }
+.slider-arrow.next { right: 14px; }
+
+/* ---- Buttons ------------------------------------------------------------ */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px; justify-content: center;
+  padding: 10px 18px; border-radius: var(--radius); border: 1px solid transparent;
+  font: inherit; font-weight: 600; cursor: pointer; text-decoration: none;
+  background: var(--navy-600); color: #fff;
+}
+.btn:hover { background: var(--navy-700); color: #fff; }
+.btn-gold { background: var(--gold); color: #241a04; }
+.btn-gold:hover { background: #a87d14; color: #241a04; }
+.btn-outline { background: transparent; border-color: rgba(255, 255, 255, .55); color: #fff; }
+.btn-outline:hover { background: rgba(255, 255, 255, .16); color: #fff; }
+.btn-ghost { background: var(--surface); border-color: var(--line); color: var(--ink); }
+.btn-ghost:hover { background: var(--surface-alt); color: var(--ink); }
+.btn-sm { padding: 6px 13px; font-size: .85rem; }
+
+/* ---- Page furniture ----------------------------------------------------- */
+.page-head { background: var(--navy-800); color: #fff; padding: 34px 0 30px; }
+.page-head h1 { color: #fff; margin: 0; }
+.page-head p { color: #b9cbe2; margin: 6px 0 0; max-width: 70ch; }
+.crumbs { background: var(--surface-alt); border-bottom: 1px solid var(--line); font-size: .84rem; }
+.crumbs .wrap { padding: 9px 0; }
+.crumbs a { text-decoration: none; }
+.crumbs span { color: var(--ink-soft); }
+
+.section { padding: 48px 0; }
+.section.alt { background: var(--surface-alt); }
+.section-head { margin-bottom: 24px; max-width: 72ch; }
+.section-head .kicker {
+  display: block; color: var(--gold); font-size: .76rem; font-weight: 700;
+  letter-spacing: .13em; text-transform: uppercase; margin-bottom: 5px;
+}
+.section-head h2 { margin: 0; }
+.section-head p { color: var(--ink-soft); margin: 7px 0 0; }
+.section-head.center { margin-inline: auto; text-align: center; }
+
+.grid { display: grid; gap: 20px; }
+.cols-2 { grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); }
+.cols-3 { grid-template-columns: repeat(auto-fill, minmax(275px, 1fr)); }
+.cols-4 { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+.split { display: grid; grid-template-columns: minmax(0, 2fr) minmax(270px, 1fr); gap: 28px; }
+
+/* ---- Cards -------------------------------------------------------------- */
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--shadow);
+}
+.card .thumb { aspect-ratio: 16 / 10; background: var(--surface-alt); overflow: hidden; }
+.card .thumb img { width: 100%; height: 100%; object-fit: cover; }
+.card .body { padding: 15px 17px; flex: 1; display: flex; flex-direction: column; gap: 7px; }
+.card h3 { margin: 0; font-size: 1.03rem; }
+.card h3 a { color: inherit; text-decoration: none; }
+.card h3 a:hover { color: var(--navy-600); }
+.card .meta { color: var(--ink-soft); font-size: .81rem; }
+.card p { color: var(--ink-soft); font-size: .92rem; margin: 0; }
+.card .foot { margin-top: auto; padding-top: 6px; }
+
+.chip {
+  align-self: flex-start; display: inline-block; font-size: .69rem; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; padding: 3px 9px; border-radius: 3px;
+  background: var(--surface-alt); color: var(--ink-soft); border: 1px solid var(--line);
+}
+.chip.gold { background: #fbf0d5; color: #6a4c05; border-color: var(--gold-soft); }
+.chip.green { background: #e2f2ea; color: #0d4b32; border-color: #a9d8c3; }
+.chip.maroon { background: #fae9e9; color: #6d1f27; border-color: #e2b3b7; }
+
+/* ---- Statistics band ---------------------------------------------------- */
+.stats { background: var(--navy-800); color: #fff; padding: 32px 0; }
+.stat { text-align: center; padding: 8px; }
+.stat .n { font-family: var(--serif); font-size: 2.2rem; font-weight: 700; color: var(--gold-soft); }
+.stat .l { font-size: .82rem; color: #bccee4; text-transform: uppercase; letter-spacing: .07em; }
+
+/* ---- Panels, lists, tables ---------------------------------------------- */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  overflow: hidden; box-shadow: var(--shadow); }
+.panel-head {
+  background: var(--navy-700); color: #fff; padding: 11px 17px; font-family: var(--serif);
+  font-weight: 700; display: flex; justify-content: space-between; align-items: center; gap: 10px;
+}
+.panel-head a { color: var(--gold-soft); font-family: var(--sans); font-size: .82rem; text-decoration: none; }
+.panel-body { padding: 17px; }
+.list { list-style: none; margin: 0; padding: 0; }
+.list li { border-bottom: 1px solid var(--line); }
+.list li:last-child { border-bottom: 0; }
+.list a { display: block; padding: 11px 17px; text-decoration: none; color: var(--ink); }
+.list a:hover { background: var(--surface-alt); }
+.list .meta { display: block; color: var(--ink-soft); font-size: .78rem; margin-top: 2px; }
+
+.table-scroll { overflow-x: auto; }
+table.data { width: 100%; border-collapse: collapse; font-size: .91rem; min-width: 560px; }
+table.data th, table.data td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--line); }
+table.data th { background: var(--surface-alt); font-size: .76rem; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--ink-soft); }
+table.data tr:hover td { background: var(--surface-alt); }
+
+dl.kv { display: grid; grid-template-columns: minmax(130px, 33%) 1fr; margin: 0; }
+dl.kv dt { padding: 9px 0; color: var(--ink-soft); font-size: .86rem; border-bottom: 1px solid var(--line); }
+dl.kv dd { padding: 9px 0; margin: 0; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+dl.kv dd.multiline { white-space: pre-line; }
+
+/* ---- Office bearers ----------------------------------------------------- */
+.person { text-align: center; }
+.person .photo {
+  width: 122px; height: 122px; margin: 0 auto 11px; border-radius: 50%;
+  overflow: hidden; background: var(--surface-alt); border: 3px solid var(--gold-soft);
+  display: grid; place-items: center;
+}
+.person .photo span { font-family: var(--serif); font-size: 1.9rem; color: var(--navy-600); }
+.person .role { color: var(--gold); font-size: .8rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .07em; }
+.person .bio { color: var(--ink-soft); font-size: .89rem; }
+
+/* ---- Message from the chair --------------------------------------------- */
+.message-box { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 24px; align-items: start; }
+.message-box .portrait {
+  border: 4px solid var(--surface); box-shadow: var(--shadow); border-radius: var(--radius);
+  background: var(--surface-alt); aspect-ratio: 3 / 4; display: grid; place-items: center;
+  font-family: var(--serif); font-size: 2.4rem; color: var(--navy-600);
+}
+.message-box blockquote {
+  margin: 0; padding-left: 18px; border-left: 4px solid var(--gold);
+  font-size: 1.02rem; color: var(--ink);
+}
+
+/* ---- Gallery ------------------------------------------------------------ */
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(205px, 1fr)); gap: 13px; }
+.gallery figure {
+  margin: 0; position: relative; aspect-ratio: 4 / 3; border: 1px solid var(--line);
+  border-radius: var(--radius); overflow: hidden; background: var(--surface-alt);
+}
+.gallery button {
+  all: unset; display: block; width: 100%; height: 100%; cursor: zoom-in;
+}
+.gallery img { width: 100%; height: 100%; object-fit: cover; }
+.gallery figcaption {
+  position: absolute; inset: auto 0 0 0; padding: 22px 10px 8px; color: #fff; font-size: .79rem;
+  background: linear-gradient(transparent, rgba(7, 26, 51, .9)); pointer-events: none;
+}
+.lightbox {
+  position: fixed; inset: 0; background: rgba(4, 10, 20, .93); z-index: 150;
+  display: grid; place-items: center; padding: 22px;
+}
+.lightbox[hidden] { display: none; }
+.lightbox img { max-height: 80vh; max-width: 92vw; object-fit: contain; }
+.lightbox .cap { color: #dbe6f4; text-align: center; margin-top: 12px; font-size: .9rem; }
+.lightbox .close {
+  position: absolute; top: 14px; right: 18px; width: 42px; height: 42px; border-radius: 50%;
+  background: none; border: 1px solid rgba(255, 255, 255, .45); color: #fff;
+  font-size: 1.3rem; cursor: pointer;
+}
+
+/* ---- Forms -------------------------------------------------------------- */
+form.gov { display: grid; gap: 15px; }
+.field label { display: block; font-weight: 600; font-size: .89rem; margin-bottom: 5px; }
+.field input, .field select, .field textarea {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); color: var(--ink); font: inherit;
+}
+.field .hint { color: var(--ink-soft); font-size: .81rem; margin-top: 4px; }
+.field .req { color: var(--maroon); }
+.field-error { color: var(--maroon); font-size: .85rem; margin-top: 4px; }
+.field input[aria-invalid="true"], .field textarea[aria-invalid="true"] { border-color: var(--maroon); }
+
+.notice-strip {
+  border: 1px solid var(--line); border-left: 5px solid var(--navy-600);
+  background: var(--surface); padding: 13px 17px; border-radius: var(--radius);
+}
+.notice-strip.ok { border-left-color: var(--green); background: #e2f2ea; color: #0d4b32; }
+.notice-strip.warn { border-left-color: var(--gold); background: #fbf0d5; color: #4a3608; }
+.notice-strip.error { border-left-color: var(--maroon); background: #fae9e9; color: #6d1f27; }
+
+.filters { display: flex; gap: 9px; flex-wrap: wrap; margin-bottom: 20px; }
+.filters button {
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+  padding: 7px 14px; border-radius: 999px; cursor: pointer; font: inherit; font-size: .87rem;
+}
+.filters button[aria-pressed="true"] { background: var(--navy-600); color: #fff; border-color: var(--navy-600); }
+
+.empty { text-align: center; padding: 40px 20px; border: 1px dashed var(--line);
+  border-radius: var(--radius); color: var(--ink-soft); background: var(--surface); }
+
+/* ---- Footer ------------------------------------------------------------- */
+.site-footer { background: var(--navy-900); color: #b4c6dc; padding: 40px 0 0; margin-top: 22px; }
+.site-footer h3 { color: #fff; font-size: .92rem; letter-spacing: .05em;
+  text-transform: uppercase; font-family: var(--sans); }
+.site-footer a { color: #cbd9ec; text-decoration: none; font-size: .89rem; }
+.site-footer a:hover { color: #fff; text-decoration: underline; }
+.site-footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+.footer-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(205px, 1fr)); gap: 28px; }
+.footer-grid li { overflow-wrap: anywhere; }
+.footer-address { white-space: pre-line; }
+.footer-bar { margin-top: 30px; border-top: 1px solid rgba(255, 255, 255, .13);
+  padding: 15px 0; font-size: .81rem; display: flex; gap: 15px; flex-wrap: wrap; align-items: center; }
+.footer-bar .spacer { flex: 1; }
+
+/* ---- Responsive --------------------------------------------------------- */
+@media (max-width: 900px) {
+  .split { grid-template-columns: minmax(0, 1fr); }
+  .message-box { grid-template-columns: minmax(0, 1fr); }
+  .message-box .portrait { max-width: 170px; }
+}
+@media (max-width: 760px) {
+  .nav-toggle { display: block; }
+  .mainnav .wrap { display: none; flex-direction: column; }
+  .mainnav.open .wrap { display: flex; }
+  .mainnav a { border-bottom: 1px solid rgba(255, 255, 255, .12); }
+  .masthead .contact-block { text-align: left; }
+  .slide { min-height: 300px; padding: 38px 0; }
+  .section { padding: 34px 0; }
+}
+@media print {
+  .topbar, .mainnav, .nav-toggle, .ticker, .slider, .site-footer, .slide-actions { display: none !important; }
+  body { background: #fff; color: #000; }
+}
+
+</style>
+<link rel="stylesheet" href="assets/css/site.css">
+<script>
+  /* Apply the saved appearance before the first paint, so the page never flashes. */
+  (function () {
+    try {
+      var d = document.documentElement;
+      d.setAttribute('data-theme', localStorage.getItem('club-theme') || 'light');
+      d.setAttribute('data-contrast', localStorage.getItem('club-contrast') || 'normal');
+      d.setAttribute('data-font', localStorage.getItem('club-font') || 'md');
+    } catch (e) { /* private browsing keeps the defaults */ }
+  })();
+</script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div class="topbar">
+  <div class="wrap">
+    <span>Government of West Bengal · Registered Society</span>
+    <span class="spacer"></span>
+    <button type="button" data-appearance="font" title="Change the text size">A<sup>+</sup> Text size</button>
+    <button type="button" data-appearance="contrast" aria-pressed="false">◐ High contrast</button>
+    <button type="button" data-appearance="theme" aria-pressed="false">☾ Dark</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <svg class="emblem" width="68" height="68" viewBox="0 0 64 64"
+           role="img" aria-label="Club emblem">
+        <circle cx="32" cy="32" r="30" fill="#0b2545" stroke="#c8961e" stroke-width="2.5"/>
+        <circle cx="32" cy="32" r="23" fill="none" stroke="#f0cf7d" stroke-width="1"/>
+        <path d="M32 13l4.6 9.4 10.4 1.5-7.5 7.3 1.8 10.3L32 36.6l-9.3 4.9 1.8-10.3-7.5-7.3 10.4-1.5z" fill="#f0cf7d"/>
+        <path d="M20 45c4 4 8 6 12 6s8-2 12-6" fill="none" stroke="#f0cf7d" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    <div class="titles">
+      <h1 data-content="orgName">Krishnanagar Youth &amp; Cultural Club</h1>
+      <p data-content="tagline">Service · Culture · Community · Established 1978</p>
+    </div>
+    <div class="contact-block">
+      <strong data-content="phone">+91 33 2555 0100</strong>
+      <a href="mailto:office@example.org" data-content="email" data-content-href="mailto:">office@example.org</a><br>
+      <span data-content="hoursShort">Monday to Saturday, 10:00 AM – 5:00 PM</span>
+    </div>
+  </div>
+</header>
+
+<button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">☰ Menu</button>
+<nav class="mainnav" id="primary-nav" aria-label="Primary">
+  <div class="wrap">
+        <a href="index.html">Home</a>
+        <a href="about.html">About Us</a>
+        <a href="committee.html">Committee</a>
+        <a href="members.html">Members</a>
+        <a href="events.html" class="active" aria-current="page">Events</a>
+        <a href="news.html">News</a>
+        <a href="notices.html">Notice Board</a>
+        <a href="gallery.html">Gallery</a>
+        <a href="downloads.html">Downloads</a>
+        <a href="membership.html">Membership</a>
+        <a href="contact.html">Contact</a>
+  </div>
+</nav>
+
+<div class="ticker">
+  <div class="wrap">
+    <span class="label">Notices</span>
+    <div class="ticker-track">
+      <div class="ticker-move" data-content-notices><a href="notices.html">▸ Annual General Meeting — 12 September 2026, 11:00 AM at the club hall</a><a href="membership.html">▸ Membership renewal for 2026-27 is open until 30 September</a><a href="events.html">▸ Blood donation camp: registrations close on 5 September</a><a href="downloads.html">▸ Audited accounts for 2024-25 are now available to download</a><a href="news.html">▸ Club receives the district award for social service</a><a href="notices.html">▸ Annual General Meeting — 12 September 2026, 11:00 AM at the club hall</a><a href="membership.html">▸ Membership renewal for 2026-27 is open until 30 September</a><a href="events.html">▸ Blood donation camp: registrations close on 5 September</a><a href="downloads.html">▸ Audited accounts for 2024-25 are now available to download</a><a href="news.html">▸ Club receives the district award for social service</a></div>
+    </div>
+  </div>
+</div>
+
+<main id="main" tabindex="-1">
+<section class="page-head">
+  <div class="wrap">
+    <h1>Events</h1>
+    <p>Programmes, camps and tournaments organised by the club.</p>
+  </div>
+</section>
+<nav class="crumbs" aria-label="Breadcrumb">
+  <div class="wrap"><a href="index.html">Home</a> <span>›</span> <span>Events</span></div>
+</nav>
+<section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="kicker">Calendar</span>
+        <h2>Events and programmes</h2>
+        <p>Every programme announced by the office appears here. Registration, where it is open,
+          closes at the time stated against the event.</p>
+      </div>
+
+      <div class="filters" data-filter-group="[data-category]">
+        <button type="button" data-filter="all" aria-pressed="true">All events</button>
+        <button type="button" data-filter="upcoming" aria-pressed="false">Upcoming</button>
+        <button type="button" data-filter="past" aria-pressed="false">Past</button>
+      </div>
+
+      <div class="grid cols-3"><article class="card" data-category="upcoming">
+          <div class="body">
+            <span class="chip gold">Cultural</span>
+            <h3>Annual Cultural Festival 2026</h3>
+            <p class="meta">21–23 September 2026, 5:00 PM<br><span aria-hidden="true">📍</span> Club Grounds, Rabindra Sarani</p>
+            <p>Three evenings of music, recitation and drama presented by members of every age group, closing with the prize distribution ceremony. Entry is free for members and their families.</p>
+            <div class="foot"><span class="chip green">Registration open</span></div>
+          </div>
+        </article><article class="card" data-category="upcoming">
+          <div class="body">
+            <span class="chip gold">Social service</span>
+            <h3>Blood Donation Camp</h3>
+            <p class="meta">7 September 2026, 9:00 AM – 2:00 PM<br><span aria-hidden="true">📍</span> Community Hall, Ward 12</p>
+            <p>Held with the district blood bank. Donors should carry a photo identity card and should eat before arriving. Refreshments and a donor certificate are provided.</p>
+            <div class="foot"><span class="chip green">Registration open</span></div>
+          </div>
+        </article><article class="card" data-category="upcoming">
+          <div class="body">
+            <span class="chip gold">Sports</span>
+            <h3>Inter-Ward Football Tournament</h3>
+            <p class="meta">2–9 October 2026, 8:00 AM<br><span aria-hidden="true">📍</span> Municipal Stadium</p>
+            <p>Sixteen ward teams compete over eight days. Team entries are accepted at the club office until 25 September, with a registration fee of ₹500 per team.</p>
+            <div class="foot"><span class="chip green">Registration open</span></div>
+          </div>
+        </article><article class="card" data-category="upcoming">
+          <div class="body">
+            <span class="chip gold">Meeting</span>
+            <h3>Annual General Meeting</h3>
+            <p class="meta">12 September 2026, 11:00 AM<br><span aria-hidden="true">📍</span> Club Hall</p>
+            <p>The audited accounts and the annual report for 2025-26 will be placed before the general body. All members are requested to attend with their membership cards.</p>
+            <div class="foot"><span class="chip maroon">Registration closed</span></div>
+          </div>
+        </article><article class="card" data-category="past">
+          <div class="body">
+            <span class="chip gold">Health</span>
+            <h3>Free Health &amp; Eye Check-up Camp</h3>
+            <p class="meta">19 July 2026, 9:00 AM – 3:00 PM<br><span aria-hidden="true">📍</span> Club Premises</p>
+            <p>General physician consultation, blood pressure and sugar screening, and eye testing by volunteer specialists. 214 residents attended.</p>
+            <div class="foot"><span class="chip maroon">Registration closed</span></div>
+          </div>
+        </article><article class="card" data-category="past">
+          <div class="body">
+            <span class="chip gold">Environment</span>
+            <h3>Tree Planting Drive</h3>
+            <p class="meta">5 June 2026, 7:00 AM<br><span aria-hidden="true">📍</span> Ward roads and pond bank</p>
+            <p>Two hundred saplings planted along the ward roads to mark World Environment Day, with students of three local schools taking part.</p>
+            <div class="foot"><span class="chip maroon">Registration closed</span></div>
+          </div>
+        </article><article class="card" data-category="past">
+          <div class="body">
+            <span class="chip gold">Education</span>
+            <h3>Scholarship Distribution</h3>
+            <p class="meta">18 May 2026, 4:00 PM<br><span aria-hidden="true">📍</span> Club Reading Room</p>
+            <p>Two scholarships of ₹12,000 each awarded to students of the ward for higher secondary study.</p>
+            <div class="foot"><span class="chip maroon">Registration closed</span></div>
+          </div>
+        </article><article class="card" data-category="past">
+          <div class="body">
+            <span class="chip gold">Cultural</span>
+            <h3>Rabindra Jayanti</h3>
+            <p class="meta">9 May 2026, 6:00 PM<br><span aria-hidden="true">📍</span> Club Hall</p>
+            <p>Songs, recitation and a short play presented by the cultural wing.</p>
+            <div class="foot"><span class="chip maroon">Registration closed</span></div>
+          </div>
+        </article></div>
+
+      <p class="notice-strip" style="margin-top:26px">
+        <strong>Registering.</strong> Registration for club programmes is taken at the office during
+        working hours, or by telephone on <a href="tel:+913325550100">+91 33 2555 0100</a>.
+        Members should quote their membership number.
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <h3 data-content="shortName">KYCC</h3>
+        <p style="font-size:.89rem" data-content="orgName">Krishnanagar Youth &amp; Cultural Club</p>
+        <p style="font-size:.83rem"><span data-content="registration">Registered under the West Bengal Societies Registration Act — Reg. No. S/1L/12345 of 1978-79</span><br>
+          Established <span data-content="established">1978</span></p>
+      </div>
+      <div>
+        <h3>Quick links</h3>
+        <ul><li><a href="about.html">About Us</a></li><li><a href="committee.html">Committee</a></li><li><a href="members.html">Members</a></li><li><a href="events.html">Events</a></li><li><a href="news.html">News</a></li><li><a href="notices.html">Notice Board</a></li></ul>
+      </div>
+      <div>
+        <h3>Office</h3>
+        <ul>
+          <li class="footer-address" data-content="address">Community Hall, 14 Rabindra Sarani
+Ward No. 12, Krishnanagar
+Nadia, West Bengal — 741101</li>
+          <li><a href="tel:+913325550100" data-content="phone" data-content-href="tel:">+91 33 2555 0100</a></li>
+          <li><a href="mailto:office@example.org" data-content="email" data-content-href="mailto:">office@example.org</a></li>
+          <li style="font-size:.83rem" data-content="hours">Monday to Saturday, 10:00 AM – 5:00 PM (closed on public holidays)</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Visit us</h3>
+        <ul>
+          <li><a href="contact.html">Write to the office</a></li>
+          <li><a href="membership.html">Become a member</a></li>
+          <li><a href="notices.html">Notice board</a></li>
+          <li><a href="downloads.html">Documents &amp; forms</a></li>
+        </ul>
+        <p style="font-size:.79rem;margin-top:11px;opacity:.85">
+          The office is open Monday to Saturday. Notices are also displayed on
+          the board at the club premises.</p>
+      </div>
+    </div>
+    <div class="footer-bar">
+      <span>© <span data-year>2026</span> <span data-content="orgName">Krishnanagar Youth &amp; Cultural Club</span>.
+        All rights reserved.</span>
+      <span class="spacer"></span>
+      <a href="contact.html">Contact</a>
+      <a href="downloads.html">Downloads</a>
+      <a href="notices.html">Notices</a>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/content.js"></script>
+<script src="assets/js/theme.js"></script>
+<script>
+/* Everything the pages need, in one small file. No libraries, no build step.
+   If a browser blocks scripts entirely, every page still reads correctly —
+   nothing here is required to see the content. */
+(function () {
+  'use strict';
+
+  // ---- Content overrides --------------------------------------------------
+  // assets/js/content.js is optional. When an administrator has published one,
+  // its values replace the text that is written into the pages.
+  var content = (typeof window.CLUB_CONTENT === 'object' && window.CLUB_CONTENT) || {};
+
+  Object.keys(content).forEach(function (key) {
+    var value = content[key];
+    if (key === 'notices' || value === undefined || value === null || value === '') return;
+
+    Array.prototype.forEach.call(
+      document.querySelectorAll('[data-content="' + key + '"]'),
+      function (node) {
+        node.textContent = value;
+        var prefix = node.getAttribute('data-content-href');
+        if (prefix) {
+          // tel: links must not carry spaces.
+          node.setAttribute('href', prefix + (prefix === 'tel:' ? String(value).replace(/\s/g, '') : value));
+        }
+      }
+    );
+  });
+
+  if (Array.isArray(content.notices) && content.notices.length) {
+    var track = document.querySelector('[data-content-notices]');
+    if (track) {
+      track.textContent = '';
+      // Printed twice so the strip scrolls without a visible gap.
+      for (var pass = 0; pass < 2; pass++) {
+        content.notices.forEach(function (notice) {
+          var link = document.createElement('a');
+          link.href = notice.href || 'notices.html';
+          // Administrator text is inserted as text, never as markup.
+          link.textContent = '\u25B8 ' + (notice.text || '');
+          track.appendChild(link);
+        });
+      }
+    }
+  }
+
+  // ---- Appearance ---------------------------------------------------------
+  var root = document.documentElement;
+
+  function remember(key, value) {
+    try { localStorage.setItem(key, value); } catch (e) { /* private browsing */ }
+  }
+
+  function setAppearance(attribute, key, value) {
+    root.setAttribute(attribute, value);
+    remember(key, value);
+  }
+
+  document.addEventListener('click', function (event) {
+    var button = event.target.closest('[data-appearance]');
+    if (!button) return;
+    var kind = button.getAttribute('data-appearance');
+
+    if (kind === 'theme') {
+      var dark = root.getAttribute('data-theme') === 'dark';
+      setAppearance('data-theme', 'club-theme', dark ? 'light' : 'dark');
+      button.setAttribute('aria-pressed', String(!dark));
+      button.textContent = dark ? '☾ Dark' : '☀ Light';
+    } else if (kind === 'contrast') {
+      var high = root.getAttribute('data-contrast') === 'high';
+      setAppearance('data-contrast', 'club-contrast', high ? 'normal' : 'high');
+      button.setAttribute('aria-pressed', String(!high));
+    } else if (kind === 'font') {
+      var next = { md: 'lg', lg: 'xl', xl: 'md' };
+      setAppearance('data-font', 'club-font', next[root.getAttribute('data-font') || 'md']);
+    }
+  });
+
+  // ---- Mobile menu --------------------------------------------------------
+  var toggle = document.querySelector('.nav-toggle');
+  var nav = document.querySelector('.mainnav');
+  if (toggle && nav) {
+    toggle.addEventListener('click', function () {
+      var open = nav.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', String(open));
+    });
+  }
+
+  // ---- Home page slider ---------------------------------------------------
+  var slider = document.querySelector('[data-slider]');
+  if (slider) {
+    var slides = Array.prototype.slice.call(slider.querySelectorAll('.slide'));
+    var dots = Array.prototype.slice.call(slider.querySelectorAll('.slider-dots button'));
+    var index = 0;
+    var timer = null;
+
+    function show(next) {
+      index = (next + slides.length) % slides.length;
+      slides.forEach(function (slide, i) { slide.classList.toggle('on', i === index); });
+      dots.forEach(function (dot, i) { dot.setAttribute('aria-current', String(i === index)); });
+    }
+
+    function play() {
+      var motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      if (motion.matches) return;                 // respect the visitor's setting
+      // The Admin Panel can turn the automatic change off, or slow it down.
+      if (slider.getAttribute('data-autoplay') === 'off') return;
+      var wait = parseInt(slider.getAttribute('data-interval'), 10);
+      if (!isFinite(wait) || wait < 2000) wait = 6000;
+      stop();
+      timer = setInterval(function () { show(index + 1); }, wait);
+    }
+    function stop() { if (timer) { clearInterval(timer); timer = null; } }
+
+    dots.forEach(function (dot, i) {
+      dot.addEventListener('click', function () { show(i); play(); });
+    });
+    var prev = slider.querySelector('.slider-arrow.prev');
+    var next = slider.querySelector('.slider-arrow.next');
+    if (prev) prev.addEventListener('click', function () { show(index - 1); play(); });
+    if (next) next.addEventListener('click', function () { show(index + 1); play(); });
+
+    slider.addEventListener('mouseenter', stop);
+    slider.addEventListener('mouseleave', play);
+    slider.addEventListener('focusin', stop);
+    show(0);
+    play();
+  }
+
+  // ---- Gallery lightbox ---------------------------------------------------
+  var lightbox = document.querySelector('[data-lightbox]');
+  if (lightbox) {
+    var lbImage = lightbox.querySelector('img');
+    var lbCaption = lightbox.querySelector('.cap');
+
+    function openLightbox(button) {
+      var figure = button.closest('figure');
+      var image = figure.querySelector('img');
+      if (image) { lbImage.src = image.src; lbImage.alt = image.alt || ''; }
+      // Captions are written by the office; insert them as text, never markup.
+      lbCaption.textContent = figure.getAttribute('data-caption') || (image && image.alt) || '';
+      lightbox.hidden = false;
+      lightbox.querySelector('.close').focus();
+    }
+    function closeLightbox() { lightbox.hidden = true; }
+
+    document.addEventListener('click', function (event) {
+      var opener = event.target.closest('.gallery button');
+      if (opener) { openLightbox(opener); return; }
+      if (event.target.closest('.lightbox .close') || event.target === lightbox) closeLightbox();
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && !lightbox.hidden) closeLightbox();
+    });
+  }
+
+  // ---- Filter buttons on list pages --------------------------------------
+  Array.prototype.forEach.call(document.querySelectorAll('[data-filter-group]'), function (group) {
+    var targetSelector = group.getAttribute('data-filter-group');
+    group.addEventListener('click', function (event) {
+      var button = event.target.closest('button[data-filter]');
+      if (!button) return;
+      var wanted = button.getAttribute('data-filter');
+
+      Array.prototype.forEach.call(group.querySelectorAll('button[data-filter]'), function (other) {
+        other.setAttribute('aria-pressed', String(other === button));
+      });
+      Array.prototype.forEach.call(document.querySelectorAll(targetSelector), function (item) {
+        var category = item.getAttribute('data-category') || '';
+        item.style.display = (wanted === 'all' || category === wanted) ? '' : 'none';
+      });
+    });
+  });
+
+  // ---- Search box on member and notice tables -----------------------------
+  Array.prototype.forEach.call(document.querySelectorAll('[data-table-search]'), function (input) {
+    var rows = document.querySelectorAll(input.getAttribute('data-table-search') + ' tbody tr');
+    input.addEventListener('input', function () {
+      var needle = input.value.trim().toLowerCase();
+      var shown = 0;
+      Array.prototype.forEach.call(rows, function (row) {
+        var match = row.textContent.toLowerCase().indexOf(needle) !== -1;
+        row.style.display = match ? '' : 'none';
+        if (match) shown++;
+      });
+      var note = document.querySelector(input.getAttribute('data-search-count'));
+      if (note) note.textContent = shown + (shown === 1 ? ' entry' : ' entries') + ' shown';
+    });
+  });
+
+  // ---- Contact form -------------------------------------------------------
+  var form = document.querySelector('[data-contact-form]');
+  if (form) {
+    // The status strip sits above the form, not inside it, so look it up on the
+    // page rather than within the form element.
+    var status = document.querySelector('[data-status]');
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var values = {
+        name: form.name.value.trim(),
+        email: form.email.value.trim(),
+        phone: form.phone.value.trim(),
+        subject: form.subject.value.trim(),
+        message: form.message.value.trim()
+      };
+
+      var problems = {};
+      if (!values.name) problems.name = 'Please give your name.';
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) problems.email = 'Please give a valid e-mail address.';
+      if (!values.subject) problems.subject = 'Please give a subject.';
+      if (values.message.length < 10) problems.message = 'Please write at least a sentence.';
+
+      ['name', 'email', 'subject', 'message'].forEach(function (field) {
+        var box = form.querySelector('[data-error-for="' + field + '"]');
+        if (box) box.textContent = problems[field] || '';
+        form[field].setAttribute('aria-invalid', problems[field] ? 'true' : 'false');
+      });
+      if (Object.keys(problems).length) { status.className = 'notice-strip error'; 
+        status.textContent = 'Please correct the fields marked above.'; status.hidden = false; return; }
+
+      status.className = 'notice-strip';
+      status.textContent = 'Sending…';
+      status.hidden = false;
+
+      // The backend, if this site is served alongside it, stores the enquiry.
+      fetch('/api/enquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values)
+      }).then(function (response) {
+        if (!response.ok) throw new Error('status ' + response.status);
+        return response.json();
+      }).then(function (result) {
+        form.reset();
+        status.className = 'notice-strip ok';
+        status.textContent = (result && result.message) || 'Thank you — your enquiry has reached the office.';
+      }).catch(function () {
+        // On a plain host there is no API. Say so, and hand over a way that works.
+        var office = form.getAttribute('data-office-email') || '';
+        var link = 'mailto:' + office
+          + '?subject=' + encodeURIComponent(values.subject)
+          + '&body=' + encodeURIComponent(values.message + '\n\n' + values.name + ' — ' + values.email
+              + (values.phone ? ' — ' + values.phone : ''));
+        status.className = 'notice-strip warn';
+        status.innerHTML = '';
+        status.appendChild(document.createTextNode(
+          'This website is hosted without the enquiry service, so the form cannot deliver your '
+          + 'message from here. '));
+        var anchor = document.createElement('a');
+        anchor.href = link;
+        anchor.textContent = 'Send it by e-mail instead';
+        status.appendChild(anchor);
+        status.appendChild(document.createTextNode(' — your text is already filled in.'));
+      });
+    });
+  }
+
+  // ---- Year in the footer -------------------------------------------------
+  Array.prototype.forEach.call(document.querySelectorAll('[data-year]'), function (node) {
+    node.textContent = String(new Date().getFullYear());
+  });
+})();
+
+</script>
+</body>
+</html>

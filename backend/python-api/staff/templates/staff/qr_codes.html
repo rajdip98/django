@@ -1,0 +1,56 @@
+{% extends 'staff/base.html' %}
+{% block heading %}QR codes{% endblock %}
+{% block content %}
+<div class="warn-banner" style="margin-bottom:18px">
+  Codes are drawn from their stored target each time they are requested, so changing the
+  target here repoints every copy already printed or published — the image itself never
+  needs replacing.
+</div>
+
+<div class="panel-card">
+  <header>
+    <h2>{{ codes|length }} code{{ codes|length|pluralize }}</h2>
+    <a class="btn btn-sm btn-primary" href="{% url 'staff:qr_create' %}">Add a QR code</a>
+  </header>
+  <div class="table-scroll">
+    <table class="gov-table">
+      <thead>
+        <tr><th style="width:110px">Code</th><th>Label &amp; target</th>
+            <th style="width:170px">Placement</th><th style="width:110px">Status</th>
+            <th style="width:150px">Updated</th><th style="width:170px">Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for code in codes %}
+          <tr>
+            <td>
+              <div style="background:#fff;padding:6px;border:1px solid var(--line);border-radius:4px;width:86px">
+                <img src="{{ code.display_url }}" alt="QR code for {{ code.label }}"
+                     style="width:100%;display:block">
+              </div>
+            </td>
+            <td>
+              <strong>{{ code.label }}</strong>
+              {% if code.image %}<span class="chip gold">Uploaded image</span>{% endif %}
+              <br><span style="font-size:.82rem;color:var(--ink-soft);word-break:break-all">{{ code.payload|truncatechars:110 }}</span>
+              {% if code.caption %}<br><span style="font-size:.78rem;color:var(--ink-soft)">{{ code.caption }}</span>{% endif %}
+            </td>
+            <td>{{ code.get_placement_display }}</td>
+            <td>{% if code.is_active %}<span class="chip green">Live</span>
+                {% else %}<span class="chip">Switched off</span>{% endif %}</td>
+            <td style="font-size:.82rem">{{ code.updated_at|date:"d M Y, H:i" }}
+              {% if code.updated_by %}<br><span style="color:var(--ink-soft)">by {{ code.updated_by.username }}</span>{% endif %}</td>
+            <td class="table-actions">
+              <a class="btn btn-sm btn-ghost" href="{{ code.display_url }}" target="_blank" rel="noopener">View</a>
+              <a class="btn btn-sm btn-ghost" href="{% url 'staff:qr_edit' code.pk %}">Edit</a>
+              <a class="btn btn-sm btn-ghost" href="{% url 'staff:qr_delete' code.pk %}">Delete</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" style="text-align:center;padding:26px;color:var(--ink-soft)">
+            No QR codes yet. <a href="{% url 'staff:qr_create' %}">Create the first one.</a></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

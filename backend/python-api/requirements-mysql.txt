@@ -1,0 +1,11 @@
+# Install alongside requirements.txt when DATABASE_URL points at MySQL or MariaDB:
+#   pip install -r requirements.txt -r requirements-mysql.txt
+#
+# mysqlclient is the faster C driver and needs build tools plus the MySQL client
+# headers (Debian/Ubuntu: apt install libmysqlclient-dev pkg-config build-essential).
+mysqlclient==2.2.8
+
+# If mysqlclient will not build — common on Windows or a locked-down host — delete
+# the line above and use this pure-Python driver instead. The project registers it
+# automatically; nothing else changes.
+# PyMySQL==1.1.1

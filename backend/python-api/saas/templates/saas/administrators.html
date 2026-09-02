@@ -1,0 +1,71 @@
+{% extends 'saas/base.html' %}
+{% block content %}
+<div class="panel-card">
+  <header>
+    <h2>{{ accounts|length }} administrator{{ accounts|length|pluralize }} across all websites</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <form method="get" style="display:flex;gap:8px">
+        <select class="gov-input gov-select" name="tenant" data-autosubmit>
+          <option value="">All websites</option>
+          {% for t in tenants %}
+            <option value="{{ t.slug }}" {% if active_tenant == t.slug %}selected{% endif %}>{{ t.name }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn btn-sm btn-ghost" type="submit">Filter</button>
+      </form>
+      <a class="btn btn-sm btn-primary" href="{% url 'saas:administrator_create' %}">Create administrator</a>
+    </div>
+  </header>
+  <div class="table-scroll">
+    <table class="gov-table">
+      <thead><tr><th>Account</th><th style="width:170px">Website</th><th style="width:120px">Role</th>
+        <th style="width:150px">Password</th><th style="width:100px">Status</th>
+        <th style="width:230px">Actions</th></tr></thead>
+      <tbody>
+        {% for a in accounts %}
+          <tr>
+            <td><strong>{{ a.display_name }}</strong>
+              <br><span style="font-size:.8rem;color:var(--ink-soft)">{{ a.user.username }} · {{ a.user.email }}</span></td>
+            <td>{{ a.tenant.name|default:"— unassigned —" }}</td>
+            <td>{% if a.is_super_admin %}<span class="chip solid">Super Admin</span>
+                {% else %}<span class="chip green">Admin</span>{% endif %}</td>
+            <td>{% if a.must_change_password %}<span class="chip gold">Default — change due</span>
+                {% else %}<span style="font-size:.8rem;color:var(--ink-soft)">Changed {{ a.password_changed_at|date:"d M Y" }}</span>{% endif %}</td>
+            <td>{% if a.is_enabled %}<span class="chip green">Active</span>
+                {% else %}<span class="chip maroon">Suspended</span>{% endif %}</td>
+            <td class="table-actions">
+              <a class="btn btn-sm btn-ghost" href="{% url 'saas:administrator_edit' a.pk %}">Edit</a>
+              <form class="inline-form" method="post" action="{% url 'saas:administrator_reset' a.pk %}">
+                {% csrf_token %}<button class="btn btn-sm btn-ghost" type="submit">Reset password</button>
+              </form>
+              <form class="inline-form" method="post" action="{% url 'saas:administrator_toggle' a.pk %}">
+                {% csrf_token %}<button class="btn btn-sm btn-ghost" type="submit">
+                  {% if a.is_enabled %}Suspend{% else %}Restore{% endif %}</button>
+              </form>
+              <a class="btn btn-sm btn-ghost" href="{% url 'saas:administrator_delete' a.pk %}">Delete</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" style="text-align:center;padding:26px;color:var(--ink-soft)">
+            No administrators yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="panel-card" style="margin-top:18px">
+  <header><h2>How administrator accounts work</h2></header>
+  <div class="inner" style="font-size:.89rem;color:var(--ink-soft)">
+    <ul style="margin:0;padding-left:1.1em">
+      <li>Every new account starts on the shared default password and must change it before
+        it can use the panel at all.</li>
+      <li>An administrator belongs to one website. A Super Admin manages that website fully;
+        an Admin manages its content only.</li>
+      <li>Neither can open this platform panel with their own account — that needs the
+        platform passphrase, and every attempt is recorded.</li>
+      <li><strong>Reset password</strong> puts an account back on the default and re-arms the
+        forced change. Use it when someone is locked out.</li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

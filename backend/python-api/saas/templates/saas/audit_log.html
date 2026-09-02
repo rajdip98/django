@@ -1,0 +1,36 @@
+{% extends 'saas/base.html' %}
+{% block content %}
+<div class="panel-card">
+  <header>
+    <h2>{{ entries.paginator.count }} entr{{ entries.paginator.count|pluralize:"y,ies" }} — all websites</h2>
+    <form method="get" style="display:flex;gap:8px">
+      <select class="gov-input gov-select" name="action" data-autosubmit>
+        <option value="">All actions</option>
+        {% for value, label in actions %}
+          <option value="{{ value }}" {% if active_action == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn btn-sm btn-primary" type="submit">Filter</button>
+    </form>
+  </header>
+  <div class="table-scroll">
+    <table class="gov-table">
+      <thead><tr><th style="width:160px">When (UTC)</th><th style="width:140px">Account</th>
+        <th style="width:190px">Action</th><th>Target &amp; detail</th><th style="width:130px">IP</th></tr></thead>
+      <tbody>
+        {% for e in entries %}
+          <tr><td>{{ e.created_at|date:"d M Y, H:i:s" }}</td>
+            <td>{{ e.actor_label }}{% if e.was_elevated %}<br><span class="chip gold">elevated</span>{% endif %}</td>
+            <td>{{ e.get_action_display }}</td>
+            <td>{{ e.target }}{% if e.detail %}<br><span style="font-size:.8rem;color:var(--ink-soft)">{{ e.detail }}</span>{% endif %}</td>
+            <td style="font-size:.8rem">{{ e.ip_address|default:"—" }}</td></tr>
+        {% empty %}
+          <tr><td colspan="5" style="text-align:center;padding:26px;color:var(--ink-soft)">
+            No entries match.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include 'club/partials/pagination.html' with page_obj=entries %}
+{% endblock %}

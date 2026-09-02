@@ -1,0 +1,41 @@
+{% extends 'staff/base.html' %}
+{% block heading %}Platform access{% endblock %}
+{% block content %}
+<div style="max-width:640px">
+  {% if not secret_enabled %}
+    <div class="danger-banner" style="margin-bottom:18px">
+      <strong>Passphrase access is switched off.</strong> Only platform accounts can open the
+      platform panel.</div>
+  {% else %}
+    <div class="warn-banner" style="margin-bottom:18px">
+      You are signed in as a <strong>website administrator</strong>. The platform panel is a
+      separate system that controls every website on this installation — creating websites,
+      issuing administrator accounts and reading the audit trail for all of them.
+      Entering the platform passphrase opens it for <strong>20 minutes</strong>. Every
+      attempt, successful or not, is recorded against your username.
+    </div>
+  {% endif %}
+  <div class="panel-card">
+    <header><h2>Enter the platform passphrase</h2></header>
+    <div class="inner">
+      <form method="post" class="gov-form" data-validate novalidate>
+        {% csrf_token %}
+        {% include 'club/partials/field.html' with field=form.passphrase full=True %}
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit" {% if not secret_enabled %}disabled{% endif %}>
+            Open the platform panel</button>
+          <a class="btn btn-ghost" href="{% url 'staff:dashboard' %}">Back to my website</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="panel-card" style="margin-top:18px">
+    <header><h2>What you can already do</h2></header>
+    <div class="inner" style="font-size:.88rem;color:var(--ink-soft)">
+      Without the platform passphrase your account manages your own website in full: its name
+      and logo, header, footer, banners, files, QR codes and — for a Super Admin — that
+      website's own administrator accounts.
+    </div>
+  </div>
+</div>
+{% endblock %}

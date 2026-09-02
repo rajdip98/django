@@ -1,0 +1,54 @@
+{% extends 'saas/base.html' %}
+{% block content %}
+<div class="panel-card">
+  <header>
+    <h2>{{ tenants|length }} website{{ tenants|length|pluralize }}</h2>
+    <a class="btn btn-sm btn-primary" href="{% url 'saas:tenant_create' %}">Add a website</a>
+  </header>
+  <div class="table-scroll">
+    <table class="gov-table">
+      <thead><tr><th>Name</th><th style="width:180px">Domain</th><th style="width:110px">Plan</th>
+        <th style="width:90px">Admins</th><th style="width:110px">Status</th>
+        <th style="width:220px">Actions</th></tr></thead>
+      <tbody>
+        {% for t in tenants %}
+          <tr>
+            <td><strong>{{ t.name }}</strong>
+              {% if t.is_default %}<span class="chip gold">Default</span>{% endif %}
+              {% if t.notes %}<br><span style="font-size:.8rem;color:var(--ink-soft)">{{ t.notes|truncatewords:14 }}</span>{% endif %}</td>
+            <td>{{ t.domain|default:"(any host)" }}</td>
+            <td>{{ t.get_plan_display }}</td>
+            <td>{{ t.admins }}</td>
+            <td>{% if t.is_active %}<span class="chip green">Online</span>
+                {% else %}<span class="chip maroon">Offline</span>{% endif %}</td>
+            <td class="table-actions">
+              <a class="btn btn-sm btn-ghost" href="{% url 'saas:tenant_edit' t.pk %}">Edit</a>
+              <a class="btn btn-sm btn-ghost" href="{% url 'saas:administrator_create' %}">Add admin</a>
+              <form class="inline-form" method="post" action="{% url 'saas:tenant_toggle' t.pk %}">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-ghost" type="submit">
+                  {% if t.is_active %}Take offline{% else %}Bring online{% endif %}</button>
+              </form>
+              <a class="btn btn-sm btn-ghost" href="{% url 'saas:tenant_delete' t.pk %}">Delete</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<div class="panel-card" style="margin-top:18px">
+  <header><h2>How websites are told apart</h2></header>
+  <div class="inner" style="font-size:.89rem;color:var(--ink-soft)">
+    <ul style="margin:0;padding-left:1.1em">
+      <li>A request is matched to a website by its domain. Point each domain at this server
+        and enter it above.</li>
+      <li>The website marked <strong>Default</strong> answers when no domain matches — useful
+        while you are still on one site.</li>
+      <li>Each website keeps its own name, logo, header, footer, banners, programmes, notices
+        and QR codes. Nothing is shared.</li>
+      <li>An administrator belongs to exactly one website and cannot see another's content.</li>
+    </ul>
+  </div>
+</div>
+{% endblock %}

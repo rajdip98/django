@@ -1,0 +1,81 @@
+{% extends 'club/base.html' %}
+{% load club_extras %}
+
+{% block content %}
+<div class="page-header">
+  <div class="wrap">
+    <h1>Search</h1>
+    {% if query %}
+      <p>{{ result_count }} result{{ result_count|pluralize }} for “{{ query }}”.</p>
+    {% else %}
+      <p>Search across pages, events, news, gallery, team members and downloads.</p>
+    {% endif %}
+  </div>
+</div>
+
+<section class="section">
+  <div class="wrap">
+    <div class="filterbar">
+      <form action="" method="get" role="search">
+        <label class="sr-only" for="page-search">Search terms</label>
+        <input class="gov-input" type="search" id="page-search" name="q" value="{{ query }}"
+               placeholder="Type a keyword and press enter" autofocus>
+        <button class="btn btn-primary" type="submit">Search</button>
+      </form>
+      <div class="pill-row">
+        <a class="pill {% if section == 'all' %}active{% endif %}" href="{% query_replace in='all' %}">Everything</a>
+        <a class="pill {% if section == 'events' %}active{% endif %}" href="{% query_replace in='events' %}">Events</a>
+        <a class="pill {% if section == 'news' %}active{% endif %}" href="{% query_replace in='news' %}">News</a>
+        <a class="pill {% if section == 'team' %}active{% endif %}" href="{% query_replace in='team' %}">Team</a>
+        <a class="pill {% if section == 'resources' %}active{% endif %}" href="{% query_replace in='resources' %}">Downloads</a>
+        <a class="pill {% if section == 'gallery' %}active{% endif %}" href="{% query_replace in='gallery' %}">Gallery</a>
+      </div>
+    </div>
+
+    {% if counts %}
+      <p style="font-size:.85rem;color:var(--ink-soft)">
+        Matches by section:
+        {% for name, count in counts %}<span class="chip">{{ name }}: {{ count }}</span> {% endfor %}
+      </p>
+    {% endif %}
+
+    {% if results %}
+      <div class="stack">
+        {% for result in results %}
+          <div class="result-item">
+            <div>
+              <span class="chip">{{ result.category }}</span>
+              <h3 style="margin-top:8px"><a href="{{ result.url }}">{{ result.title }}</a></h3>
+              {% if result.description %}<p class="card-text" style="margin:0">{{ result.description }}…</p>{% endif %}
+              {% if result.date %}<span class="meta">📅 {{ result.date|date:"d M Y" }}</span>{% endif %}
+            </div>
+            <a class="btn btn-sm btn-ghost" href="{{ result.url }}">Open →</a>
+          </div>
+        {% endfor %}
+      </div>
+      {% include 'club/partials/pagination.html' with page_obj=results %}
+    {% elif query %}
+      <div class="empty-state">
+        <span class="glyph" aria-hidden="true">🔍</span>
+        <p>Nothing matched “{{ query }}”. Try a different keyword, or browse the sections below.</p>
+        <div class="pill-row" style="justify-content:center;margin-top:14px">
+          <a class="pill" href="{% url 'club:events' %}">Events</a>
+          <a class="pill" href="{% url 'club:news' %}">News</a>
+          <a class="pill" href="{% url 'club:gallery' %}">Gallery</a>
+          <a class="pill" href="{% url 'club:resources' %}">Downloads</a>
+          <a class="pill" href="{% url 'club:team' %}">Team</a>
+        </div>
+      </div>
+    {% else %}
+      <div class="grid cols-3">
+        <div class="feature"><span class="icon" aria-hidden="true">🎟</span>
+          <div><h3>Events</h3><p>Find a programme by title, venue or description.</p></div></div>
+        <div class="feature"><span class="icon" aria-hidden="true">📰</span>
+          <div><h3>News</h3><p>Search notices, announcements and achievements.</p></div></div>
+        <div class="feature"><span class="icon" aria-hidden="true">📄</span>
+          <div><h3>Downloads</h3><p>Locate forms, reports and rules by keyword.</p></div></div>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

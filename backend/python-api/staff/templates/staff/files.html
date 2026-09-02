@@ -1,0 +1,44 @@
+{% extends 'staff/base.html' %}
+{% block heading %}Files &amp; downloads{% endblock %}
+{% block content %}
+<div class="panel-card">
+  <header>
+    <h2>{{ files|length }} file{{ files|length|pluralize }}</h2>
+    <a class="btn btn-sm btn-primary" href="{% url 'staff:file_create' %}">Upload a file</a>
+  </header>
+  <div class="table-scroll">
+    <table class="gov-table">
+      <thead>
+        <tr><th>Title</th><th style="width:150px">Category</th><th style="width:120px">Label</th>
+            <th style="width:120px">Published</th><th style="width:100px">Downloads</th>
+            <th style="width:100px">Status</th><th style="width:170px">Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for file in files %}
+          <tr>
+            <td><strong>{{ file.title }}</strong>
+              {% if file.description %}<br><span style="font-size:.82rem;color:var(--ink-soft)">{{ file.description|truncatewords:14 }}</span>{% endif %}
+            </td>
+            <td>{{ file.category.name|default:"—" }}</td>
+            <td>{{ file.file_label|default:"—" }}</td>
+            <td>{{ file.published_on|date:"d M Y" }}</td>
+            <td>{{ file.downloads }}</td>
+            <td>{% if file.is_published %}<span class="chip green">Live</span>
+                {% else %}<span class="chip">Draft</span>{% endif %}</td>
+            <td class="table-actions">
+              {% if file.download_url %}
+                <a class="btn btn-sm btn-ghost" href="{{ file.download_url }}" target="_blank" rel="noopener">Open</a>
+              {% endif %}
+              <a class="btn btn-sm btn-ghost" href="{% url 'staff:file_edit' file.pk %}">Edit</a>
+              <a class="btn btn-sm btn-ghost" href="{% url 'staff:file_delete' file.pk %}">Delete</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" style="text-align:center;padding:26px;color:var(--ink-soft)">
+            No files yet. <a href="{% url 'staff:file_create' %}">Upload the first one.</a></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

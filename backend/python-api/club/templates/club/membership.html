@@ -1,0 +1,112 @@
+{% extends 'club/base.html' %}
+
+{% block content %}
+<div class="page-header">
+  <div class="wrap">
+    <h1>Membership</h1>
+    <p>Join {{ org.organization_name }} — membership is open to all residents of the area
+       aged 15 years and above. There is no application fee.</p>
+  </div>
+</div>
+
+{% if benefits %}
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="section-title">Member Benefits</h2>
+      <p class="section-sub">What you receive as an enrolled member of the organisation.</p>
+    </div>
+    <div class="grid cols-3">
+      {% for benefit in benefits %}
+        <div class="feature">
+          <span class="icon" aria-hidden="true">{{ benefit.icon|default:"✔" }}</span>
+          <div><h3>{{ benefit.title }}</h3><p>{{ benefit.description }}</p></div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section tinted" id="apply">
+  <div class="wrap layout-sidebar">
+    <div>
+      <div class="section-head">
+        <h2 class="section-title">Membership Application Form</h2>
+        <p class="section-sub">All fields marked <span class="req">*</span> are mandatory.
+          The office verifies every application and responds within seven working days.</p>
+      </div>
+
+      <fieldset class="gov-fieldset">
+        <legend>Applicant particulars</legend>
+        <form method="post" enctype="multipart/form-data" class="gov-form" data-validate novalidate>
+          {% csrf_token %}
+          {% if form.non_field_errors %}<div class="notice-strip error">{{ form.non_field_errors }}</div>{% endif %}
+          <div class="form-row">
+            {% include 'club/partials/field.html' with field=form.full_name %}
+            {% include 'club/partials/field.html' with field=form.email %}
+          </div>
+          <div class="form-row">
+            {% include 'club/partials/field.html' with field=form.phone %}
+            {% include 'club/partials/field.html' with field=form.date_of_birth %}
+          </div>
+          {% include 'club/partials/field.html' with field=form.address full=True %}
+          <div class="form-row">
+            {% include 'club/partials/field.html' with field=form.department %}
+            {% include 'club/partials/field.html' with field=form.photo %}
+          </div>
+          {% include 'club/partials/field.html' with field=form.interests full=True %}
+          {% include 'club/partials/field.html' with field=form.reason full=True %}
+          {% include 'club/partials/field.html' with field=form.declaration full=True %}
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Submit application</button>
+            <button class="btn btn-ghost" type="reset">Reset form</button>
+            <span class="form-note">Your details are used only for membership administration.</span>
+          </div>
+        </form>
+      </fieldset>
+    </div>
+
+    <aside class="stack">
+      <div class="panel">
+        <div class="panel-head">Eligibility &amp; Documents</div>
+        <div class="panel-body" style="font-size:.88rem">
+          <ul style="margin:0;padding-left:1.1em;color:var(--ink-soft)">
+            <li>Minimum age 15 years as on the date of application.</li>
+            <li>One passport-size photograph (JPG/PNG, under 2 MB).</li>
+            <li>Proof of residence to be produced at the office at the time of verification.</li>
+            <li>Annual subscription as decided by the executive committee.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">Already a member?</div>
+        <div class="panel-body">
+          <p style="font-size:.88rem;color:var(--ink-soft)">Sign in to the member portal to view your
+            membership status, registered events and certificates.</p>
+          <a class="btn btn-primary btn-block" href="{% url 'club:login' %}">Member login</a>
+          <a class="btn btn-ghost btn-block" style="margin-top:8px" href="{% url 'club:signup' %}">Create a portal account</a>
+        </div>
+      </div>
+      {% if qr_codes %}
+      <div class="panel">
+        <div class="panel-head">Scan to apply on your phone</div>
+        <div class="panel-body">
+          {% for code in qr_codes %}
+            <div class="qr-block" style="margin-bottom:14px">
+              <div class="frame"><img src="{{ code.display_url }}" alt="QR code — {{ code.label }}" loading="lazy"></div>
+              <div class="label">{{ code.caption|default:code.label }}</div>
+              {% if code.scans_hint %}<div class="hint">{{ code.scans_hint }}</div>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      <div class="notice-strip warn">
+        Note the acknowledgement number shown after submission. It is required for any enquiry
+        about your application.
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

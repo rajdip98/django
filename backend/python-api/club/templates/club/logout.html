@@ -1,0 +1,21 @@
+{% extends 'club/base.html' %}
+
+{% block content %}
+<section class="section">
+  <div class="wrap" style="max-width:560px">
+    <div class="panel">
+      <div class="panel-head">Sign out</div>
+      <div class="panel-body" style="text-align:center;padding:30px">
+        <p style="color:var(--ink-soft)">You are signed in as
+          <strong>{{ user.get_full_name|default:user.username }}</strong>.
+          Do you want to sign out of the member portal?</p>
+        <form method="post" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          {% csrf_token %}
+          <button class="btn btn-primary" type="submit">Yes, sign out</button>
+          <a class="btn btn-ghost" href="{% url 'club:dashboard' %}">Stay signed in</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

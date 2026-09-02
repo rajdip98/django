@@ -1,0 +1,30 @@
+{% load club_extras %}<article class="card">
+  <div class="card-media">
+    {% include 'club/partials/thumb.html' with image=event.image label=event.title alt=event.title %}
+    {% if event.category %}<span class="chip solid">{{ event.category.name }}</span>{% endif %}
+    <span class="date-badge">
+      <span class="d">{{ event.start|date:"d" }}</span>
+      <span class="m">{{ event.start|date:"M Y" }}</span>
+    </span>
+  </div>
+  <div class="card-body">
+    <h3 class="card-title"><a href="{{ event.get_absolute_url }}">{{ event.title }}</a></h3>
+    <div class="card-meta">
+      <span>🕘 {{ event.start|date:"g:i A" }}</span>
+      <span>📍 {{ event.venue }}</span>
+    </div>
+    <p class="card-text">{{ event.summary|default:event.description|truncatewords:20 }}</p>
+    <div class="card-foot">
+      {% if event.is_upcoming %}
+        {% if event.can_register %}
+          <span class="chip green">Registration open</span>
+        {% else %}
+          <span class="chip">Registration closed</span>
+        {% endif %}
+      {% else %}
+        <span class="chip">Concluded</span>
+      {% endif %}
+      <a class="btn btn-sm btn-ghost" href="{{ event.get_absolute_url }}">Details →</a>
+    </div>
+  </div>
+</article>

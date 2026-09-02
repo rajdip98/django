@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Super Admin Panel &mdash; Club Website</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" type="image/svg+xml" href="../../assets/img/emblem.svg">
+<link rel="stylesheet" href="../../assets/css/panel.css">
+</head>
+<body data-role="super">
+
+<!-- The engine fills each of these. They must exist, and they must be empty. -->
+<div class="gate" id="gate"></div>
+
+<div class="console" id="console" hidden>
+  <aside class="rail" id="rail"></aside>
+  <main class="stage" id="stage"></main>
+</div>
+
+<div class="docket" id="docket" hidden></div>
+
+<noscript>
+  <div style="max-width:640px;margin:60px auto;padding:24px;font:16px/1.6 Georgia,serif">
+    <h1 style="font-size:1.3rem">This panel needs JavaScript</h1>
+    <p>The Super Admin Panel runs entirely in your browser &mdash; it has no server behind
+       it &mdash; so it cannot work with scripts turned off.</p>
+    <p><a href="../../index.html">Back to the website</a></p>
+  </div>
+</noscript>
+
+<script src="../../assets/js/panel-auth.js"></script>
+<script src="../../assets/js/panel-core.js"></script>
+<script>ClubPanel.start({ role: 'super' });</script>
+</body>
+</html>

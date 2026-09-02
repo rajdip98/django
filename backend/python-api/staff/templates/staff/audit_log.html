@@ -1,0 +1,49 @@
+{% extends 'staff/base.html' %}
+{% load club_extras %}
+{% block heading %}Audit log{% endblock %}
+{% block content %}
+<div class="panel-card">
+  <header>
+    <h2>{{ entries.paginator.count }} entr{{ entries.paginator.count|pluralize:"y,ies" }}</h2>
+    <form method="get" style="display:flex;gap:8px;flex-wrap:wrap">
+      <label class="sr-only" for="actor">Filter by account</label>
+      <input class="gov-input" type="search" id="actor" name="actor" value="{{ actor_query }}"
+             placeholder="Account" style="width:150px">
+      <label class="sr-only" for="action">Filter by action</label>
+      <select class="gov-input gov-select" id="action" name="action" data-autosubmit>
+        <option value="">All actions</option>
+        {% for value, label in actions %}
+          <option value="{{ value }}" {% if active_action == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn btn-sm btn-primary" type="submit">Filter</button>
+    </form>
+  </header>
+  <div class="table-scroll">
+    <table class="gov-table">
+      <thead>
+        <tr><th style="width:160px">When (UTC)</th><th style="width:140px">Account</th>
+            <th style="width:190px">Action</th><th>Target &amp; detail</th>
+            <th style="width:130px">IP</th></tr>
+      </thead>
+      <tbody>
+        {% for entry in entries %}
+          <tr>
+            <td>{{ entry.created_at|date:"d M Y, H:i:s" }}</td>
+            <td>{{ entry.actor_label }}
+              {% if entry.was_elevated %}<br><span class="chip gold">elevated</span>{% endif %}</td>
+            <td>{{ entry.get_action_display }}</td>
+            <td>{{ entry.target }}
+              {% if entry.detail %}<br><span style="font-size:.8rem;color:var(--ink-soft)">{{ entry.detail }}</span>{% endif %}</td>
+            <td style="font-size:.8rem">{{ entry.ip_address|default:"—" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" style="text-align:center;padding:26px;color:var(--ink-soft)">
+            No entries match these filters.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include 'club/partials/pagination.html' with page_obj=entries %}
+{% endblock %}

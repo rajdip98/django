@@ -1,0 +1,48 @@
+{% extends 'staff/base.html' %}
+{% block heading %}{{ entry.plural }}{% endblock %}
+{% block content %}
+{% if entry.help %}<div class="warn-banner" style="margin-bottom:18px">{{ entry.help }}</div>{% endif %}
+
+<div class="panel-card">
+  <header>
+    <h2>{{ page.paginator.count }} {{ entry.plural|lower }}</h2>
+    {% if may_create %}
+      <a class="btn btn-sm btn-primary" href="{% url 'staff:content_create' kind %}">
+        Add {{ entry.label|lower }}</a>
+    {% else %}
+      <span class="chip">Added from the website</span>
+    {% endif %}
+  </header>
+  <div class="table-scroll">
+    <table class="gov-table">
+      <thead>
+        <tr>
+          {% for heading in headings %}<th>{{ heading }}</th>{% endfor %}
+          <th style="width:170px">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for object, cells in rows %}
+          <tr>
+            {% for heading, value in cells %}
+              <td>{% if forloop.first %}<strong>{{ value }}</strong>{% else %}{{ value }}{% endif %}</td>
+            {% endfor %}
+            <td class="table-actions">
+              <a class="btn btn-sm btn-ghost" href="{% url 'staff:content_edit' kind object.pk %}">Edit</a>
+              <a class="btn btn-sm btn-ghost" href="{% url 'staff:content_delete' kind object.pk %}">Delete</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="{{ headings|length|add:1 }}"
+                  style="text-align:center;padding:26px;color:var(--ink-soft)">
+            Nothing here yet.{% if may_create %}
+            <a href="{% url 'staff:content_create' kind %}">Add the first {{ entry.label|lower }}.</a>
+            {% endif %}
+          </td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include 'club/partials/pagination.html' with page_obj=page %}
+{% endblock %}

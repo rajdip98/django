@@ -1,0 +1,16 @@
+# Test runs should print test results, not a running commentary.
+spring:
+  main:
+    banner-mode: off
+  web:
+    resources:
+      add-mappings: false
+  servlet:
+    multipart:
+      enabled: false
+
+logging:
+  level:
+    root: WARN
+    org.club.gateway: ERROR
+    org.springframework: WARN

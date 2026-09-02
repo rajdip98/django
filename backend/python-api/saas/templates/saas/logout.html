@@ -1,0 +1,15 @@
+{% extends 'saas/base.html' %}
+{% block heading %}Sign out{% endblock %}
+{% block content %}
+<div class="panel-card" style="max-width:520px">
+  <header><h2>Sign out of the platform panel</h2></header>
+  <div class="inner">
+    <p style="color:var(--ink-soft)">You are signed in as <strong>{{ user.get_username }}</strong>.</p>
+    <form method="post" style="display:flex;gap:10px;flex-wrap:wrap">
+      {% csrf_token %}
+      <button class="btn btn-primary" type="submit">Yes, sign out</button>
+      <a class="btn btn-ghost" href="{% url 'saas:dashboard' %}">Stay signed in</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'club/base.html' %}
+
+{% block content %}
+<div class="page-header">
+  <div class="wrap"><h1>Member Login</h1><p>Sign in to the member portal of {{ org.organization_name }}.</p></div>
+</div>
+
+<section class="section">
+  <div class="wrap layout-sidebar">
+    <div style="max-width:520px">
+      <fieldset class="gov-fieldset">
+        <legend>Sign in</legend>
+        <form method="post" class="gov-form" data-validate novalidate>
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="notice-strip error">{{ form.non_field_errors }}</div>
+          {% endif %}
+          {% include 'club/partials/field.html' with field=form.username full=True %}
+          {% include 'club/partials/field.html' with field=form.password full=True %}
+          <input type="hidden" name="next" value="{{ next }}">
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Login</button>
+            <a class="btn btn-ghost" href="{% url 'club:password_reset' %}">Forgot password?</a>
+          </div>
+        </form>
+      </fieldset>
+      <p style="margin-top:16px;font-size:.9rem">
+        New here? <a href="{% url 'club:signup' %}">Create a portal account</a> or
+        <a href="{% url 'club:membership' %}">apply for membership</a>.
+      </p>
+    </div>
+    <aside class="stack">
+      <div class="panel">
+        <div class="panel-head">Inside the portal</div>
+        <ul class="panel-list">
+          <li><a href="{% url 'club:membership' %}">Membership status &amp; ID card</a></li>
+          <li><a href="{% url 'club:events' %}">Your event registrations</a></li>
+          <li><a href="{% url 'club:resources' %}">Member documents</a></li>
+          <li><a href="{% url 'club:notifications' %}">Notices and reminders</a></li>
+        </ul>
+      </div>
+      <div class="notice-strip warn">
+        Never share your password. The office will never ask for it over the telephone.
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

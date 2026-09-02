@@ -1,0 +1,47 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en" data-theme="light" data-font="md">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Platform sign-in</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="{% static 'club/css/gov.css' %}">
+<link rel="stylesheet" href="{% static 'staff/css/panel.css' %}">
+</head>
+<body style="display:grid;place-items:center;min-height:100vh;background:
+  linear-gradient(140deg,#1b0f2b,#452a6b)">
+<main style="width:100%;max-width:430px;padding:20px">
+  <div style="text-align:center;margin-bottom:18px;color:#fff">
+    <div style="font-size:2.4rem" aria-hidden="true">⬢</div>
+    <h1 style="color:#fff;font-size:1.3rem;margin:6px 0 0">Platform Panel</h1>
+    <p style="color:#d3c3ea;margin:4px 0 0;font-size:.85rem;letter-spacing:.08em;
+       text-transform:uppercase">Owner access · all websites</p>
+  </div>
+  <div class="panel-card">
+    <header><h2>Sign in</h2></header>
+    <div class="inner">
+      {% if messages %}
+        <ul class="messages" style="padding-top:0;margin-bottom:14px">
+          {% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+      <form method="post" class="gov-form" data-validate novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="notice-strip error">{{ form.non_field_errors }}</div>{% endif %}
+        {% include 'club/partials/field.html' with field=form.username full=True %}
+        {% include 'club/partials/field.html' with field=form.password full=True %}
+        <div class="form-actions">
+          <button class="btn btn-primary btn-block" type="submit">Sign in</button>
+        </div>
+      </form>
+      <p style="font-size:.8rem;color:var(--ink-soft);margin:14px 0 0">
+        This is not a website's admin panel. Website administrators sign in at their own
+        site's <code>/adminpanel/login</code> — a site-admin account cannot sign in here.
+      </p>
+    </div>
+  </div>
+</main>
+<script src="{% static 'club/js/site.js' %}"></script>
+</body>
+</html>

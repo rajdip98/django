@@ -1,0 +1,87 @@
+{% extends 'club/base.html' %}
+{% load club_extras %}
+
+{% block content %}
+<section class="section">
+  <div class="wrap layout-sidebar">
+    <article>
+      <div style="border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--line);aspect-ratio:16/7">
+        {% include 'club/partials/thumb.html' with image=event.image label=event.title alt=event.title %}
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 10px">
+        {% if event.category %}<span class="chip solid">{{ event.category.name }}</span>{% endif %}
+        {% if event.is_upcoming %}
+          <span class="chip green">Upcoming</span>
+        {% else %}<span class="chip">Concluded</span>{% endif %}
+        {% if event.is_featured %}<span class="chip gold">Featured</span>{% endif %}
+      </div>
+      <h1>{{ event.title }}</h1>
+      <p style="color:var(--ink-soft)">{{ event.summary }}</p>
+
+      <div class="table-scroll" style="margin:22px 0">
+        <table class="gov-table">
+          <caption>Programme details</caption>
+          <tbody>
+            <tr><th style="width:210px">Date &amp; time</th>
+                <td>{{ event.start|date:"l, d F Y" }} at {{ event.start|date:"g:i A" }}
+                  {% if event.end %} — {{ event.end|date:"g:i A, d F Y" }}{% endif %}</td></tr>
+            <tr><th>Venue</th><td>{{ event.venue }}</td></tr>
+            <tr><th>Organised by</th><td>{{ event.organizer|default:org.organization_name }}</td></tr>
+            {% if event.capacity %}
+            <tr><th>Seats</th><td>{{ event.capacity }} total ·
+              {% if event.seats_left %}{{ event.seats_left }} remaining{% else %}Fully booked{% endif %}</td></tr>
+            {% endif %}
+            {% if event.registration_deadline %}
+            <tr><th>Registration closes</th><td>{{ event.registration_deadline|date:"d F Y" }}</td></tr>
+            {% endif %}
+            <tr><th>Registrations received</th><td>{{ registration_count }}</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-head"><h2 class="section-title">About this programme</h2></div>
+      {{ event.description|linebreaks }}
+
+      {% if related_events %}
+        <div class="section-head" style="margin-top:34px"><h2 class="section-title">Related Events</h2></div>
+        <div class="grid cols-3">
+          {% for event in related_events %}{% include 'club/partials/event_card.html' %}{% endfor %}
+        </div>
+      {% endif %}
+    </article>
+
+    <aside class="stack">
+      <div class="panel">
+        <div class="panel-head">Registration</div>
+        <div class="panel-body">
+          {% if event.can_register %}
+            <p style="font-size:.88rem;color:var(--ink-soft)">Registration is open. Confirm your seat online — no fee is charged.</p>
+            <a class="btn btn-gold btn-block" href="{% url 'club:event_register' event.slug %}">Register for this event</a>
+          {% elif not event.is_upcoming %}
+            <div class="notice-strip">This programme has concluded. Photographs are published in the gallery.</div>
+            <a class="btn btn-ghost btn-block" style="margin-top:12px" href="{% url 'club:gallery' %}">View gallery</a>
+          {% else %}
+            <div class="notice-strip warn">Registration for this programme is closed.</div>
+            <a class="btn btn-ghost btn-block" style="margin-top:12px" href="{% url 'club:contact' %}">Contact the office</a>
+          {% endif %}
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">Add to your plan</div>
+        <ul class="panel-list">
+          <li><a href="{% url 'club:calendar' %}?year={{ event.start|date:'Y' }}&month={{ event.start|date:'n' }}">🗓 See this month's calendar</a></li>
+          <li><a href="{% url 'club:events' %}">📋 All events</a></li>
+          <li><a href="{% url 'club:contact' %}">📞 Enquire about this event</a></li>
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-head">Venue</div>
+        <div class="panel-body">
+          <p style="font-size:.9rem;margin:0">📍 {{ event.venue }}</p>
+          <p style="font-size:.84rem;color:var(--ink-soft);margin:8px 0 0">{{ org.address|linebreaksbr }}</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

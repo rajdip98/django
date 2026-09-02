@@ -1,0 +1,52 @@
+{% extends 'club/base.html' %}
+
+{% block content %}
+<section class="section">
+  <div class="wrap">
+    <nav class="dash-tabs" aria-label="Member portal" style="margin-top:0">
+      <a href="{% url 'club:dashboard' %}">Overview</a>
+      <a href="{% url 'club:profile' %}">Profile</a>
+      <a href="{% url 'club:my_events' %}">My Events</a>
+      <a class="active" href="{% url 'club:my_certificates' %}">Certificates</a>
+    </nav>
+
+    <div class="section-head">
+      <h2 class="section-title">Certificates &amp; Documents</h2>
+      <p class="section-sub">Certificates issued to {{ profile.display_name }} ({{ profile.membership_id }}).</p>
+    </div>
+
+    {% if certificates %}
+      <div class="table-scroll">
+        <table class="gov-table">
+          <thead>
+            <tr><th style="width:60px">Sl.</th><th>Certificate</th><th style="width:140px">Issued on</th>
+                <th style="width:180px">Reference</th><th style="width:130px">Action</th></tr>
+          </thead>
+          <tbody>
+            {% for certificate in certificates %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ certificate.title }}</td>
+                <td>{{ certificate.issued_on|date:"d M Y" }}</td>
+                <td>{{ certificate.reference_no|default:"—" }}</td>
+                <td>
+                  {% if certificate.file %}
+                    <a class="btn btn-sm btn-primary" href="{{ certificate.file.url }}" download>⬇ Download</a>
+                  {% else %}<span class="chip">Collect at office</span>{% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <span class="glyph" aria-hidden="true">🏅</span>
+        <p>No certificates have been issued to you yet. Certificates are published after
+           participation in a programme is marked by the office.</p>
+        <a class="btn btn-ghost btn-sm" href="{% url 'club:events' %}">See upcoming programmes</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

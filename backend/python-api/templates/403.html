@@ -1,0 +1,14 @@
+{% extends 'club/base.html' %}
+{% block title %}Not permitted — {{ org.organization_name }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="wrap" style="max-width:640px;text-align:center">
+    <div style="font-size:3.4rem;line-height:1" aria-hidden="true">🔒</div>
+    <h1>You do not have access to that page</h1>
+    <p style="color:var(--ink-soft)">Sign in with an account that has permission, or go
+      back to the website.</p>
+    <p><a class="btn btn-primary" href="{% url 'club:login' %}">Sign in</a>
+       <a class="btn btn-ghost" href="{% url 'club:home' %}">Back to home</a></p>
+  </div>
+</section>
+{% endblock %}

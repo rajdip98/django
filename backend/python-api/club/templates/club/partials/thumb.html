@@ -1,0 +1,11 @@
+{% load club_extras %}{% comment %}
+Renders an uploaded image when one exists, otherwise a deterministic coloured
+placeholder built from the title — so a freshly installed site still looks
+complete without shipping stock photography.
+{% endcomment %}{% if image %}
+<img src="{{ image.url }}" alt="{{ alt|default:label }}" loading="lazy">
+{% else %}
+<div class="placeholder-art ph-{{ label|swatch }}" role="img" aria-label="{{ alt|default:label }}">
+  <span style="position:relative;z-index:1">{{ label|initials }}</span>
+</div>
+{% endif %}

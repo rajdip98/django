@@ -1,0 +1,136 @@
+{% extends 'club/base.html' %}
+{% load club_extras %}
+
+{% block content %}
+<div class="page-header">
+  <div class="wrap">
+    <h1>About Us</h1>
+    <p>{{ org.registration_line|default:org.slogan }}</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="wrap layout-sidebar">
+    <div>
+      <div class="section-head"><h2 class="section-title">Our Story</h2></div>
+      {{ org.history|linebreaks }}
+
+      <div class="grid cols-2" style="margin:26px 0">
+        <div class="panel">
+          <div class="panel-head">Mission</div>
+          <div class="panel-body">{{ org.mission|linebreaks }}</div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">Vision</div>
+          <div class="panel-body">{{ org.vision|linebreaks }}</div>
+        </div>
+      </div>
+
+      {% if org.objective_list %}
+      <div class="section-head"><h2 class="section-title">Objectives</h2></div>
+      <div class="table-scroll">
+        <table class="gov-table">
+          <thead><tr><th style="width:70px">Sl. No.</th><th>Objective</th></tr></thead>
+          <tbody>
+            {% for objective in org.objective_list %}
+              <tr><td>{{ forloop.counter }}.</td><td>{{ objective }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+
+      {% if core_values %}
+      <div class="section-head" style="margin-top:34px"><h2 class="section-title">Core Values</h2></div>
+      <div class="grid cols-2">
+        {% for value in core_values %}
+          <div class="feature">
+            <span class="icon" aria-hidden="true">{{ forloop.counter }}</span>
+            <div><h3>{{ value.title }}</h3><p>{{ value.description }}</p></div>
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if milestones %}
+      <div class="section-head" style="margin-top:34px"><h2 class="section-title">Our Journey</h2></div>
+      <div class="timeline">
+        {% for milestone in milestones %}
+          <div class="timeline-item">
+            <div class="year">{{ milestone.year }}</div>
+            <strong>{{ milestone.title }}</strong>
+            <p style="margin:4px 0 0;color:var(--ink-soft);font-size:.9rem">{{ milestone.description }}</p>
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if achievements %}
+      <div class="section-head" style="margin-top:34px" id="achievements">
+        <h2 class="section-title">Achievements &amp; Recognition</h2>
+      </div>
+      <div class="table-scroll">
+        <table class="gov-table">
+          <caption>Awards and recognitions received by the organisation.</caption>
+          <thead><tr><th style="width:90px">Year</th><th>Recognition</th><th style="width:30%">Awarded by</th></tr></thead>
+          <tbody>
+            {% for achievement in achievements %}
+              <tr>
+                <td>{{ achievement.year|default:"—" }}</td>
+                <td><strong>{{ achievement.title }}</strong>
+                  {% if achievement.description %}<br><span style="font-size:.84rem;color:var(--ink-soft)">{{ achievement.description }}</span>{% endif %}
+                </td>
+                <td>{{ achievement.awarded_by|default:"—" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </div>
+
+    <aside class="stack">
+      {% if president %}
+      <div class="panel">
+        <div class="panel-head">Message from the {{ president.position }}</div>
+        <div class="panel-body">
+          <div class="member-card" style="text-align:center">
+            <div class="portrait">
+              {% include 'club/partials/thumb.html' with image=president.photo label=president.name alt=president.name %}
+            </div>
+            <strong>{{ president.name }}</strong>
+            <div class="position">{{ president.position }}</div>
+          </div>
+          <p style="font-size:.88rem;color:var(--ink-soft);margin-top:12px">“{{ president.bio|truncatewords:55 }}”</p>
+          <a class="btn btn-ghost btn-sm btn-block" href="{% url 'club:team' %}">Meet the full team</a>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="panel">
+        <div class="panel-head">At a Glance</div>
+        <div class="panel-body">
+          <dl class="kv">
+            <dt>Established</dt><dd>{{ org.established }}</dd>
+            <dt>Registration</dt><dd>{{ org.registration_line|default:"—" }}</dd>
+            {% for stat in statistics %}
+              <dt>{{ stat.label }}</dt><dd>{{ stat.value }}{{ stat.suffix }}</dd>
+            {% endfor %}
+            <dt>Office hours</dt><dd>{{ org.office_hours|default:"—" }}</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">Related Links</div>
+        <ul class="panel-list">
+          <li><a href="{% url 'club:team' %}">Executive committee</a></li>
+          <li><a href="{% url 'club:activities' %}">Our activities</a></li>
+          <li><a href="{% url 'club:resources' %}">Annual reports &amp; rules</a></li>
+          <li><a href="{% url 'club:membership' %}">Become a member</a></li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

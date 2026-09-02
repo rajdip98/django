@@ -1,0 +1,12 @@
+{% extends 'club/base.html' %}
+{% block title %}Bad request — {{ org.organization_name }}{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="wrap" style="max-width:640px;text-align:center">
+    <h1>That request could not be processed</h1>
+    <p style="color:var(--ink-soft)">Please go back and try again. If you were
+      submitting a form, reload the page first so a fresh security token is issued.</p>
+    <p><a class="btn btn-primary" href="{% url 'club:home' %}">Back to home</a></p>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,314 @@
+{% extends 'club/base.html' %}
+{% load club_extras %}
+
+{% block content %}
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">Established {{ org.established }} · Serving the community</span>
+      <h1>{{ org.organization_name }}</h1>
+      <p class="lede">{{ org.introduction|default:org.slogan }}</p>
+      <div class="hero-actions">
+        <a class="btn btn-gold" href="{% url 'club:membership' %}">Join Us</a>
+        <a class="btn btn-outline on-dark" href="{% url 'club:about' %}">Learn More</a>
+        <a class="btn btn-outline on-dark" href="{% url 'club:calendar' %}">Event Calendar</a>
+      </div>
+    </div>
+    <div class="hero-card">
+      <h2><span aria-hidden="true">📌</span> Upcoming Programmes</h2>
+      {% for event in upcoming_events %}
+        <a class="mini-event" href="{{ event.get_absolute_url }}">
+          <span class="when">{{ event.start|date:"D, d M Y · g:i A" }}</span>
+          <span class="what">{{ event.title }}</span>
+          <span style="font-size:.8rem;opacity:.8">📍 {{ event.venue }}</span>
+        </a>
+      {% empty %}
+        <p style="color:#dbe7f7;margin:0">No programmes are scheduled at the moment. Please check back soon.</p>
+      {% endfor %}
+      <a class="btn btn-outline on-dark btn-sm btn-block" style="margin-top:14px"
+         href="{% url 'club:events' %}">View all events</a>
+    </div>
+  </div>
+</section>
+
+{% if hero_banners %}
+<section class="section" style="padding-bottom:0">
+  <div class="wrap stack">
+    {% for banner in hero_banners %}
+      <a class="banner-card" href="{{ banner.link_url|default:'#' }}">
+        {% if banner.image %}<img src="{{ banner.image.url }}" alt="{{ banner.title }}">{% endif %}
+        <span class="body">
+          <span>
+            <strong style="display:block;font-family:var(--serif);font-size:1.15rem">{{ banner.title }}</strong>
+            {% if banner.subtitle %}<span style="color:var(--ink-soft);font-size:.9rem">{{ banner.subtitle }}</span>{% endif %}
+          </span>
+          {% if banner.link_url %}<span class="btn btn-sm btn-primary">{{ banner.link_text }}</span>{% endif %}
+        </span>
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if statistics %}
+<section class="section">
+  <div class="wrap">
+    <div class="stat-grid">
+      {% for stat in statistics %}
+        <div class="stat">
+          <div class="value" data-count-to="{{ stat.value }}" data-suffix="{{ stat.suffix }}">0</div>
+          <div class="label">{{ stat.label }}</div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section tinted">
+  <div class="wrap layout-sidebar">
+    <div>
+      <div class="section-head">
+        <h2 class="section-title">About the Organisation</h2>
+        <p class="section-sub">{{ org.slogan }}</p>
+      </div>
+      <p>{{ org.history|truncatewords:70|linebreaks }}</p>
+      <div class="grid cols-2" style="margin-top:20px">
+        <div class="feature">
+          <span class="icon" aria-hidden="true">🎯</span>
+          <div><h3>Our Mission</h3><p>{{ org.mission|truncatewords:26 }}</p></div>
+        </div>
+        <div class="feature">
+          <span class="icon" aria-hidden="true">🔭</span>
+          <div><h3>Our Vision</h3><p>{{ org.vision|truncatewords:26 }}</p></div>
+        </div>
+      </div>
+      <p style="margin-top:20px"><a class="btn btn-primary" href="{% url 'club:about' %}">Read our full story</a></p>
+    </div>
+    <aside class="stack">
+      <div class="panel">
+        <div class="panel-head">Notice Board <a href="{% url 'club:notifications' %}">All</a></div>
+        <ul class="panel-list scroll-list">
+          {% for note in notifications_list %}
+            <li>
+              <a href="{{ note.target_url }}">
+                {{ note.title }}{% if note.is_new %}<span class="tag-new">NEW</span>{% endif %}
+                <span class="meta">{{ note.get_kind_display }} · {{ note.published_at|date:"d M Y" }}</span>
+              </a>
+            </li>
+          {% empty %}
+            <li><a href="{% url 'club:notifications' %}">No notices published yet.</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% if sidebar_qr_codes %}
+      <div class="panel">
+        <div class="panel-head">Scan to connect</div>
+        <div class="panel-body">
+          {% for code in sidebar_qr_codes %}
+            <div class="qr-block" style="margin-bottom:14px">
+              <div class="frame"><img src="{{ code.display_url }}" alt="QR code — {{ code.label }}" loading="lazy"></div>
+              <div class="label">{{ code.caption|default:code.label }}</div>
+              {% if code.scans_hint %}<div class="hint">{{ code.scans_hint }}</div>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      <div class="panel">
+        <div class="panel-head">Quick Services</div>
+        <ul class="panel-list">
+          <li><a href="{% url 'club:membership' %}">🖊 Apply for membership</a></li>
+          <li><a href="{% url 'club:events' %}">🎟 Register for an event</a></li>
+          <li><a href="{% url 'club:resources' %}">📄 Download forms &amp; reports</a></li>
+          <li><a href="{% url 'club:calendar' %}">🗓 Programme calendar</a></li>
+          <li><a href="{% url 'club:contact' %}">📞 Contact the office</a></li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head row">
+      <div>
+        <h2 class="section-title">Upcoming Events</h2>
+        <p class="section-sub">Programmes open for participation and registration.</p>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="{% url 'club:events' %}">All events →</a>
+    </div>
+    {% if upcoming_events %}
+      <div class="grid cols-3">
+        {% for event in upcoming_events %}{% include 'club/partials/event_card.html' %}{% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <span class="glyph" aria-hidden="true">🗓</span>
+        <p>No upcoming events have been announced. The calendar is updated regularly.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{% if home_banners %}
+<section class="section">
+  <div class="wrap">
+    {% for banner in home_banners %}
+      <a class="banner-strip" href="{{ banner.link_url|default:'#' }}">
+        {% if banner.image %}<img src="{{ banner.image.url }}" alt="{{ banner.title }}">{% endif %}
+        <span class="banner-text">
+          <strong>{{ banner.title }}</strong>
+          {% if banner.subtitle %}<span>{{ banner.subtitle }}</span>{% endif %}
+        </span>
+        {% if banner.link_url %}<span class="btn btn-sm btn-gold">{{ banner.link_text }}</span>{% endif %}
+      </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if activities %}
+<section class="section tinted">
+  <div class="wrap">
+    <div class="section-head row">
+      <div>
+        <h2 class="section-title">What We Do</h2>
+        <p class="section-sub">Year-round activities run by our members and volunteers.</p>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="{% url 'club:activities' %}">All activities →</a>
+    </div>
+    <div class="grid cols-3">
+      {% for activity in activities %}
+        <div class="feature">
+          <span class="icon" aria-hidden="true">{{ activity.icon|default:"◆" }}</span>
+          <div>
+            <h3>{{ activity.title }}</h3>
+            <p>{{ activity.summary|default:activity.description|truncatewords:18 }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if articles %}
+<section class="section">
+  <div class="wrap">
+    <div class="section-head row">
+      <div>
+        <h2 class="section-title">Latest News</h2>
+        <p class="section-sub">Announcements, achievements and press notes.</p>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="{% url 'club:news' %}">All news →</a>
+    </div>
+    <div class="grid cols-3">
+      {% for article in articles %}{% include 'club/partials/news_card.html' %}{% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if gallery_items %}
+<section class="section tinted">
+  <div class="wrap">
+    <div class="section-head row">
+      <div>
+        <h2 class="section-title">From the Gallery</h2>
+        <p class="section-sub">Moments from our recent programmes.</p>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="{% url 'club:gallery' %}">Full gallery →</a>
+    </div>
+    <div class="gallery-grid">
+      {% for item in gallery_items %}
+        <button type="button" class="gallery-tile" data-lightbox
+                data-full="{% if item.image %}{{ item.image.url }}{% endif %}"
+                data-video="{{ item.video_url }}"
+                data-caption="{{ item.title|escape }}"
+                data-initials="{{ item.title|initials }}"
+                data-swatch="ph-{{ item.title|swatch }}">
+          {% include 'club/partials/thumb.html' with image=item.image label=item.title alt=item.title %}
+          {% if item.media_type == 'video' %}<span class="play" aria-hidden="true">▶</span>{% endif %}
+          <span class="overlay">{{ item.title }}</span>
+        </button>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if leaders %}
+<section class="section">
+  <div class="wrap">
+    <div class="section-head row">
+      <div>
+        <h2 class="section-title">Office Bearers</h2>
+        <p class="section-sub">The committee elected to serve the current term.</p>
+      </div>
+      <a class="btn btn-ghost btn-sm" href="{% url 'club:team' %}">Full team →</a>
+    </div>
+    <div class="grid cols-4">
+      {% for member in leaders %}
+        <div class="card member-card">
+          <div class="card-body">
+            <div class="portrait">
+              {% include 'club/partials/thumb.html' with image=member.photo label=member.name alt=member.name %}
+            </div>
+            <h3 class="card-title">{{ member.name }}</h3>
+            <div class="position">{{ member.position }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if testimonials %}
+<section class="section tinted">
+  <div class="wrap">
+    <div class="section-head">
+      <h2 class="section-title">In Their Words</h2>
+      <p class="section-sub">Members, partners and beneficiaries on working with us.</p>
+    </div>
+    <div class="grid cols-3">
+      {% for testimonial in testimonials %}
+        <figure class="card" style="margin:0">
+          <div class="card-body">
+            <blockquote style="margin:0;font-size:.92rem;color:var(--ink-soft)">“{{ testimonial.quote }}”</blockquote>
+            <figcaption style="display:flex;gap:12px;align-items:center;margin-top:14px">
+              <span style="width:44px;height:44px;border-radius:50%;overflow:hidden;flex:none">
+                {% include 'club/partials/thumb.html' with image=testimonial.photo label=testimonial.name alt=testimonial.name %}
+              </span>
+              <span>
+                <strong style="display:block;font-size:.9rem">{{ testimonial.name }}</strong>
+                <span style="font-size:.78rem;color:var(--ink-soft)">{{ testimonial.role }}</span>
+              </span>
+            </figcaption>
+          </div>
+        </figure>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section" style="padding-bottom:0">
+  <div class="wrap">
+    <div class="hero" style="border-radius:var(--radius-lg)">
+      <div class="wrap" style="grid-template-columns:minmax(0,1fr) auto;padding-top:38px;padding-bottom:38px">
+        <div>
+          <h2 style="color:#fff;margin-bottom:6px">Become a member today</h2>
+          <p style="color:#dbe7f7;margin:0">Membership is open to all residents above 15 years of age.
+            Apply online — the office confirms every application within seven working days.</p>
+        </div>
+        <div class="hero-actions" style="margin:0">
+          <a class="btn btn-gold" href="{% url 'club:membership' %}">Apply now</a>
+          <a class="btn btn-outline on-dark" href="{% url 'club:contact' %}">Talk to us</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% load club_extras %}{% if page_obj.paginator.num_pages > 1 %}
+<nav class="pagination-wrap" aria-label="Pagination">
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+      <li><a href="{% page_link 1 %}" aria-label="First page">«</a></li>
+      <li><a href="{% page_link page_obj.previous_page_number %}" rel="prev">Previous</a></li>
+    {% endif %}
+    {% for num in page_obj.paginator.page_range %}
+      {% if num == page_obj.number %}
+        <li><span class="current" aria-current="page">{{ num }}</span></li>
+      {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+        <li><a href="{% page_link num %}">{{ num }}</a></li>
+      {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+      <li><a href="{% page_link page_obj.next_page_number %}" rel="next">Next</a></li>
+      <li><a href="{% page_link page_obj.paginator.num_pages %}" aria-label="Last page">»</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}

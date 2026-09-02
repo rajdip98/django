@@ -2,7 +2,7 @@ services:
   django:
     restart: unless-stopped
     build:
-      context: ./app
+      context: ./backend/python-api
       dockerfile: Dockerfile
     ports:
       - mode: ingress

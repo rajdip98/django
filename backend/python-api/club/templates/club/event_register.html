@@ -1,0 +1,56 @@
+{% extends 'club/base.html' %}
+
+{% block content %}
+<div class="page-header">
+  <div class="wrap">
+    <h1>Event Registration</h1>
+    <p>{{ event.title }} · {{ event.start|date:"l, d F Y, g:i A" }} · {{ event.venue }}</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="wrap layout-sidebar">
+    <div>
+      <fieldset class="gov-fieldset">
+        <legend>Participant details</legend>
+        <form method="post" class="gov-form" data-validate novalidate>
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="notice-strip error">{{ form.non_field_errors }}</div>
+          {% endif %}
+          <div class="form-row">
+            {% include 'club/partials/field.html' with field=form.full_name %}
+            {% include 'club/partials/field.html' with field=form.email %}
+          </div>
+          <div class="form-row">
+            {% include 'club/partials/field.html' with field=form.phone %}
+          </div>
+          {% include 'club/partials/field.html' with field=form.remarks full=True %}
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Confirm registration</button>
+            <a class="btn btn-ghost" href="{{ event.get_absolute_url }}">Cancel</a>
+            <span class="form-note">Fields marked <span class="req">*</span> are mandatory.</span>
+          </div>
+        </form>
+      </fieldset>
+    </div>
+    <aside class="stack">
+      <div class="panel">
+        <div class="panel-head">Programme summary</div>
+        <div class="panel-body">
+          <dl class="kv">
+            <dt>Event</dt><dd>{{ event.title }}</dd>
+            <dt>Date</dt><dd>{{ event.start|date:"d F Y" }}</dd>
+            <dt>Time</dt><dd>{{ event.start|date:"g:i A" }}</dd>
+            <dt>Venue</dt><dd>{{ event.venue }}</dd>
+            {% if event.seats_left %}<dt>Seats left</dt><dd>{{ event.seats_left }}</dd>{% endif %}
+          </dl>
+        </div>
+      </div>
+      <div class="notice-strip warn">
+        One registration is permitted per e-mail address. Carry a photo identity card to the venue.
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'club/base.html' %}
+
+{% block content %}
+<div class="page-header">
+  <div class="wrap">
+    <h1>Activities</h1>
+    <p>Workshops, seminars, competitions, training, community service and cultural programmes
+       organised through the year.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="wrap">
+    {% for category, items in groups %}
+      <div class="section-head" style="margin-top:{% if not forloop.first %}38px{% else %}0{% endif %}">
+        <h2 class="section-title">{% if category %}{{ category.name }}{% else %}Other Activities{% endif %}</h2>
+      </div>
+      <div class="grid cols-3">
+        {% for activity in items %}
+          <article class="card" id="activity-{{ activity.slug }}">
+            <div class="card-media">
+              {% include 'club/partials/thumb.html' with image=activity.image label=activity.title alt=activity.title %}
+              {% if activity.icon %}<span class="chip solid">{{ activity.icon }} {{ activity.title|truncatewords:2 }}</span>{% endif %}
+            </div>
+            <div class="card-body">
+              <h3 class="card-title">{{ activity.title }}</h3>
+              {% if activity.frequency %}<div class="card-meta"><span>🔁 {{ activity.frequency }}</span></div>{% endif %}
+              <p class="card-text">{{ activity.description|default:activity.summary }}</p>
+              <div class="card-foot">
+                <span class="chip">{% if category %}{{ category.name }}{% else %}Programme{% endif %}</span>
+                <a class="btn btn-sm btn-ghost" href="{% url 'club:events' %}?q={{ activity.title|urlencode }}">Related events →</a>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% empty %}
+      <div class="empty-state">
+        <span class="glyph" aria-hidden="true">📋</span>
+        <p>Activities have not been published yet. Please check back shortly.</p>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

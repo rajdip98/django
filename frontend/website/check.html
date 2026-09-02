@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Installation check</title>
+<meta name="robots" content="noindex">
+<style>
+  /* Deliberately written inline. If the stylesheet is missing or the server is
+     misconfigured, this page must still be readable — that is its whole job. */
+  body { font-family: system-ui, "Segoe UI", Arial, sans-serif; background: #f2f5f9;
+         color: #16202b; margin: 0; padding: 26px 18px; line-height: 1.6; }
+  .box { max-width: 780px; margin: 0 auto; background: #fff; border: 1px solid #d3dbe5;
+         border-radius: 8px; padding: 24px 26px; }
+  h1 { font-family: Georgia, serif; margin: 0 0 4px; font-size: 1.5rem; }
+  .sub { color: #56626f; margin: 0 0 22px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #e6ebf2; font-size: .94rem; }
+  th { font-size: .74rem; text-transform: uppercase; letter-spacing: .07em; color: #56626f; }
+  .ok { color: #16704a; font-weight: 700; }
+  .bad { color: #8c2f39; font-weight: 700; }
+  .wait { color: #56626f; }
+  .verdict { padding: 14px 17px; border-radius: 6px; border-left: 5px solid #56626f;
+             background: #eef2f7; margin-bottom: 20px; }
+  .verdict.good { border-left-color: #16704a; background: #e2f2ea; }
+  .verdict.bad { border-left-color: #8c2f39; background: #fae9e9; }
+  code { background: #eef2f7; padding: 1px 5px; border-radius: 3px; font-size: .9em; }
+  .fix { font-size: .88rem; color: #56626f; }
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>Installation check</h1>
+  <p class="sub">If you can read this page, your web host is working and serving files
+     correctly. The tests below check that the rest of the website arrived with it.</p>
+
+  <div class="verdict" id="verdict">Running the checks…</div>
+
+  <div class="verdict" style="border-left-color:#c8961e;background:#fbf0d5">
+    <strong>Delete this page once your website is working.</strong>
+    It is a setup tool, and it names the folders your panels live in. Removing
+    <code>check.html</code> from your host takes nothing away from the website.
+  </div>
+
+  <table>
+    <thead><tr><th style="width:34%">What is being checked</th><th style="width:15%">Result</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Page served by the host</td><td class="ok">PASS</td>
+          <td class="fix">You are reading this, so HTML files are being served.</td></tr>
+      <tr><td>Stylesheet <code>assets/css/site.css</code></td>
+          <td id="r-css" class="wait">checking…</td><td class="fix" id="n-css"></td></tr>
+      <tr><td>Script <code>assets/js/site.js</code></td>
+          <td id="r-js" class="wait">checking…</td><td class="fix" id="n-js"></td></tr>
+      <tr><td>Image <code>assets/img/emblem.svg</code></td>
+          <td id="r-img" class="wait">checking…</td><td class="fix" id="n-img"></td></tr>
+      <tr><td>Home page <code>index.html</code></td>
+          <td id="r-home" class="wait">checking…</td><td class="fix" id="n-home"></td></tr>
+      <tr><td>Bare domain opens the home page</td>
+          <td id="r-root" class="wait">checking…</td><td class="fix" id="n-root"></td></tr>
+      <tr><td>Settings <code>assets/js/content.js</code></td>
+          <td id="r-content" class="wait">checking…</td><td class="fix" id="n-content"></td></tr>
+      <tr><td>Appearance <code>assets/js/theme.js</code></td>
+          <td id="r-theme" class="wait">checking…</td><td class="fix" id="n-theme"></td></tr>
+      <tr><td>Admin Panel files</td>
+          <td id="r-panel" class="wait">checking…</td><td class="fix" id="n-panel"></td></tr>
+      <tr><td>Super Admin Panel files</td>
+          <td id="r-superpanel" class="wait">checking…</td><td class="fix" id="n-superpanel"></td></tr>
+      <tr><td>Panel engine <code>assets/js/panel-core.js</code></td>
+          <td id="r-core" class="wait">checking…</td><td class="fix" id="n-core"></td></tr>
+      <tr><td>Panel design <code>assets/css/panel.css</code></td>
+          <td id="r-panelcss" class="wait">checking…</td><td class="fix" id="n-panelcss"></td></tr>
+      <tr><td>Sign-in <code>assets/js/panel-auth.js</code></td>
+          <td id="r-auth" class="wait">checking…</td><td class="fix" id="n-auth"></td></tr>
+      <tr><td>Backend (server-based panels)</td>
+          <td id="r-api" class="wait">checking…</td><td class="fix" id="n-api"></td></tr>
+    </tbody>
+  </table>
+
+  <h2 style="font-family:Georgia,serif;font-size:1.1rem">Where these files are</h2>
+  <table>
+    <tr><td style="width:34%">This page's address</td><td id="url"></td></tr>
+    <tr><td>Folder the site is in</td><td id="folder"></td></tr>
+  </table>
+
+  <p><a href="index.html">→ Go to the home page</a></p>
+</div>
+
+<script>
+(function () {
+  var results = {};
+
+  function set(key, pass, note) {
+    var cell = document.getElementById('r-' + key);
+    cell.textContent = pass ? 'PASS' : 'FAIL';
+    cell.className = pass ? 'ok' : 'bad';
+    document.getElementById('n-' + key).textContent = note;
+    results[key] = pass;
+    verdict();
+  }
+
+  function verdict() {
+    var keys = ['css', 'js', 'img', 'home', 'root', 'content', 'theme', 'panel', 'auth'];
+    var done = keys.every(function (k) { return k in results; });
+    if (!done) return;
+    // content.js only exists after the first publish, so its absence is not a fault.
+    var failed = keys.filter(function (k) { return k !== 'content' && !results[k]; });
+    var box = document.getElementById('verdict');
+    if (!failed.length) {
+      box.className = 'verdict good';
+      box.innerHTML = '<strong>Everything is installed correctly.</strong> '
+        + 'Open the home page — it will display properly.';
+    } else {
+      box.className = 'verdict bad';
+      var advice = [];
+      if (!results.home || !results.root) {
+        advice.push('<code>index.html</code> is missing from this folder — that is why the '
+          + 'bare address shows "Page not found". Upload it into the same folder as this page.');
+      }
+      if (!results.css || !results.js || !results.img) {
+        advice.push('The <code>assets</code> folder is missing. The pages will still display '
+          + 'correctly because the design is built into each one, but upload it so the '
+          + 'photographs appear.');
+      }
+      if (results.css && !results.theme) {
+        advice.push('<code>assets/js/theme.js</code> did not arrive. The banners, typefaces, '
+          + 'colours and logo set in the Admin Panel need it — upload it into '
+          + '<code>assets/js/</code>.');
+      }
+      if (!results.auth) {
+        advice.push('<code>assets/js/panel-auth.js</code> did not arrive, so neither admin '
+          + 'panel can check a password. Upload it into <code>assets/js/</code>.');
+      }
+      if (!results.core) {
+        advice.push('<code>assets/js/panel-core.js</code> did not arrive. The panels are the '
+          + 'sign-in box and this file together — without it you can sign in and find '
+          + 'nothing there. Upload it into <code>assets/js/</code>.');
+      }
+      if (!results.panelcss) {
+        advice.push('<code>assets/css/panel.css</code> did not arrive. The panels will still '
+          + 'work, but with no layout. Upload it into <code>assets/css/</code>.');
+      }
+      box.innerHTML = '<strong>The upload is incomplete.</strong><ul><li>'
+        + advice.join('</li><li>') + '</li></ul>';
+    }
+  }
+
+  function check(key, path, okNote, badNote) {
+    fetch(path, { cache: 'no-store' })
+      .then(function (r) { set(key, r.ok, r.ok ? okNote : 'HTTP ' + r.status + ' — ' + badNote); })
+      .catch(function () { set(key, false, badNote); });
+  }
+
+  check('css', 'assets/css/site.css', 'Found. The design will load.',
+        'Not found. Upload the assets folder.');
+  check('js', 'assets/js/site.js', 'Found. Menus and the gallery will work.',
+        'Not found. Upload the assets folder.');
+  check('img', 'assets/img/emblem.svg', 'Found. Images will display.',
+        'Not found. Upload the assets folder.');
+  check('home', 'index.html', 'Found.',
+        'Not found — this is why the bare domain shows "Page not found". Upload index.html.');
+  check('content', 'assets/js/content.js',
+        'Found. Anything published from the Admin Panel is being applied.',
+        'Not found. Publish once from the Admin Panel and upload the file it writes; until '
+        + 'then the pages show the text built into them.');
+  check('theme', 'assets/js/theme.js',
+        'Found. Banners, typefaces, colours, logo, header and footer are being applied.',
+        'Not found. Upload it — without it the panels can still change the wording, but not '
+        + 'the appearance.');
+  check('panel', 'adminpanel/login/index.html',
+        'Found. The Admin Panel will open.',
+        'Not found. Upload the adminpanel folder.');
+  check('superpanel', 'superadminpanel/login/index.html',
+        'Found. The Super Admin Panel will open.',
+        'Not found. Upload the superadminpanel folder.');
+  check('core', 'assets/js/panel-core.js',
+        'Found. Both panels have their editing screen.',
+        'Not found. Upload it — without it the panels show a sign-in box and nothing behind it.');
+  check('panelcss', 'assets/css/panel.css',
+        'Found. The panels will be laid out correctly.',
+        'Not found. Upload it, or the panels will work but look like plain text.');
+  check('auth', 'assets/js/panel-auth.js',
+        'Found. The panels can check a password.',
+        'Not found. Upload it, or neither panel will let anyone in.');
+
+  // Ask for the folder itself, the way a visitor typing the bare domain does.
+  var folderPath = window.location.pathname.replace(/[^\/]*$/, '');
+  fetch(folderPath, { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.text() : Promise.reject(new Error(r.status)); })
+    .then(function (body) {
+      var isHome = body.indexOf('Serving the ward') !== -1 || body.indexOf('slider') !== -1;
+      set('root', isHome,
+          isHome ? 'Typing your domain alone opens the home page.'
+                 : 'The address resolves, but not to the home page. Check that index.html '
+                   + 'is present and is not named index.html.txt or Index.html.');
+    })
+    .catch(function (e) {
+      set('root', false, 'The bare address returns an error (' + e.message + '). '
+        + 'index.html is missing from this folder.');
+    });
+
+  // The panels are served by the backend; on a plain host there is none.
+  fetch('/api/health', { cache: 'no-store' })
+    .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
+    .then(function () {
+      var cell = document.getElementById('r-api');
+      cell.textContent = 'PASS'; cell.className = 'ok';
+      document.getElementById('n-api').textContent =
+        'The backend is running, so the Admin and Super Admin panels will open.';
+    })
+    .catch(function () {
+      var cell = document.getElementById('r-api');
+      cell.textContent = 'ABSENT'; cell.className = 'wait';
+      document.getElementById('n-api').textContent =
+        'No backend on this domain. This is the ordinary case on shared hosting, and nothing '
+        + 'is wrong: both admin panels run in the browser and work without one.';
+    });
+
+  document.getElementById('url').textContent = window.location.href;
+  var folder = window.location.pathname.replace(/check\.html$/, '');
+  document.getElementById('folder').textContent =
+    folder === '/' ? '/ (correct — the site is at the top level)'
+                   : folder + '  ← the site is in a sub-folder; move the files up into public_html';
+})();
+</script>
+</body>
+</html>

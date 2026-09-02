@@ -1,0 +1,71 @@
+{% extends 'club/base.html' %}
+
+{% block content %}
+<div class="page-header">
+  <div class="wrap">
+    <h1>Event Calendar</h1>
+    <p>Month-wise schedule of programmes. Select any entry to open the event page and register.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="wrap layout-sidebar">
+    <div>
+      <div class="cal-toolbar">
+        <a class="btn btn-ghost btn-sm"
+           href="?year={{ prev_month|date:'Y' }}&month={{ prev_month|date:'n' }}">‹ {{ prev_month|date:"F Y" }}</a>
+        <h2 style="margin:0">{{ anchor|date:"F Y" }}</h2>
+        <a class="btn btn-ghost btn-sm"
+           href="?year={{ next_month|date:'Y' }}&month={{ next_month|date:'n' }}">{{ next_month|date:"F Y" }} ›</a>
+      </div>
+      <div class="table-scroll">
+        <table class="calendar">
+          <caption class="sr-only">Events during {{ anchor|date:"F Y" }}</caption>
+          <thead>
+            <tr>{% for day in weekday_names %}<th scope="col">{{ day }}</th>{% endfor %}</tr>
+          </thead>
+          <tbody>
+            {% for week in weeks %}
+              <tr>
+                {% for cell in week %}
+                  <td class="{% if not cell.in_month %}out{% endif %}{% if cell.is_today %} today{% endif %}">
+                    <span class="daynum">{{ cell.date|date:"j" }}</span>
+                    {% for event in cell.events %}
+                      <a class="cal-event" href="{{ event.get_absolute_url }}"
+                         title="{{ event.title }} — {{ event.start|date:'g:i A' }}">{{ event.start|date:"g:i A" }} {{ event.title }}</a>
+                    {% endfor %}
+                  </td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <aside class="stack">
+      <div class="panel">
+        <div class="panel-head">{{ anchor|date:"F Y" }} — Programmes</div>
+        <ul class="panel-list scroll-list">
+          {% for event in month_events %}
+            <li>
+              <a href="{{ event.get_absolute_url }}">
+                {{ event.title }}
+                <span class="meta">{{ event.start|date:"d M, g:i A" }} · {{ event.venue }}</span>
+              </a>
+            </li>
+          {% empty %}
+            <li><a href="{% url 'club:events' %}">No programmes scheduled this month.</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="panel">
+        <div class="panel-head">Legend</div>
+        <div class="panel-body" style="font-size:.85rem;color:var(--ink-soft)">
+          <p style="margin:0 0 8px"><span class="cal-event" style="display:inline-block">Event</span> — click to open details.</p>
+          <p style="margin:0">Today's date is highlighted in the grid.</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends 'saas/base.html' %}
+{% block heading %}Delete a website{% endblock %}
+{% block content %}
+<div class="panel-card" style="max-width:640px">
+  <header><h2>Delete “{{ tenant_to_delete.name }}”</h2></header>
+  <div class="inner">
+    <div class="danger-banner">
+      This removes the website and everything belonging to it. There is no undo, and
+      no copy is kept — take a database backup first if you may want it back.
+    </div>
+
+    <p style="margin-top:16px;font-size:.9rem;color:var(--ink-soft)">What will be destroyed:</p>
+    <div class="table-scroll">
+      <table class="gov-table">
+        <tbody>
+          {% for label, number in counts %}
+            <tr><td>{{ label|capfirst }}</td><td style="width:90px"><strong>{{ number }}</strong></td></tr>
+          {% endfor %}
+          <tr><td>Its settings, banners, QR codes, gallery, team, downloads and notices</td>
+              <td><strong>all</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:18px;font-size:.9rem">
+      If you only want it off the internet for a while,
+      <a href="{% url 'saas:tenants' %}">take it offline</a> instead — that keeps everything.
+    </p>
+
+    <form method="post" class="gov-form" style="margin-top:18px">
+      {% csrf_token %}
+      <div class="field">
+        <label for="confirm_name">Type <strong>{{ tenant_to_delete.name }}</strong> to confirm</label>
+        <input class="gov-input" id="confirm_name" name="confirm_name" autocomplete="off" required>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit" style="background:var(--maroon)">
+          Delete this website permanently</button>
+        <a class="btn btn-ghost" href="{% url 'saas:tenants' %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
