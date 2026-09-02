@@ -18,3 +18,4 @@ backend/python-api/media/*
 # Anything holding a real secret.
 .env
 *.vault
+node_modules/

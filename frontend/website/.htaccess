@@ -46,6 +46,32 @@ ErrorDocument 404 /404.html
   </IfModule>
 </Files>
 
+# Same reasoning for the sign-in file. Changing a password in the Super Admin
+# Panel writes a new panel-auth.js; if the browser kept the old one for a week
+# the old password would go on working and the new one would be refused.
+<Files "panel-auth.js">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "no-cache, must-revalidate"
+  </IfModule>
+  <IfModule mod_expires.c>
+    ExpiresDefault "access plus 0 seconds"
+  </IfModule>
+</Files>
+
+# The instructions are for you, not for visitors. Without this anyone could
+# read them at yourdomain.com/README.txt.
+<FilesMatch "^(README|readme)\.(txt|md)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    <IfModule mod_access_compat.c>
+      Order allow,deny
+      Deny from all
+    </IfModule>
+  </IfModule>
+</FilesMatch>
+
 <IfModule mod_headers.c>
   Header set X-Content-Type-Options "nosniff"
   Header set X-Frame-Options "SAMEORIGIN"

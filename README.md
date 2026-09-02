@@ -4,12 +4,49 @@ A complete website for a registered club, with a two-tier administration system.
 
 ```
 frontend/
-  website/     ← plain HTML. Upload this. It works on any host.
-  react-app/   ← the same site in React (needs a build step)
-backend/       ← Python, Java, C#, Dash and C++ services
-PRD.md         ← what this product is meant to do
-TRD.md         ← how it is built
+  website/       ← plain HTML. Upload this. It works on any host.
+  react-app/     ← the same site in React (needs a build step)
+backend/         ← Python, Java, C#, Dash and C++ services
+PANEL-GUIDE.txt  ← the admin panels: passwords, sections, publishing
+PRD.md           ← what this product is meant to do
+TRD.md           ← how it is built
+_test/           ← tests for the panel system (needs Node)
 ```
+
+## The two panels
+
+`yourdomain.com/adminpanel/login/` and `yourdomain.com/superadminpanel/login/`.
+
+Between them they set the club name and logo, the home-page banners and their
+pictures, the typefaces and text size, every colour, the header wording and main
+menu, the footer, gallery photographs, contact details and the notice strip. The
+Super Admin Panel adds password changes, a server-side lock, backup and restore,
+and an activity log.
+
+Pictures are chosen from your computer or dragged onto the panel.
+
+**The passwords are in `PANEL-GUIDE.txt`** — kept out of `frontend/website/`
+on purpose, because everything in that folder gets uploaded to your web host.
+
+A panel never touches your website on its own. It writes `content.js`; you
+upload that to `assets/js/` and the change appears on every page at once. That
+is also the honest answer to how much the password protects: it is a lock on an
+office door, not a bank vault, because on a static site the check has to run in
+the browser. What really protects the site is that publishing needs your hosting
+login. `PANEL-GUIDE.txt` explains this properly, and shows how to add a real
+server-side lock through cPanel in about a minute.
+
+### Testing it
+
+```
+npm install jsdom
+bash _test/run-all.sh
+```
+
+Four suites: both panels sign in and show the right sections for their role;
+published settings reach every page; a full round trip from editing in the panel
+to the change appearing on the site; and `check.html` reporting correctly on a
+complete and an incomplete upload.
 
 ---
 
@@ -94,45 +131,34 @@ yourdomain.com/adminpanel/login/          website content
 yourdomain.com/superadminpanel/login/     administers websites and administrators
 ```
 
-**Both addresses now work on plain hosting.** What you get depends on whether
-the backend is running:
+**The panels are not shown anywhere on the website.** No page links to them and
+no page mentions them. You reach them by typing the address:
 
-| | Without a backend | With the backend |
-|---|---|---|
-| `/adminpanel/login/` | **Offline editor** — change the club name, tagline, address, telephone, e-mail, office hours and the scrolling notices. Download one small `content.js` and upload it to `assets/js/`, and every page updates at once. | The full Django panel: accounts, roles, uploads, events, members, audit log |
-| `/superadminpanel/login/` | Explains what needs a server, with step-by-step instructions for switching the backend on through cPanel | The platform panel |
-
-Both pages check for a backend on the domain and step aside automatically when
-one is there.
-
-The offline editor has no password, and could not usefully have one — anyone can
-read the source of a page on a static site. That is safe: the editor cannot
-change your website, it only prepares a file. Publishing means uploading to your
-host, which needs your hosting login.
-
-| | Admin | Super Admin |
-|---|---|---|
-| Edit content, banners, logo, files | ✅ | ✅ |
-| Create or remove administrators | ❌ | ✅ |
-| Platform panel | ❌ | separate sign-in |
-
-Every administrator must replace the shared default password at first sign-in
-before the panel will show anything.
-
-### Running the backend
-
-```bash
-export DATABASE_URL="mysql://clubapp:password@127.0.0.1:3306/club"
-export REPORTS_DATABASE_URL="mysql://clubreports:password@127.0.0.1:3306/club"
-cd backend && ./start-all.sh
+```
+www.studentcartonline.in/adminpanel/login
+www.studentcartonline.in/superadminpanel/login
 ```
 
-Needs MySQL 8, Python 3.11, Java 21 and .NET 8. `backend/README.md` has the
-database setup and what each service does.
+Both work with or without a trailing slash. Each has its own password, and the
+Admin password will not open the Super Admin panel.
 
-**Before real data goes in:** the three default passwords are visible in this
-repository, so treat them as public. Override them —
-`PANEL_DEFAULT_PASSWORD`, `PANEL_ELEVATION_SECRET`, `PLATFORM_DEFAULT_PASSWORD`.
+| | Admin Panel | Super Admin Panel |
+|---|---|---|
+| Name, logo, banners, photographs | yes | yes |
+| Header, footer, colours, typefaces | yes | yes |
+| Office details and notices | yes | yes |
+| Publish changes | yes | yes |
+| **Change either password** | no | **yes** |
+| **Server lock** (a password on the folder itself) | no | **yes** |
+| **Backup and restore** | no | **yes** |
+| **Activity log** | no | **yes** |
+
+The Super Admin panel contains everything the Admin panel does, plus the four
+rows above — so it can change, remove or edit anything the Admin panel controls.
+
+Hiding the addresses is not by itself protection. The password is the lock, and
+"Server lock" in the Super Admin panel adds a second one at the host.
+
 
 ---
 

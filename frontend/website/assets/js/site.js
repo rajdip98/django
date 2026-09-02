@@ -102,8 +102,12 @@
     function play() {
       var motion = window.matchMedia('(prefers-reduced-motion: reduce)');
       if (motion.matches) return;                 // respect the visitor's setting
+      // The Admin Panel can turn the automatic change off, or slow it down.
+      if (slider.getAttribute('data-autoplay') === 'off') return;
+      var wait = parseInt(slider.getAttribute('data-interval'), 10);
+      if (!isFinite(wait) || wait < 2000) wait = 6000;
       stop();
-      timer = setInterval(function () { show(index + 1); }, 6000);
+      timer = setInterval(function () { show(index + 1); }, wait);
     }
     function stop() { if (timer) { clearInterval(timer); timer = null; } }
 

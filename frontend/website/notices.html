@@ -418,8 +418,6 @@ form.gov { display: grid; gap: 15px; }
     <button type="button" data-appearance="font" title="Change the text size">A<sup>+</sup> Text size</button>
     <button type="button" data-appearance="contrast" aria-pressed="false">◐ High contrast</button>
     <button type="button" data-appearance="theme" aria-pressed="false">☾ Dark</button>
-    <a class="staff" href="/adminpanel/login/">🔑 Admin Panel</a>
-    <a class="staff gold" href="/superadminpanel/login/">⬢ Super Admin</a>
   </div>
 </div>
 
@@ -541,14 +539,16 @@ Nadia, West Bengal — 741101</li>
         </ul>
       </div>
       <div>
-        <h3>Staff</h3>
+        <h3>Visit us</h3>
         <ul>
-          <li><a href="/adminpanel/login/">🔑 Admin Panel</a></li>
-          <li><a href="/superadminpanel/login/">⬢ Super Admin Panel</a></li>
-          <li><a href="/analytics/">📊 Analytics dashboard</a></li>
+          <li><a href="contact.html">Write to the office</a></li>
+          <li><a href="membership.html">Become a member</a></li>
+          <li><a href="notices.html">Notice board</a></li>
+          <li><a href="downloads.html">Documents &amp; forms</a></li>
         </ul>
         <p style="font-size:.79rem;margin-top:11px;opacity:.85">
-          Staff sign-in only. Every attempt is recorded in the audit log.</p>
+          The office is open Monday to Saturday. Notices are also displayed on
+          the board at the club premises.</p>
       </div>
     </div>
     <div class="footer-bar">
@@ -557,13 +557,13 @@ Nadia, West Bengal — 741101</li>
       <span class="spacer"></span>
       <a href="contact.html">Contact</a>
       <a href="downloads.html">Downloads</a>
-      <a href="/adminpanel/login/">Admin Panel</a>
-      <a href="/superadminpanel/login/">Super Admin</a>
+      <a href="notices.html">Notices</a>
     </div>
   </div>
 </footer>
 
 <script src="assets/js/content.js"></script>
+<script src="assets/js/theme.js"></script>
 <script>
 /* Everything the pages need, in one small file. No libraries, no build step.
    If a browser blocks scripts entirely, every page still reads correctly —
@@ -669,8 +669,12 @@ Nadia, West Bengal — 741101</li>
     function play() {
       var motion = window.matchMedia('(prefers-reduced-motion: reduce)');
       if (motion.matches) return;                 // respect the visitor's setting
+      // The Admin Panel can turn the automatic change off, or slow it down.
+      if (slider.getAttribute('data-autoplay') === 'off') return;
+      var wait = parseInt(slider.getAttribute('data-interval'), 10);
+      if (!isFinite(wait) || wait < 2000) wait = 6000;
       stop();
-      timer = setInterval(function () { show(index + 1); }, 6000);
+      timer = setInterval(function () { show(index + 1); }, wait);
     }
     function stop() { if (timer) { clearInterval(timer); timer = null; } }
 

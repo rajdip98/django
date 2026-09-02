@@ -1,0 +1,224 @@
+================================================================================
+  THE ADMIN AND SUPER ADMIN PANELS
+================================================================================
+
+  KEEP THIS FILE OFF YOUR WEB HOST.
+
+  It names your passwords. It belongs on your own computer, next to README.md,
+  and it is deliberately not inside frontend/website/ so that uploading the site
+  cannot publish it by accident.
+
+
+--------------------------------------------------------------------------------
+  THE PANELS ARE NOT SHOWN ON THE WEBSITE
+--------------------------------------------------------------------------------
+
+  Nothing on the public site links to them, and no page mentions them. The only
+  way in is to type the address yourself:
+
+      www.studentcartonline.in/adminpanel/login
+      www.studentcartonline.in/superadminpanel/login
+
+  Both work with or without the "/" on the end. Save them as bookmarks — there
+  is deliberately no link to click.
+
+  This hides the doors; it is not a lock. The lock is the password, and the
+  stronger lock is "Server lock" inside the Super Admin Panel, which puts a
+  password on the folder at the host itself.
+
+
+--------------------------------------------------------------------------------
+  SIGNING IN
+--------------------------------------------------------------------------------
+
+  Admin Panel          yourdomain.com/adminpanel/login/
+                       password:  rajdip@10
+
+  Super Admin Panel    yourdomain.com/superadminpanel/login/
+                       password:  rajdip@2007
+
+  Each panel accepts only its own password. Typing the Admin password into the
+  Super Admin box does not work, and the other way round.
+
+  After five wrong tries the box pauses for a minute.
+
+  A signed-in panel closes itself after thirty minutes with nobody using it, so
+  an unattended screen does not stay open.
+
+
+--------------------------------------------------------------------------------
+  WHAT EACH PANEL CAN DO
+--------------------------------------------------------------------------------
+
+  ADMIN — the day-to-day editing
+
+    Overview            what is set at the moment, at a glance
+    Name and logo       the club name, short name, tagline, year, registration
+                        details, and the logo itself
+    Banners             the sliding panels on the home page: as many as you
+                        like, each with its own picture, heading, text and
+                        two buttons
+    Typefaces           the heading and body fonts, overall text size,
+                        heading thickness and letter spacing
+    Colours             the whole palette
+    Header and menu     the top strip wording and the main menu
+    Footer              the footer text and its columns of links
+    Photographs         pictures for the gallery and anywhere else
+    Office and notices  address, telephone, e-mail, opening hours, and the
+                        scrolling notice strip
+    Publish             writes the file that puts it all online
+    Help                the same instructions, inside the panel
+
+  SUPER ADMIN — all of the above, and four sections besides
+
+    Administrators      change either password
+    Server lock         put a second lock in front of the panels, on the host
+                        itself, through cPanel
+    Backup              save and restore everything
+    Activity            what has been changed, and when
+
+
+--------------------------------------------------------------------------------
+  ADDING PICTURES
+--------------------------------------------------------------------------------
+
+  Every picture section takes a file from your computer. Choose the file or drag
+  it onto the panel; it is scaled down and stored straight away.
+
+  Pictures live inside content.js as text, which is why the panel keeps telling
+  you how large each one is. Some rough guidance:
+
+      a logo                          usually under  50 KB
+      one banner photograph           200 - 400 KB
+      the whole content.js file       keep it under about 2 MB
+
+  Above roughly 3 MB the first visit to your site starts to feel slow, and the
+  panel says so.
+
+  IF YOU HAVE MANY PHOTOGRAPHS, there is a better way. Upload the picture files
+  themselves to assets/img/ through your hosting File Manager, then type the
+  path — assets/img/festival.jpg — into the panel instead of choosing a file.
+  The picture is then served on its own, content.js stays small, and visitors'
+  browsers cache the images between visits. The panel offers this wherever a
+  picture can be set.
+
+
+--------------------------------------------------------------------------------
+  PUTTING CHANGES ONLINE
+--------------------------------------------------------------------------------
+
+  Nothing you do in a panel touches your website until you do this. Until then
+  the changes sit in your browser only.
+
+  1.  Press Preview. Your real site opens in a new tab with the changes
+      applied, and a red strip along the bottom reminds you that only you can
+      see them.
+
+  2.  Open Publish and press "Download content.js".
+
+  3.  In your hosting File Manager, go to
+
+          public_html/assets/js/
+
+      and upload the file there, replacing the content.js already in it.
+
+  4.  Open your website and press Ctrl+F5.
+
+  The strip along the bottom of the panel — the docket — always tells you what
+  has changed and whether it has been published yet.
+
+
+--------------------------------------------------------------------------------
+  CHANGING A PASSWORD
+--------------------------------------------------------------------------------
+
+  Super Admin Panel -> Administrators.
+
+  You may change one password or both. Change the Admin password, then change
+  the Super Admin password, and the single file you download at the end carries
+  both changes. The panel tells you which passwords the file sets before you
+  download it.
+
+  Choose which sign-in to change, type the new password twice, and download the
+  panel-auth.js it writes. Upload that to
+
+          public_html/assets/js/panel-auth.js
+
+  The new password works from the next sign-in. If you do not upload the file,
+  the old password stays in force — the panel cannot change your host by itself.
+
+  Write the new password down somewhere before you upload. There is no reset:
+  what is stored is a one-way hash, and a forgotten password can only be
+  replaced by editing panel-auth.js by hand.
+
+
+--------------------------------------------------------------------------------
+  HOW MUCH THE PASSWORD ACTUALLY PROTECTS  — PLEASE READ THIS
+--------------------------------------------------------------------------------
+
+  Your website is a set of plain files on a host. There is no server program
+  behind it to check a password, so the check happens in the visitor's own
+  browser, and the browser has to be given something to check against.
+
+  What is stored in panel-auth.js is a PBKDF2-SHA256 hash at 100,000 iterations
+  — a one-way result. Your password cannot be read back out of it, and guessing
+  it by brute force would be slow work.
+
+  But the check itself runs on the visitor's machine, and anyone who opens the
+  browser's developer tools can step around it. Treat it as a lock on an office
+  door: it stops the casual passer-by, and it is not a bank vault.
+
+  WHAT ACTUALLY PROTECTS YOUR WEBSITE is that the panels cannot publish. They
+  only prepare a file. Putting anything online means uploading that file to your
+  host, and that needs your hosting password, which is nowhere in this project.
+  Somebody who defeats the panel lock can look at your draft settings. They
+  still cannot change one word of your live website.
+
+  IF YOU WANT A REAL LOCK, use your host's own. Super Admin Panel -> Server lock
+  walks you through it: cPanel's "Directory Privacy" puts a genuine password
+  prompt in front of /adminpanel/ and /superadminpanel/, checked by the server
+  before any file is sent. It takes about a minute and is worth doing.
+
+  And keep the panels off search engines. Both pages already carry
+  noindex/nofollow, so this is handled — but do not link to them from a public
+  page you have added yourself.
+
+
+--------------------------------------------------------------------------------
+  IF SOMETHING LOOKS WRONG
+--------------------------------------------------------------------------------
+
+  Open  yourdomain.com/check.html
+
+  It tests your own installation and names exactly which file is missing. The
+  panels need six files present:
+
+      assets/js/panel-auth.js      who may sign in
+      assets/js/panel-core.js      the editing screen itself
+      assets/css/panel.css         its layout
+      assets/js/theme.js           applies the settings to the public pages
+      assets/js/content.js         the settings
+      adminpanel/ and superadminpanel/   the two panel folders
+
+  Common symptoms:
+
+  "Sign-in file missing"
+      panel-auth.js did not upload. Put it in assets/js/.
+
+  Sign-in works, then a blank screen
+      panel-core.js did not upload. Put it in assets/js/.
+
+  The panel works but looks like plain text on a white page
+      panel.css did not upload. Put it in assets/css/.
+
+  The panel publishes, but the website does not change
+      Either content.js went to the wrong folder — it belongs in
+      assets/js/, not the site root — or theme.js is missing, or your
+      browser is showing you a cached page. Press Ctrl+F5.
+
+  Banners and colours do nothing, but the wording changes
+      theme.js did not upload. The wording is applied by each page on its
+      own; everything else needs theme.js.
+
+  "This browser will not check the password"
+      Very old browser. Any current Chrome, Firefox, Edge or Safari is fine.

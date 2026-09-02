@@ -36,6 +36,12 @@
 
   <div class="verdict" id="verdict">Running the checks…</div>
 
+  <div class="verdict" style="border-left-color:#c8961e;background:#fbf0d5">
+    <strong>Delete this page once your website is working.</strong>
+    It is a setup tool, and it names the folders your panels live in. Removing
+    <code>check.html</code> from your host takes nothing away from the website.
+  </div>
+
   <table>
     <thead><tr><th style="width:34%">What is being checked</th><th style="width:15%">Result</th><th>Notes</th></tr></thead>
     <tbody>
@@ -51,7 +57,21 @@
           <td id="r-home" class="wait">checking…</td><td class="fix" id="n-home"></td></tr>
       <tr><td>Bare domain opens the home page</td>
           <td id="r-root" class="wait">checking…</td><td class="fix" id="n-root"></td></tr>
-      <tr><td>Backend (admin panels)</td>
+      <tr><td>Settings <code>assets/js/content.js</code></td>
+          <td id="r-content" class="wait">checking…</td><td class="fix" id="n-content"></td></tr>
+      <tr><td>Appearance <code>assets/js/theme.js</code></td>
+          <td id="r-theme" class="wait">checking…</td><td class="fix" id="n-theme"></td></tr>
+      <tr><td>Admin Panel files</td>
+          <td id="r-panel" class="wait">checking…</td><td class="fix" id="n-panel"></td></tr>
+      <tr><td>Super Admin Panel files</td>
+          <td id="r-superpanel" class="wait">checking…</td><td class="fix" id="n-superpanel"></td></tr>
+      <tr><td>Panel engine <code>assets/js/panel-core.js</code></td>
+          <td id="r-core" class="wait">checking…</td><td class="fix" id="n-core"></td></tr>
+      <tr><td>Panel design <code>assets/css/panel.css</code></td>
+          <td id="r-panelcss" class="wait">checking…</td><td class="fix" id="n-panelcss"></td></tr>
+      <tr><td>Sign-in <code>assets/js/panel-auth.js</code></td>
+          <td id="r-auth" class="wait">checking…</td><td class="fix" id="n-auth"></td></tr>
+      <tr><td>Backend (server-based panels)</td>
           <td id="r-api" class="wait">checking…</td><td class="fix" id="n-api"></td></tr>
     </tbody>
   </table>
@@ -79,10 +99,11 @@
   }
 
   function verdict() {
-    var keys = ['css', 'js', 'img', 'home', 'root'];
+    var keys = ['css', 'js', 'img', 'home', 'root', 'content', 'theme', 'panel', 'auth'];
     var done = keys.every(function (k) { return k in results; });
     if (!done) return;
-    var failed = keys.filter(function (k) { return !results[k]; });
+    // content.js only exists after the first publish, so its absence is not a fault.
+    var failed = keys.filter(function (k) { return k !== 'content' && !results[k]; });
     var box = document.getElementById('verdict');
     if (!failed.length) {
       box.className = 'verdict good';
@@ -99,6 +120,24 @@
         advice.push('The <code>assets</code> folder is missing. The pages will still display '
           + 'correctly because the design is built into each one, but upload it so the '
           + 'photographs appear.');
+      }
+      if (results.css && !results.theme) {
+        advice.push('<code>assets/js/theme.js</code> did not arrive. The banners, typefaces, '
+          + 'colours and logo set in the Admin Panel need it — upload it into '
+          + '<code>assets/js/</code>.');
+      }
+      if (!results.auth) {
+        advice.push('<code>assets/js/panel-auth.js</code> did not arrive, so neither admin '
+          + 'panel can check a password. Upload it into <code>assets/js/</code>.');
+      }
+      if (!results.core) {
+        advice.push('<code>assets/js/panel-core.js</code> did not arrive. The panels are the '
+          + 'sign-in box and this file together — without it you can sign in and find '
+          + 'nothing there. Upload it into <code>assets/js/</code>.');
+      }
+      if (!results.panelcss) {
+        advice.push('<code>assets/css/panel.css</code> did not arrive. The panels will still '
+          + 'work, but with no layout. Upload it into <code>assets/css/</code>.');
       }
       box.innerHTML = '<strong>The upload is incomplete.</strong><ul><li>'
         + advice.join('</li><li>') + '</li></ul>';
@@ -119,6 +158,29 @@
         'Not found. Upload the assets folder.');
   check('home', 'index.html', 'Found.',
         'Not found — this is why the bare domain shows "Page not found". Upload index.html.');
+  check('content', 'assets/js/content.js',
+        'Found. Anything published from the Admin Panel is being applied.',
+        'Not found. Publish once from the Admin Panel and upload the file it writes; until '
+        + 'then the pages show the text built into them.');
+  check('theme', 'assets/js/theme.js',
+        'Found. Banners, typefaces, colours, logo, header and footer are being applied.',
+        'Not found. Upload it — without it the panels can still change the wording, but not '
+        + 'the appearance.');
+  check('panel', 'adminpanel/login/index.html',
+        'Found. The Admin Panel will open.',
+        'Not found. Upload the adminpanel folder.');
+  check('superpanel', 'superadminpanel/login/index.html',
+        'Found. The Super Admin Panel will open.',
+        'Not found. Upload the superadminpanel folder.');
+  check('core', 'assets/js/panel-core.js',
+        'Found. Both panels have their editing screen.',
+        'Not found. Upload it — without it the panels show a sign-in box and nothing behind it.');
+  check('panelcss', 'assets/css/panel.css',
+        'Found. The panels will be laid out correctly.',
+        'Not found. Upload it, or the panels will work but look like plain text.');
+  check('auth', 'assets/js/panel-auth.js',
+        'Found. The panels can check a password.',
+        'Not found. Upload it, or neither panel will let anyone in.');
 
   // Ask for the folder itself, the way a visitor typing the bare domain does.
   var folderPath = window.location.pathname.replace(/[^\/]*$/, '');
@@ -149,8 +211,8 @@
       var cell = document.getElementById('r-api');
       cell.textContent = 'ABSENT'; cell.className = 'wait';
       document.getElementById('n-api').textContent =
-        'No backend on this domain. Expected on plain hosting — the website itself is '
-        + 'unaffected, but the two admin panel links will show a 404.';
+        'No backend on this domain. This is the ordinary case on shared hosting, and nothing '
+        + 'is wrong: both admin panels run in the browser and work without one.';
     });
 
   document.getElementById('url').textContent = window.location.href;

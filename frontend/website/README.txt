@@ -130,41 +130,80 @@ THE ADMIN PANELS
       yourdomain.com/adminpanel/login/
       yourdomain.com/superadminpanel/login/
 
-BOTH OF THESE NOW WORK on ordinary hosting — they are real pages in this
-folder. Make sure the "adminpanel" and "superadminpanel" folders upload along
-with everything else.
+The two passwords are in PANEL-GUIDE.txt, which is kept OUTSIDE this folder on
+purpose. This file you are reading is uploaded to your web host along with the
+site, so anyone can read it at yourdomain.com/README.txt — which is exactly why
+no password is written in it.
 
-WHAT THE ADMIN PANEL DOES
--------------------------
-It lets you change, on every page at once:
+Both are real pages in this folder and work on ordinary hosting. Make sure the
+"adminpanel" and "superadminpanel" folders upload with everything else, along
+with these files in assets/:
 
-      the club name              the address
-      the short name/initials    the telephone number
-      the tagline                the e-mail address
-      the year established       the office hours
-      the registration details   the scrolling notices
+      assets/js/panel-auth.js     who may sign in
+      assets/js/panel-core.js     the editing screen
+      assets/css/panel.css        its layout
+      assets/js/theme.js          applies the settings to the public pages
 
-How to use it:
+If any of those is missing the panel will not open properly. check.html tells
+you which one.
 
-  1. Open  yourdomain.com/adminpanel/login/
-  2. Edit the boxes.
-  3. Press "Download content.js".
-  4. Upload that file to     public_html/assets/js/content.js
+
+WHAT THE PANELS DO
+------------------
+Between them they change, on every page at once:
+
+      the club name and logo      the banners on the home page, with pictures
+      the tagline and short name  the typefaces and the text size
+      the address and telephone   every colour on the site
+      the e-mail and hours        the header wording and the main menu
+      the registration details    the footer text and its link columns
+      the scrolling notices       photographs for the gallery
+
+Pictures are chosen from your computer — or dragged onto the panel — and stored
+inside the file the panel writes.
+
+The Super Admin Panel does all of that, and adds four sections the Admin Panel
+does not have: changing either password, locking the panels on the server,
+backup and restore, and a log of what has been changed.
+
+
+HOW TO USE THEM
+---------------
+  1. Open  yourdomain.com/adminpanel/login/  and sign in.
+  2. Make your changes. The strip along the bottom keeps count of them.
+  3. Press Preview to see your real site with the changes applied. Only you
+     can see this — a red strip along the bottom says so.
+  4. Open Publish and press "Download content.js".
+  5. Upload that file to    public_html/assets/js/content.js
      (replacing the one already there)
-  5. Reload your website — every page shows the new details.
+  6. Reload your website and press Ctrl+F5.
 
-IS IT SAFE WITHOUT A PASSWORD?
-------------------------------
-Yes. The page cannot change your website; it only prepares a file. To publish
-anything you must upload that file to your host, and that needs your hosting
-login, which nobody else has. A password typed into a page on a static website
-would be visible to anyone who views the page source, so it would protect
-nothing.
+Nothing you do in a panel reaches your website before step 5.
 
-For real administrator accounts, roles, file uploads, event and member
-management, and an audit log, you need the backend running. Open
-  yourdomain.com/superadminpanel/login/
-for step-by-step instructions, or read backend/README.md.
+
+HOW MUCH DOES THE PASSWORD PROTECT?
+-----------------------------------
+It is a lock on an office door, not a bank vault. Be clear about this.
+
+This is a static website with no server program behind it, so the password is
+checked in the browser. What is stored is a PBKDF2-SHA256 hash at 100,000
+iterations — your password cannot be read back out of it — but the check itself
+runs on the visitor's machine, and someone who opens the browser's developer
+tools can step around it.
+
+What actually protects your website is that the panels cannot publish. They
+only prepare a file. Putting anything online means uploading that file to your
+host, and that needs your hosting password, which is nowhere in these files.
+Someone who defeats the panel lock can read your draft settings. They still
+cannot change one word of your live site.
+
+For a real lock, use your host's own: cPanel's "Directory Privacy" on the
+adminpanel and superadminpanel folders puts a genuine password prompt in front
+of them, checked by the server. The Super Admin Panel has step-by-step
+instructions under "Server lock". It takes about a minute.
+
+There is a fuller explanation in PANEL-GUIDE.txt, which is kept outside this
+folder deliberately — it names the passwords, so it should not be uploaded.
 
 
 THE CONTACT FORM
